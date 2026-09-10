@@ -8,29 +8,55 @@ import QtQuick
 //   * an event-stream Process keeps workspaces / windows / focus live
 //   * action() fires one-shot `niri msg action ...` commands
 //
-// niri emits a full WorkspacesChanged and WindowsChanged right after the
-// stream opens, so we get initial state for free.
+// Anti-flicker: the workspaces and windowList arrays feed Repeaters, and
+// re-assigning a JS array rebuilds every delegate. niri re-sends full state
+// whenever the event stream (re)connects, and emits WindowOpenedOrChanged on
+// every title change. So we compute a signature of the *visible* fields and
+// only re-assign the array when that signature actually changes — identical or
+// title-only updates never touch the Repeaters.
 Singleton {
     id: root
 
-    // Sorted list of workspace objects: {id, idx, name, output, is_active,
-    // is_focused, is_urgent, active_window_id, windowCount}
     property var workspaces: []
-    // Map of window id -> window object {id, title, app_id, workspace_id, ...}
+    property var windowList: []
     property var windows: ({})
     property int focusedWindowId: -1
     property string focusedTitle: ""
     property string focusedAppId: ""
 
-    // Windows in a stable order for the taskbar (by id).
-    property var windowList: []
+    property string _wsSig: ""
+    property string _wlSig: ""
+
+    function _applyWorkspaces(list) {
+        let sig = "";
+        for (let i = 0; i < list.length; i++) {
+            const w = list[i];
+            sig += w.id + "," + w.idx + "," + (w.name || "") + "," + (w.is_active === true)
+                + "," + (w.is_focused === true) + "," + (w.is_urgent === true)
+                + "," + (w.windowCount || 0) + "," + (w.output || "") + "|";
+        }
+        if (sig === root._wsSig)
+            return;
+        root._wsSig = sig;
+        root.workspaces = list;
+    }
+
+    function _applyWindowList(list) {
+        let sig = "";
+        for (let i = 0; i < list.length; i++)
+            sig += list[i].id + ":" + (list[i].app_id || "") + "|";
+        if (sig === root._wlSig)
+            return;
+        root._wlSig = sig;
+        root.windowList = list;
+    }
 
     function _rebuildWindowList() {
         const arr = [];
         for (const k in root.windows)
             arr.push(root.windows[k]);
         arr.sort((a, b) => a.id - b.id);
-        root.windowList = arr;
+        _applyWindowList(arr);
     }
 
     function _recountWorkspaces() {
@@ -42,7 +68,7 @@ Singleton {
         const ws = root.workspaces.slice();
         for (let i = 0; i < ws.length; i++)
             ws[i].windowCount = counts[ws[i].id] || 0;
-        root.workspaces = ws;
+        _applyWorkspaces(ws);
     }
 
     function _sortWorkspaces(list) {
@@ -62,33 +88,34 @@ Singleton {
 
     function handleEvent(ev) {
         if (ev.WorkspacesChanged) {
-            const list = ev.WorkspacesChanged.workspaces.slice();
-            root.workspaces = _sortWorkspaces(list);
-            _recountWorkspaces();
+            const list = _sortWorkspaces(ev.WorkspacesChanged.workspaces.slice());
+            // carry counts over from current window map
+            const counts = ({});
+            for (const k in root.windows)
+                counts[root.windows[k].workspace_id] = (counts[root.windows[k].workspace_id] || 0) + 1;
+            for (let i = 0; i < list.length; i++)
+                list[i].windowCount = counts[list[i].id] || 0;
+            _applyWorkspaces(list);
         } else if (ev.WorkspaceActivated) {
             const id = ev.WorkspaceActivated.id;
             const ws = root.workspaces.slice();
-            for (let i = 0; i < ws.length; i++) {
-                // Only one workspace per output is active; niri sends the newly
-                // activated one. Mark focus on the matching output.
-                if (ws[i].id === id) {
-                    ws[i].is_active = true;
-                    ws[i].is_focused = ev.WorkspaceActivated.focused;
-                } else if (ev.WorkspaceActivated.focused) {
-                    ws[i].is_focused = false;
-                }
-            }
-            // Clear is_active for others on the same output as the activated one.
             let out = null;
             for (let i = 0; i < ws.length; i++)
                 if (ws[i].id === id) out = ws[i].output;
-            for (let i = 0; i < ws.length; i++)
-                if (ws[i].output === out && ws[i].id !== id)
-                    ws[i].is_active = false;
-            root.workspaces = ws;
+            for (let i = 0; i < ws.length; i++) {
+                if (ws[i].id === id) {
+                    ws[i].is_active = true;
+                    ws[i].is_focused = ev.WorkspaceActivated.focused;
+                } else {
+                    if (ws[i].output === out)
+                        ws[i].is_active = false;
+                    if (ev.WorkspaceActivated.focused)
+                        ws[i].is_focused = false;
+                }
+            }
+            _applyWorkspaces(ws);
         } else if (ev.WorkspaceActiveWindowChanged) {
-            // active_window_id isn't shown in the bar; mutate in place so we
-            // don't churn the workspaces Repeater on every focus change.
+            // active_window_id isn't rendered; mutate in place, no Repeater churn.
             const ws = root.workspaces;
             for (let i = 0; i < ws.length; i++)
                 if (ws[i].id === ev.WorkspaceActiveWindowChanged.workspace_id)
@@ -98,7 +125,7 @@ Singleton {
             for (let i = 0; i < ws.length; i++)
                 if (ws[i].id === ev.WorkspaceUrgencyChanged.id)
                     ws[i].is_urgent = ev.WorkspaceUrgencyChanged.urgent;
-            root.workspaces = ws;
+            _applyWorkspaces(ws);
         } else if (ev.WindowsChanged) {
             const map = ({});
             const list = ev.WindowsChanged.windows;
@@ -119,14 +146,12 @@ Singleton {
             if (w.is_focused)
                 root.focusedWindowId = w.id;
             _updateFocusedTitle();
-            // Only rebuild the list-backed models (taskbar / workspace counts)
-            // when the window set or its placement actually changed. A plain
-            // title change (e.g. a terminal updating its title) must NOT rebuild
-            // the Repeaters — that was the source of the flicker.
-            if (!existed || prevWs !== w.workspace_id)
+            // The signature guard makes these no-ops for a title-only change,
+            // but we still skip the work when placement clearly didn't move.
+            if (!existed || prevWs !== w.workspace_id) {
                 _rebuildWindowList();
-            if (!existed || prevWs !== w.workspace_id)
                 _recountWorkspaces();
+            }
         } else if (ev.WindowClosed) {
             delete root.windows[ev.WindowClosed.id];
             if (root.focusedWindowId === ev.WindowClosed.id)
@@ -143,14 +168,12 @@ Singleton {
         }
     }
 
-    // Fire a niri action, e.g. action(["focus-workspace", "2"]).
     function action(args) {
         actionProc.command = ["niri", "msg", "action"].concat(args);
         actionProc.running = true;
     }
 
     function focusWorkspace(ws) {
-        // niri references workspaces by index or name; prefer name if set.
         root.action(["focus-workspace", ws.name ? String(ws.name) : String(ws.idx)]);
     }
 
@@ -164,8 +187,10 @@ Singleton {
         running: false
     }
 
-    // Long-lived event stream. If niri restarts, the process exits and we
-    // restart it after a short delay.
+    // Long-lived event stream. If it drops (see noctalia issue #2200, the niri
+    // socket can silently disconnect), we restart it — and because of the
+    // signature guards above, the re-sent full state does NOT cause a visible
+    // rebuild when nothing actually changed.
     Process {
         id: stream
         command: ["niri", "msg", "--json", "event-stream"]
@@ -177,11 +202,14 @@ Singleton {
                 try {
                     root.handleEvent(JSON.parse(line));
                 } catch (e) {
-                    // Ignore malformed / partial lines.
+                    // ignore malformed / partial lines
                 }
             }
         }
-        onExited: restartTimer.start()
+        onExited: (code, status) => {
+            console.log("[Niri] event-stream exited code=" + code + " — restarting");
+            restartTimer.start();
+        }
     }
 
     Timer {
