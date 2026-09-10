@@ -33,11 +33,11 @@ Singleton {
     property string fontFamily: "Jetsevka"
     property string fontFamilyFallback: "JetBrainsMono Nerd Font Propo"
     readonly property var fontList: [fontFamily, fontFamilyFallback]
-    property int fontSize: 15
+    property int fontSize: 17
     property int fontWeight: Font.Bold
 
-    // ---- Bar geometry (matches Waybar: bottom dock, height 32) ----
-    property int barHeight: 32
+    // ---- Bar geometry (bump barHeight/fontSize if it looks tiny on HiDPI) ----
+    property int barHeight: 40
     property int pillVMargin: 6        // vertical margin around pills
     property int pillHPad: 8           // horizontal padding inside pills
     property int pillGap: 5            // gap between module groups

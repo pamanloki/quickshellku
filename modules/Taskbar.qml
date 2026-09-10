@@ -50,10 +50,10 @@ Item {
 
                 Image {
                     anchors.centerIn: parent
-                    width: 16
-                    height: 16
-                    sourceSize.width: 16
-                    sourceSize.height: 16
+                    width: 20
+                    height: 20
+                    sourceSize.width: 20
+                    sourceSize.height: 20
                     source: root.iconFor(modelData.app_id)
                     fillMode: Image.PreserveAspectFit
                 }
