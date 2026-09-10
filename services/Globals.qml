@@ -1,0 +1,67 @@
+pragma Singleton
+
+import Quickshell
+import Quickshell.Io
+import QtQuick
+
+// Central UI state + IPC entry points, so niri keybinds can drive the shell:
+//   qs ipc call launcher   toggle
+//   qs ipc call wifi       toggle
+//   qs ipc call bluetooth  toggle
+//   qs ipc call power      toggle
+//   qs ipc call brightness osd
+Singleton {
+    id: root
+
+    property bool launcherOpen: false
+    property bool wifiOpen: false
+    property bool bluetoothOpen: false
+    property bool powerOpen: false
+    property bool brightnessOsd: false
+
+    // Only one popup panel at a time (launcher/wifi/bt/power are exclusive).
+    function _closeAll() {
+        launcherOpen = false;
+        wifiOpen = false;
+        bluetoothOpen = false;
+        powerOpen = false;
+    }
+
+    function toggleLauncher() { const v = !launcherOpen; _closeAll(); launcherOpen = v; }
+    function toggleWifi()     { const v = !wifiOpen;     _closeAll(); wifiOpen = v; }
+    function toggleBluetooth(){ const v = !bluetoothOpen;_closeAll(); bluetoothOpen = v; }
+    function togglePower()    { const v = !powerOpen;    _closeAll(); powerOpen = v; }
+
+    Timer {
+        id: osdTimer
+        interval: 1500
+        onTriggered: root.brightnessOsd = false
+    }
+    function showBrightnessOsd() {
+        root.brightnessOsd = true;
+        osdTimer.restart();
+    }
+
+    IpcHandler {
+        target: "launcher"
+        function toggle() { root.toggleLauncher(); }
+        function open() { root._closeAll(); root.launcherOpen = true; }
+        function close() { root.launcherOpen = false; }
+    }
+    IpcHandler {
+        target: "wifi"
+        function toggle() { root.toggleWifi(); }
+    }
+    IpcHandler {
+        target: "bluetooth"
+        function toggle() { root.toggleBluetooth(); }
+    }
+    IpcHandler {
+        target: "power"
+        function toggle() { root.togglePower(); }
+    }
+    IpcHandler {
+        target: "brightness"
+        function osd() { root.showBrightnessOsd(); }
+    }
+}

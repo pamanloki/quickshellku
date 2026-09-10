@@ -1,0 +1,71 @@
+pragma Singleton
+
+import Quickshell
+import Quickshell.Io
+import QtQuick
+
+// Base16 theme, auto-synced from your Flavours-generated Waybar colors.
+// It reads ~/.config/waybar/colors.css (the same file your Waybar imports)
+// and live-reloads when Flavours rewrites it, so Quickshell always matches
+// your current theme. If the file is missing, the defaults below are used.
+Singleton {
+    id: root
+
+    // ---- Base16 palette (defaults = Base16 "Default Dark") ----
+    property color base00: "#181818" // background
+    property color base01: "#282828" // lighter background (pills)
+    property color base02: "#383838" // selection / icon pills
+    property color base03: "#585858" // comments / dim
+    property color base04: "#b8b8b8"
+    property color base05: "#d8d8d8" // default foreground
+    property color base06: "#e8e8e8"
+    property color base07: "#f8f8f8"
+    property color base08: "#ab4642" // red
+    property color base09: "#dc9656" // orange
+    property color base0A: "#f7ca88" // yellow
+    property color base0B: "#a1b56c" // green
+    property color base0C: "#86c1b9" // cyan
+    property color base0D: "#7cafc2" // blue
+    property color base0E: "#ba8baf" // magenta
+    property color base0F: "#a16946" // brown
+
+    // ---- Fonts (from your Waybar style.css) ----
+    property string fontFamily: "Jetsevka"
+    property string fontFamilyFallback: "JetBrainsMono Nerd Font Propo"
+    readonly property var fontList: [fontFamily, fontFamilyFallback]
+    property int fontSize: 15
+    property int fontWeight: Font.Bold
+
+    // ---- Bar geometry (matches Waybar: bottom dock, height 32) ----
+    property int barHeight: 32
+    property int pillVMargin: 6        // vertical margin around pills
+    property int pillHPad: 8           // horizontal padding inside pills
+    property int pillGap: 5            // gap between module groups
+    property int radius: 0             // Waybar uses square corners here
+
+    // Path to the Flavours colors file (same one Waybar imports).
+    property string colorsPath: Quickshell.env("HOME") + "/.config/waybar/colors.css"
+
+    function parseColors(txt) {
+        if (!txt)
+            return;
+        // Matches lines like: @define-color base00 #1d1f21;
+        const re = /@define-color\s+(base[0-9A-Fa-f]{2})\s+(#[0-9A-Fa-f]{3,8})/g;
+        let m;
+        while ((m = re.exec(txt)) !== null) {
+            // Normalise key to the property name (base00..base09, base0A..base0F)
+            const name = "base" + m[1].slice(4).toUpperCase();
+            if (root.hasOwnProperty(name))
+                root[name] = m[2];
+        }
+    }
+
+    FileView {
+        id: colorFile
+        path: root.colorsPath
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        onLoaded: root.parseColors(text())
+    }
+}
