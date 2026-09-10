@@ -8,9 +8,9 @@ Item {
     Text {
         id: label
         anchors.centerIn: parent
-        text: ""
+        text: "│"
         color: Theme.base03
-        font.family: Theme.fontFamilyFallback
-        font.pixelSize: 18
+        font.family: Theme.fontFamily
+        font.pixelSize: Theme.fontSize + 2
     }
 }

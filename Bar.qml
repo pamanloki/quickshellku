@@ -47,20 +47,23 @@ PanelWindow {
         spacing: Theme.pillGap
 
         StatPill {
-            icon: ""
+            icon: "󰘚"
             value: SystemStats.cpuPercent + "%"
             accent: Theme.base08
+            minValueWidth: 44
         }
         StatPill {
-            icon: ""
+            icon: "󰍛"
             value: SystemStats.memUsedGiB.toFixed(1) + "GiB"
             accent: Theme.base0C
+            minValueWidth: 66
             onClicked: Quickshell.execDetached(["footx", "-e", "-f", "btop"])
         }
         StatPill {
-            icon: ""
+            icon: "󰋊"
             value: SystemStats.diskFree
             accent: Theme.base0A
+            minValueWidth: 52
         }
         TempPill {}
         BacklightPill {}

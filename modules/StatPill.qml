@@ -13,6 +13,7 @@ Item {
     property color accent: Theme.base05
     property color iconBg: Theme.base02
     property bool showValue: true
+    property int minValueWidth: 0   // fix a min width so changing numbers don't jitter
 
     signal clicked()
     signal rightClicked()
@@ -49,7 +50,7 @@ Item {
             height: parent.height
             radius: Theme.radius
             color: Theme.base01
-            implicitWidth: valText.implicitWidth + 2 * Theme.pillHPad
+            implicitWidth: Math.max(root.minValueWidth, valText.implicitWidth + 2 * Theme.pillHPad)
             visible: root.showValue && root.value.length > 0
             Text {
                 id: valText

@@ -87,11 +87,12 @@ Singleton {
                     ws[i].is_active = false;
             root.workspaces = ws;
         } else if (ev.WorkspaceActiveWindowChanged) {
-            const ws = root.workspaces.slice();
+            // active_window_id isn't shown in the bar; mutate in place so we
+            // don't churn the workspaces Repeater on every focus change.
+            const ws = root.workspaces;
             for (let i = 0; i < ws.length; i++)
                 if (ws[i].id === ev.WorkspaceActiveWindowChanged.workspace_id)
                     ws[i].active_window_id = ev.WorkspaceActiveWindowChanged.active_window_id;
-            root.workspaces = ws;
         } else if (ev.WorkspaceUrgencyChanged) {
             const ws = root.workspaces.slice();
             for (let i = 0; i < ws.length; i++)
@@ -112,12 +113,20 @@ Singleton {
             _updateFocusedTitle();
         } else if (ev.WindowOpenedOrChanged) {
             const w = ev.WindowOpenedOrChanged.window;
+            const existed = root.windows[w.id] !== undefined;
+            const prevWs = existed ? root.windows[w.id].workspace_id : null;
             root.windows[w.id] = w;
             if (w.is_focused)
                 root.focusedWindowId = w.id;
-            _rebuildWindowList();
-            _recountWorkspaces();
             _updateFocusedTitle();
+            // Only rebuild the list-backed models (taskbar / workspace counts)
+            // when the window set or its placement actually changed. A plain
+            // title change (e.g. a terminal updating its title) must NOT rebuild
+            // the Repeaters — that was the source of the flicker.
+            if (!existed || prevWs !== w.workspace_id)
+                _rebuildWindowList();
+            if (!existed || prevWs !== w.workspace_id)
+                _recountWorkspaces();
         } else if (ev.WindowClosed) {
             delete root.windows[ev.WindowClosed.id];
             if (root.focusedWindowId === ev.WindowClosed.id)

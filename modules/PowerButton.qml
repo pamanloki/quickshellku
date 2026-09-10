@@ -18,7 +18,7 @@ Item {
         Text {
             id: label
             anchors.centerIn: parent
-            text: ""
+            text: "󰐥"
             color: Theme.base00
             font.family: Theme.fontFamilyFallback
             font.pixelSize: Theme.fontSize

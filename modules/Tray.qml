@@ -32,13 +32,13 @@ Item {
                 model: SystemTray.items
                 delegate: Item {
                     required property var modelData
-                    width: 18
-                    height: 18
+                    width: 20
+                    height: 20
 
                     Image {
                         anchors.fill: parent
-                        sourceSize.width: 18
-                        sourceSize.height: 18
+                        sourceSize.width: 20
+                        sourceSize.height: 20
                         source: modelData.icon
                         fillMode: Image.PreserveAspectFit
                     }
