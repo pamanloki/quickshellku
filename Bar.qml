@@ -65,6 +65,7 @@ PanelWindow {
         TempPill {}
         BacklightPill {}
         VolumePill {}
+        XbpsPill {}
         Clock {}
         BluetoothPill {}
         NetworkPill {}

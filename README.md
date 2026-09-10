@@ -16,6 +16,7 @@ Flavours), reusing the same tools I already run:
 | Wi-Fi | `iwctl` (iwd) — panel + fallback to **impala** |
 | Bluetooth | `bluetoothctl` (bluez) — panel + fallback to **bluetui** |
 | Launcher | native, reads `.desktop` files (like fuzzel) |
+| Updates | `xbps-install -Mun` (Void update count) |
 | Power | native grid → delegates to your `power-fuzzel` script |
 | Tray | StatusNotifierItem (native) |
 
@@ -87,6 +88,7 @@ You can also click the bar:
 - **Backlight pill** → nightlight menu · scroll → brightness
 - **Volume pill** → pavucontrol · scroll → volume · right-click → mute
 - **CPU/Mem/Disk/Temp** → mem/temp open `btop`
+- **Updates pill** (󰏗) → runs `xbps-upgrade.sh` · right-click → re-check
 - **Power button** (right, red) → power menu
 - **Clock** → toggle time / full date
 
