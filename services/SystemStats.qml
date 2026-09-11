@@ -5,28 +5,39 @@ import Quickshell.Io
 import QtQuick
 
 // CPU / memory / disk / temperature, polled every 2s with a single process.
-// CPU is a delta of /proc/stat; memory from /proc/meminfo; disk via df;
-// temperature from the first thermal zone (override zonePath if needed).
+//
+// Memory matches your Waybar memory_usage.sh (htop-style):
+//   used = MemTotal - (MemFree + Active(file) + Inactive(file) + SReclaimable)
+// Temperature matches your temp.sh: `sensors` "Package id 0", thresholds
+// warm >= 55, critical >= 70.
 Singleton {
     id: root
 
     property int cpuPercent: 0
     property real memUsedGiB: 0
     property real memTotalGiB: 0
+    property string memText: "--"
     property string diskFree: "--"
     property int tempC: 0
+    property bool tempKnown: false
 
-    readonly property string tempClass: tempC >= 80 ? "critical" : (tempC >= 60 ? "warm" : "cool")
+    readonly property string tempClass: !tempKnown ? "unknown"
+        : (tempC >= 70 ? "critical" : (tempC >= 55 ? "warm" : "cool"))
 
     property int _prevIdle: 0
     property int _prevTotal: 0
-    property string zonePath: "/sys/class/thermal/thermal_zone0/temp"
+
+    function _num(re, txt) {
+        const m = re.exec(txt);
+        return m ? (parseInt(m[1]) || 0) : 0;
+    }
 
     function _parse(out) {
-        const sections = out.split("@@@");
-        // 0: /proc/stat first line, 1: meminfo, 2: temp, 3: df avail
-        if (sections[0]) {
-            const p = sections[0].trim().split(/\s+/);
+        const s = out.split("@@@");
+
+        // 0: /proc/stat first line
+        if (s[0]) {
+            const p = s[0].trim().split(/\s+/);
             if (p[0] === "cpu") {
                 let total = 0;
                 for (let i = 1; i < p.length; i++)
@@ -40,31 +51,45 @@ Singleton {
                 root._prevIdle = idle;
             }
         }
-        if (sections[1]) {
-            const t = sections[1];
-            const tot = parseInt((/MemTotal:\s+(\d+)/.exec(t) || [])[1]) || 0;
-            const av = parseInt((/MemAvailable:\s+(\d+)/.exec(t) || [])[1]) || 0;
-            root.memTotalGiB = tot / 1048576;
-            root.memUsedGiB = (tot - av) / 1048576;
+
+        // 1: /proc/meminfo (kB), htop-style used
+        if (s[1]) {
+            const t = s[1];
+            const total = _num(/MemTotal:\s+(\d+)/, t);
+            const free = _num(/MemFree:\s+(\d+)/, t);
+            const af = _num(/Active\(file\):\s+(\d+)/, t);
+            const iaf = _num(/Inactive\(file\):\s+(\d+)/, t);
+            const sr = _num(/SReclaimable:\s+(\d+)/, t);
+            const used = total - (free + af + iaf + sr); // kB
+            root.memTotalGiB = total / 1048576;
+            root.memUsedGiB = used / 1048576;
+            root.memText = used < 1048576
+                ? Math.round(used / 1024) + "MiB"
+                : (used / 1048576).toFixed(1) + "GiB";
         }
-        if (sections[2]) {
-            const v = parseInt(sections[2].trim());
-            if (!isNaN(v))
-                root.tempC = Math.round(v / 1000);
+
+        // 2: `sensors` Package id 0 line, e.g. "Package id 0:  +45.0°C  (...)"
+        if (s[2] && s[2].trim().length > 0) {
+            const m = /([+-]?\d+(?:\.\d+)?)\s*°?C/.exec(s[2]);
+            if (m) {
+                root.tempC = Math.round(parseFloat(m[1]));
+                root.tempKnown = true;
+            }
+        } else {
+            root.tempKnown = false;
         }
-        if (sections[3]) {
-            const d = sections[3].trim();
-            if (d.length > 0)
-                root.diskFree = d;
-        }
+
+        // 3: df avail on /
+        if (s[3] && s[3].trim().length > 0)
+            root.diskFree = s[3].trim();
     }
 
     Process {
         id: proc
         command: ["sh", "-c",
             "head -1 /proc/stat; printf '@@@'; " +
-            "grep -E 'MemTotal|MemAvailable' /proc/meminfo; printf '@@@'; " +
-            "cat " + root.zonePath + " 2>/dev/null; printf '@@@'; " +
+            "cat /proc/meminfo; printf '@@@'; " +
+            "sensors 2>/dev/null | grep -m1 'Package id 0'; printf '@@@'; " +
             "df -h --output=avail / | tail -1 | tr -d ' '"]
         stdout: StdioCollector {
             onStreamFinished: root._parse(text)

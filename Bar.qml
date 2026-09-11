@@ -54,7 +54,7 @@ PanelWindow {
         }
         StatPill {
             icon: "󰍛"
-            value: SystemStats.memUsedGiB.toFixed(1) + "GiB"
+            value: SystemStats.memText
             accent: Theme.base0C
             valueMax: "99.9GiB"
             onClicked: Quickshell.execDetached(["footx", "-e", "-f", "btop"])
