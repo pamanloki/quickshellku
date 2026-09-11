@@ -63,14 +63,25 @@ Variants {
                 Item {
                     width: parent.width
                     height: 30
-                    Text {
+                    Row {
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
-                        text: "󰂚  Notifications"
-                        color: Theme.base05
-                        font.family: Theme.fontFamilyFallback
-                        font.pixelSize: Theme.fontSize + 2
-                        font.weight: Theme.fontWeight
+                        spacing: 8
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "󰂚"
+                            color: Theme.base05
+                            font.family: Theme.fontFamilyFallback
+                            font.pixelSize: Theme.fontSize + 2
+                        }
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "Notifications"
+                            color: Theme.base05
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize + 2
+                            font.weight: Theme.fontWeight
+                        }
                     }
                     Row {
                         anchors.right: parent.right
@@ -80,12 +91,24 @@ Variants {
                         Rectangle {
                             width: 72; height: 30; radius: 8
                             color: Notifications.doNotDisturb ? Theme.base08 : (dndMA.containsMouse ? Theme.base02 : Theme.base01)
-                            Text {
+                            Row {
                                 anchors.centerIn: parent
-                                text: Notifications.doNotDisturb ? "󰂛 DND" : "󰂚 DND"
-                                color: Notifications.doNotDisturb ? Theme.base00 : Theme.base05
-                                font.family: Theme.fontFamilyFallback
-                                font.pixelSize: Theme.fontSize - 3
+                                spacing: 5
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: Notifications.doNotDisturb ? "󰂛" : "󰂚"
+                                    color: Notifications.doNotDisturb ? Theme.base00 : Theme.base05
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize - 3
+                                }
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "DND"
+                                    color: Notifications.doNotDisturb ? Theme.base00 : Theme.base05
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSize - 3
+                                    font.weight: Theme.fontWeight
+                                }
                             }
                             MouseArea {
                                 id: dndMA
@@ -98,12 +121,24 @@ Variants {
                         Rectangle {
                             width: 72; height: 30; radius: 8
                             color: clMA.containsMouse ? Theme.base08 : Theme.base01
-                            Text {
+                            Row {
                                 anchors.centerIn: parent
-                                text: "󰩺 Clear"
-                                color: clMA.containsMouse ? Theme.base00 : Theme.base05
-                                font.family: Theme.fontFamilyFallback
-                                font.pixelSize: Theme.fontSize - 3
+                                spacing: 5
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "󰩺"
+                                    color: clMA.containsMouse ? Theme.base00 : Theme.base05
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize - 3
+                                }
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "Clear"
+                                    color: clMA.containsMouse ? Theme.base00 : Theme.base05
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSize - 3
+                                    font.weight: Theme.fontWeight
+                                }
                             }
                             MouseArea {
                                 id: clMA
@@ -116,15 +151,25 @@ Variants {
                 }
 
                 // empty state
-                Text {
+                Column {
                     visible: Notifications.history.length === 0
                     width: parent.width
-                    horizontalAlignment: Text.AlignHCenter
                     topPadding: 40
-                    text: "󰂜\nNo notifications"
-                    color: Theme.base03
-                    font.family: Theme.fontFamilyFallback
-                    font.pixelSize: Theme.fontSize + 4
+                    spacing: 8
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "󰂜"
+                        color: Theme.base03
+                        font.family: Theme.fontFamilyFallback
+                        font.pixelSize: Theme.fontSize + 12
+                    }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "No notifications"
+                        color: Theme.base03
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize
+                    }
                 }
 
                 // history list
@@ -232,7 +277,7 @@ Variants {
                             Text {
                                 width: parent.width
                                 text: card.modelData.body
-                                color: Theme.base04
+                                color: Theme.base05
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontSize - 3
                                 textFormat: Text.StyledText

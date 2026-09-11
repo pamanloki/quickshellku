@@ -134,7 +134,7 @@ Variants {
                         Text {
                             width: parent.width
                             text: card.modelData.body || ""
-                            color: Theme.base04
+                            color: Theme.base05
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSize - 2
                             textFormat: Text.StyledText
