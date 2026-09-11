@@ -292,7 +292,7 @@ Variants {
                                 icon: "󰃝"
                                 accent: Theme.base09
                                 on: Nightlight.active
-                                caption: Nightlight.active ? "Night Light" : "Off"
+                                caption: Nightlight.active ? "On" : "Off"
                                 onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
                                 onOpened: Globals.toggleNightlight()
                             }
@@ -300,7 +300,7 @@ Variants {
                                 icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"
                                 accent: Theme.base08
                                 on: Notifications.doNotDisturb
-                                caption: Notifications.doNotDisturb ? "DND" : "Off"
+                                caption: Notifications.doNotDisturb ? "On" : "Off"
                                 onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
                                 onOpened: Notifications.doNotDisturb = !Notifications.doNotDisturb
                             }
