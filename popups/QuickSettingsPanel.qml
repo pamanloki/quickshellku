@@ -4,10 +4,10 @@ import Quickshell.Wayland
 import Quickshell.Services.Pipewire
 import "root:/services"
 
-// Quick Settings, using the iOS 26/27 Control Centre *layout* (a floating card
-// with a 2x2 round connectivity cluster, tall vertical brightness/volume
-// sliders, a now-playing tile with a scrubber, and an output picker) — but with
-// solid theme colours, no translucent "liquid glass" and no blur.
+// Quick Settings, using the iOS 26/27 Control Centre *layout* — solid theme
+// colours, no glass/blur. The Now Playing tile is a separate module (its own
+// floating card) above the Quick Settings card, like iOS; the QS card merges
+// into the bar.
 Variants {
     model: Quickshell.screens
 
@@ -188,158 +188,28 @@ Variants {
             }
 
             width: 372
-            height: contentCol.implicitHeight + 30
+            height: stack.implicitHeight
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.rightMargin: 8
             anchors.bottomMargin: 0
 
-            // rounded top, open bottom → merges into the bar like the other panels
-            IslandBg { anchors.fill: parent; radius: 22 }
-            MouseArea { anchors.fill: parent }
-
             Column {
-                id: contentCol
+                id: stack
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.margins: 18
-                spacing: 14
+                anchors.bottom: parent.bottom
+                spacing: 10
 
-                // ---- header: date + wallpaper/theme ----
-                Row {
-                    width: parent.width
-                    Column {
-                        width: parent.width - 92
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 1
-                        Text {
-                            text: Qt.formatDate(Time.now, "dddd")
-                            color: Theme.base05
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize + 3
-                            font.weight: Theme.fontWeight
-                        }
-                        Text {
-                            text: Qt.formatDate(Time.now, "d MMMM yyyy")
-                            color: Theme.base04
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize - 2
-                        }
-                    }
-                    Row {
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 8
-                        Rectangle {
-                            width: 40; height: 40; radius: 20
-                            color: wallH.hovered ? win.slotBg : win.modBg
-                            border.width: 1; border.color: win.hairline
-                            Text { anchors.centerIn: parent; text: "󰸉"; color: Theme.base0C
-                                font.family: Theme.fontFamilyFallback; font.pixelSize: Theme.fontSize + 4 }
-                            HoverHandler { id: wallH }
-                            MouseArea { anchors.fill: parent; onClicked: Globals.toggleWallpaper() }
-                        }
-                        Rectangle {
-                            width: 40; height: 40; radius: 20
-                            color: themeH.hovered ? win.slotBg : win.modBg
-                            border.width: 1; border.color: win.hairline
-                            Text { anchors.centerIn: parent; text: "󰸌"; color: Theme.base0E
-                                font.family: Theme.fontFamilyFallback; font.pixelSize: Theme.fontSize + 4 }
-                            HoverHandler { id: themeH }
-                            MouseArea { anchors.fill: parent; onClicked: Globals.toggleTheme() }
-                        }
-                    }
-                }
-
-                // ---- connectivity cluster  +  vertical sliders ----
-                Row {
-                    width: parent.width
-                    spacing: 14
-                    readonly property real colW: (width - 14) / 2
-                    readonly property real blockH: 168
-
-                    // 2x2 round toggles, each with a caption (connected SSID /
-                    // device name shows here)
-                    Rectangle {
-                        width: parent.colW
-                        height: parent.blockH
-                        radius: 24
-                        color: win.modBg
-                        border.width: 1; border.color: win.hairline
-
-                        Grid {
-                            anchors.centerIn: parent
-                            columns: 2
-                            rowSpacing: 10
-                            columnSpacing: 8
-                            ConnCell {
-                                icon: Network.icon
-                                accent: Theme.base0B
-                                on: Network.radioOn
-                                caption: Network.connected ? Network.ssid : (Network.radioOn ? "Wi-Fi" : "Off")
-                                onToggled: Network.setRadio(!Network.radioOn)
-                                onOpened: Globals.toggleWifi()
-                            }
-                            ConnCell {
-                                icon: Bluetooth.icon
-                                accent: Theme.base0D
-                                on: Bluetooth.powered
-                                caption: Bluetooth.anyConnected ? Bluetooth.connectedName : (Bluetooth.powered ? "Bluetooth" : "Off")
-                                onToggled: Bluetooth.setPowered(!Bluetooth.powered)
-                                onOpened: Globals.toggleBluetooth()
-                            }
-                            ConnCell {
-                                icon: "󰃝"
-                                accent: Theme.base09
-                                on: Nightlight.active
-                                caption: Nightlight.active ? "On" : "Off"
-                                onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
-                                onOpened: Globals.toggleNightlight()
-                            }
-                            ConnCell {
-                                icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"
-                                accent: Theme.base08
-                                on: Notifications.doNotDisturb
-                                caption: Notifications.doNotDisturb ? "On" : "Off"
-                                onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
-                                onOpened: Notifications.doNotDisturb = !Notifications.doNotDisturb
-                            }
-                        }
-                    }
-
-                    // brightness + volume vertical sliders
-                    Row {
-                        width: parent.colW
-                        height: parent.blockH
-                        spacing: 14
-                        VSlider {
-                            width: (parent.width - 14) / 2
-                            height: parent.height
-                            icon: Brightness.icon
-                            value: Brightness.percent
-                            accent: Theme.base0E
-                            onMoved: v => Brightness.set(v)
-                        }
-                        VSlider {
-                            width: (parent.width - 14) / 2
-                            height: parent.height
-                            icon: win.muted || win.volume === 0 ? "󰖁" : (win.volume >= 50 ? "󰕾" : "󰖀")
-                            value: win.volume
-                            accent: Theme.base0D
-                            badgeMuted: win.muted
-                            onMoved: v => win.setVolume(v)
-                        }
-                    }
-                }
-
-                // ---- now playing ----
+                // ================= Now Playing (separate module) =================
                 Rectangle {
+                    id: mediaCard
+                    visible: Player.hasPlayer
                     width: parent.width
                     height: 92
                     radius: 22
                     color: win.modBg
                     border.width: 1; border.color: win.hairline
-                    visible: Player.hasPlayer
 
                     Timer {
                         interval: 1000
@@ -495,95 +365,239 @@ Variants {
                     }
                 }
 
-                // ---- audio output switcher (collapsible) ----
-                Column {
+                // ================= Quick Settings (merges into the bar) =================
+                Item {
+                    id: qsCard
                     width: parent.width
-                    spacing: 6
+                    height: contentCol.implicitHeight + 30
 
-                    Rectangle {
-                        width: parent.width
-                        height: 40
-                        radius: 14
-                        color: outHdr.hovered ? win.slotBg : win.modBg
-                        border.width: 1; border.color: win.hairline
-                        Row {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 12
-                            anchors.right: chevron.left
-                            anchors.rightMargin: 8
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 10
-                            Text {
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: "󰓃"
-                                color: Theme.base0D
-                                font.family: Theme.fontFamilyFallback
-                                font.pixelSize: Theme.fontSize + 2
-                            }
-                            Text {
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: parent.width - 34
-                                text: win.nodeName(win.sink)
-                                color: Theme.base05
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize - 2
-                                elide: Text.ElideRight
-                            }
-                        }
-                        Text {
-                            id: chevron
-                            anchors.right: parent.right
-                            anchors.rightMargin: 12
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: win.audioExpanded ? "󰅃" : "󰅀"
-                            color: Theme.base04
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: Theme.fontSize
-                        }
-                        HoverHandler { id: outHdr }
-                        MouseArea { anchors.fill: parent; onClicked: win.audioExpanded = !win.audioExpanded }
-                    }
+                    IslandBg { anchors.fill: parent; radius: 22 }
+                    MouseArea { anchors.fill: parent }
 
                     Column {
-                        width: parent.width
-                        spacing: 4
-                        visible: win.audioExpanded
-                        Repeater {
-                            model: win.sinks
-                            delegate: Rectangle {
-                                required property var modelData
-                                width: parent.width
-                                height: 34
-                                radius: 12
-                                readonly property bool isDefault: modelData === win.sink
-                                color: isDefault ? win.slotBg : (devHover.hovered ? win.modBg : "transparent")
+                        id: contentCol
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.margins: 18
+                        spacing: 14
+
+                        // ---- header: date + wallpaper/theme ----
+                        Row {
+                            width: parent.width
+                            Column {
+                                width: parent.width - 92
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 1
                                 Text {
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: 14
-                                    anchors.right: parent.right
-                                    anchors.rightMargin: 34
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: win.nodeName(modelData)
+                                    text: Qt.formatDate(Time.now, "dddd")
                                     color: Theme.base05
                                     font.family: Theme.fontFamily
-                                    font.pixelSize: Theme.fontSize - 3
-                                    elide: Text.ElideRight
+                                    font.pixelSize: Theme.fontSize + 3
+                                    font.weight: Theme.fontWeight
                                 }
                                 Text {
+                                    text: Qt.formatDate(Time.now, "d MMMM yyyy")
+                                    color: Theme.base04
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSize - 2
+                                }
+                            }
+                            Row {
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 8
+                                Rectangle {
+                                    width: 40; height: 40; radius: 20
+                                    color: wallH.hovered ? win.slotBg : win.modBg
+                                    border.width: 1; border.color: win.hairline
+                                    Text { anchors.centerIn: parent; text: "󰸉"; color: Theme.base0C
+                                        font.family: Theme.fontFamilyFallback; font.pixelSize: Theme.fontSize + 4 }
+                                    HoverHandler { id: wallH }
+                                    MouseArea { anchors.fill: parent; onClicked: Globals.toggleWallpaper() }
+                                }
+                                Rectangle {
+                                    width: 40; height: 40; radius: 20
+                                    color: themeH.hovered ? win.slotBg : win.modBg
+                                    border.width: 1; border.color: win.hairline
+                                    Text { anchors.centerIn: parent; text: "󰸌"; color: Theme.base0E
+                                        font.family: Theme.fontFamilyFallback; font.pixelSize: Theme.fontSize + 4 }
+                                    HoverHandler { id: themeH }
+                                    MouseArea { anchors.fill: parent; onClicked: Globals.toggleTheme() }
+                                }
+                            }
+                        }
+
+                        // ---- connectivity cluster  +  vertical sliders ----
+                        Row {
+                            width: parent.width
+                            spacing: 14
+                            readonly property real colW: (width - 14) / 2
+                            readonly property real blockH: 168
+
+                            // 2x2 round toggles, each with a caption
+                            Rectangle {
+                                width: parent.colW
+                                height: parent.blockH
+                                radius: 24
+                                color: win.modBg
+                                border.width: 1; border.color: win.hairline
+
+                                Grid {
+                                    anchors.centerIn: parent
+                                    columns: 2
+                                    rowSpacing: 10
+                                    columnSpacing: 8
+                                    ConnCell {
+                                        icon: Network.icon
+                                        accent: Theme.base0B
+                                        on: Network.radioOn
+                                        caption: Network.connected ? Network.ssid : (Network.radioOn ? "Wi-Fi" : "Off")
+                                        onToggled: Network.setRadio(!Network.radioOn)
+                                        onOpened: Globals.toggleWifi()
+                                    }
+                                    ConnCell {
+                                        icon: Bluetooth.icon
+                                        accent: Theme.base0D
+                                        on: Bluetooth.powered
+                                        caption: Bluetooth.anyConnected ? Bluetooth.connectedName : (Bluetooth.powered ? "Bluetooth" : "Off")
+                                        onToggled: Bluetooth.setPowered(!Bluetooth.powered)
+                                        onOpened: Globals.toggleBluetooth()
+                                    }
+                                    ConnCell {
+                                        icon: "󰃝"
+                                        accent: Theme.base09
+                                        on: Nightlight.active
+                                        caption: Nightlight.active ? "On" : "Off"
+                                        onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
+                                        onOpened: Globals.toggleNightlight()
+                                    }
+                                    ConnCell {
+                                        icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"
+                                        accent: Theme.base08
+                                        on: Notifications.doNotDisturb
+                                        caption: Notifications.doNotDisturb ? "On" : "Off"
+                                        onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
+                                        onOpened: Notifications.doNotDisturb = !Notifications.doNotDisturb
+                                    }
+                                }
+                            }
+
+                            // brightness + volume vertical sliders
+                            Row {
+                                width: parent.colW
+                                height: parent.blockH
+                                spacing: 14
+                                VSlider {
+                                    width: (parent.width - 14) / 2
+                                    height: parent.height
+                                    icon: Brightness.icon
+                                    value: Brightness.percent
+                                    accent: Theme.base0E
+                                    onMoved: v => Brightness.set(v)
+                                }
+                                VSlider {
+                                    width: (parent.width - 14) / 2
+                                    height: parent.height
+                                    icon: win.muted || win.volume === 0 ? "󰖁" : (win.volume >= 50 ? "󰕾" : "󰖀")
+                                    value: win.volume
+                                    accent: Theme.base0D
+                                    badgeMuted: win.muted
+                                    onMoved: v => win.setVolume(v)
+                                }
+                            }
+                        }
+
+                        // ---- audio output switcher (collapsible) ----
+                        Column {
+                            width: parent.width
+                            spacing: 6
+
+                            Rectangle {
+                                width: parent.width
+                                height: 40
+                                radius: 14
+                                color: outHdr.hovered ? win.slotBg : win.modBg
+                                border.width: 1; border.color: win.hairline
+                                Row {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 12
+                                    anchors.right: chevron.left
+                                    anchors.rightMargin: 8
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: 10
+                                    Text {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: "󰓃"
+                                        color: Theme.base0D
+                                        font.family: Theme.fontFamilyFallback
+                                        font.pixelSize: Theme.fontSize + 2
+                                    }
+                                    Text {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: parent.width - 34
+                                        text: win.nodeName(win.sink)
+                                        color: Theme.base05
+                                        font.family: Theme.fontFamily
+                                        font.pixelSize: Theme.fontSize - 2
+                                        elide: Text.ElideRight
+                                    }
+                                }
+                                Text {
+                                    id: chevron
                                     anchors.right: parent.right
                                     anchors.rightMargin: 12
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: parent.isDefault ? "󰄬" : ""
-                                    color: Theme.base0B
+                                    text: win.audioExpanded ? "󰅃" : "󰅀"
+                                    color: Theme.base04
                                     font.family: Theme.fontFamilyFallback
-                                    font.pixelSize: Theme.fontSize - 1
+                                    font.pixelSize: Theme.fontSize
                                 }
-                                HoverHandler { id: devHover }
-                                MouseArea {
-                                    anchors.fill: parent
-                                    onClicked: {
-                                        Pipewire.preferredDefaultAudioSink = modelData;
-                                        win.audioExpanded = false;
+                                HoverHandler { id: outHdr }
+                                MouseArea { anchors.fill: parent; onClicked: win.audioExpanded = !win.audioExpanded }
+                            }
+
+                            Column {
+                                width: parent.width
+                                spacing: 4
+                                visible: win.audioExpanded
+                                Repeater {
+                                    model: win.sinks
+                                    delegate: Rectangle {
+                                        required property var modelData
+                                        width: parent.width
+                                        height: 34
+                                        radius: 12
+                                        readonly property bool isDefault: modelData === win.sink
+                                        color: isDefault ? win.slotBg : (devHover.hovered ? win.modBg : "transparent")
+                                        Text {
+                                            anchors.left: parent.left
+                                            anchors.leftMargin: 14
+                                            anchors.right: parent.right
+                                            anchors.rightMargin: 34
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            text: win.nodeName(modelData)
+                                            color: Theme.base05
+                                            font.family: Theme.fontFamily
+                                            font.pixelSize: Theme.fontSize - 3
+                                            elide: Text.ElideRight
+                                        }
+                                        Text {
+                                            anchors.right: parent.right
+                                            anchors.rightMargin: 12
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            text: parent.isDefault ? "󰄬" : ""
+                                            color: Theme.base0B
+                                            font.family: Theme.fontFamilyFallback
+                                            font.pixelSize: Theme.fontSize - 1
+                                        }
+                                        HoverHandler { id: devHover }
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            onClicked: {
+                                                Pipewire.preferredDefaultAudioSink = modelData;
+                                                win.audioExpanded = false;
+                                            }
+                                        }
                                     }
                                 }
                             }
