@@ -4,9 +4,9 @@ import Quickshell.Wayland
 import Quickshell.Services.Pipewire
 import "root:/services"
 
-// Unified on-screen display for volume + brightness. It watches the Pipewire
-// sink and the Brightness service and pops up automatically on any change
-// (mouse scroll, keyboard keys, external tools), so there's a single OSD.
+// macOS-style on-screen display for volume + brightness: a centred rounded
+// square with a big glyph and the classic 16-segment level bar. Watches the
+// Pipewire sink and the Brightness service and pops up automatically on change.
 Variants {
     model: Quickshell.screens
 
@@ -15,12 +15,9 @@ Variants {
         required property var modelData
         screen: modelData
 
-        anchors { bottom: true }
-        margins.bottom: Theme.dockIconSize + 44   // sit above the Dock
-        implicitWidth: 280
-        implicitHeight: 58
+        anchors { top: true; bottom: true; left: true; right: true }
         color: "transparent"
-        visible: Globals.osdVisible
+        visible: Globals.osdVisible || card.opacity > 0.01
         exclusiveZone: 0
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
@@ -48,53 +45,57 @@ Variants {
         Timer { running: true; interval: 1200; onTriggered: win.ready = true }
 
         readonly property bool isVol: Globals.osdKind === "volume"
+        readonly property bool isMuted: Globals.osdMuted && isVol
         readonly property string osdIcon: isVol
-            ? (Globals.osdMuted || Globals.osdValue === 0 ? "󰖁" : Globals.osdValue >= 50 ? "󰕾" : "󰖀")
-            : "󰖨"
-        readonly property color osdColor: isVol ? Theme.base0D : Theme.base0E
+            ? (isMuted || Globals.osdValue === 0 ? "󰖁" : Globals.osdValue >= 50 ? "󰕾" : "󰖀")
+            : "󰃟"
+        // 16 segments, classic macOS HUD
+        readonly property int filled: Math.round(Math.max(0, Math.min(100, Globals.osdValue)) / 100 * 16)
 
         Rectangle {
-            anchors.fill: parent
+            id: card
+            anchors.centerIn: parent
+            width: 190
+            height: 190
+            radius: 26
             color: Theme.base00
             border.color: Theme.base02
-            border.width: 2
-            radius: 14
+            border.width: 1
 
+            opacity: Globals.osdVisible ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: Theme.durEffects; easing.type: Easing.OutCubic } }
+            scale: Globals.osdVisible ? 1 : 0.9
+            Behavior on scale { NumberAnimation { duration: Theme.durEffects; easing.type: Easing.OutCubic } }
+
+            // big glyph
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 34
+                text: win.osdIcon
+                color: win.isMuted ? Theme.base08 : Theme.base05
+                font.family: Theme.fontFamilyFallback
+                font.pixelSize: 84
+            }
+
+            // 16-segment level bar
             Row {
-                anchors.fill: parent
-                anchors.margins: 14
-                spacing: 12
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: win.osdIcon
-                    color: win.osdColor
-                    font.family: Theme.fontFamilyFallback
-                    font.pixelSize: 26
-                }
-                Rectangle {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width - 100
-                    height: 8
-                    radius: 4
-                    color: Theme.base02
-                    Rectangle {
-                        height: parent.height
-                        radius: 4
-                        width: parent.width * Math.max(0, Math.min(100, Globals.osdValue)) / 100
-                        color: win.osdColor
-                        Behavior on width { NumberAnimation { duration: 90 } }
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 26
+                spacing: 3
+                Repeater {
+                    model: 16
+                    delegate: Rectangle {
+                        required property int index
+                        width: 7
+                        height: 12
+                        radius: 2
+                        color: index < win.filled
+                            ? (win.isVol ? Theme.base0D : Theme.base0E)
+                            : Theme.base02
+                        Behavior on color { ColorAnimation { duration: 80 } }
                     }
-                }
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 44
-                    horizontalAlignment: Text.AlignRight
-                    text: (Globals.osdMuted && win.isVol) ? "×" : (Globals.osdValue + "%")
-                    color: Theme.base05
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize
-                    font.weight: Theme.fontWeight
-                    font.features: ({ "tnum": 1 })
                 }
             }
         }
