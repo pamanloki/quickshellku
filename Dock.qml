@@ -3,34 +3,44 @@ import Quickshell
 import Quickshell.Wayland
 import "root:/services"
 
-// macOS-style Dock: a floating rounded bar at the bottom centre with a launcher
-// button and one icon per running app (grouped from niri windows). Icons
-// magnify on hover, show a running dot and a name tooltip; click focuses the app.
+// macOS-style Dock: floating rounded bar, bottom centre. A Launchpad button,
+// then pinned + running apps (grouped from niri windows) — hover magnify, name
+// tooltip, running dot. Click focuses a running app or launches a pinned one.
 PanelWindow {
     id: dock
     required property var modelData
     screen: modelData
 
+    // Pinned app ids (edit to taste; matches .desktop / window app_id).
+    property var pinned: ["brave", "foot"]
+
     anchors { bottom: true }
     margins.bottom: 6
     implicitWidth: Math.max(1, dockBg.width)
-    // extra headroom above the bar for the hover tooltip
-    implicitHeight: Theme.dockIconSize + 22 + 24
+    implicitHeight: Theme.dockIconSize + 22 + 24   // extra top for tooltip
     exclusiveZone: Theme.dockIconSize + 22 + 6
     color: "transparent"
 
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.namespace: "quickshell:dock"
 
-    // one entry per app_id (first window becomes the focus target)
-    readonly property var apps: {
+    // pinned first, then any other running apps; dedup by app_id
+    readonly property var items: {
         const list = Niri.windowList || [];
-        const seen = ({});
-        const out = [];
+        const runId = ({});
+        const order = [];
         for (let i = 0; i < list.length; i++) {
             const a = list[i].app_id || "?";
-            if (!seen[a]) { seen[a] = true; out.push({ app_id: a, id: list[i].id }); }
+            if (!(a in runId)) { runId[a] = list[i].id; order.push(a); }
         }
+        const out = [];
+        const seen = ({});
+        for (const a of dock.pinned) {
+            out.push({ app_id: a, id: (a in runId) ? runId[a] : -1, running: (a in runId) });
+            seen[a] = true;
+        }
+        for (const a of order)
+            if (!seen[a]) out.push({ app_id: a, id: runId[a], running: true });
         return out;
     }
 
@@ -47,18 +57,24 @@ PanelWindow {
         if (!entry) { try { entry = DesktopEntries.heuristicLookup(appId); } catch (e) {} }
         return entry && entry.name ? entry.name : appId;
     }
+    function launch(appId) {
+        let entry = DesktopEntries.byId(appId);
+        if (!entry) { try { entry = DesktopEntries.heuristicLookup(appId); } catch (e) {} }
+        if (entry) entry.execute();
+    }
 
     component DockCell: Item {
         id: cell
         property string source: ""
+        property string glyph: ""      // draw a coloured tile instead of an image
+        property color glyphBg: Theme.base0D
         property string tip: ""
         property bool running: false
         signal activated()
-        implicitWidth: Theme.dockIconSize + 8
+        implicitWidth: Theme.dockIconSize + 10
         implicitHeight: dock.implicitHeight
 
-        // hover tooltip
-        Rectangle {
+        Rectangle {   // tooltip
             visible: cellMA.containsMouse && cell.tip.length > 0
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
@@ -78,20 +94,38 @@ PanelWindow {
             }
         }
 
-        Image {
-            id: img
+        Item {
+            id: iconWrap
             width: Theme.dockIconSize
             height: Theme.dockIconSize
-            sourceSize.width: Theme.dockIconSize
-            sourceSize.height: Theme.dockIconSize
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 8
-            source: cell.source
-            fillMode: Image.PreserveAspectFit
+            anchors.bottomMargin: 9
             transformOrigin: Item.Bottom
             scale: cellMA.containsMouse ? 1.35 : 1
             Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+
+            Image {
+                anchors.fill: parent
+                visible: cell.glyph.length === 0
+                sourceSize.width: Theme.dockIconSize
+                sourceSize.height: Theme.dockIconSize
+                source: cell.source
+                fillMode: Image.PreserveAspectFit
+            }
+            Rectangle {
+                anchors.fill: parent
+                visible: cell.glyph.length > 0
+                radius: 10
+                color: cell.glyphBg
+                Text {
+                    anchors.centerIn: parent
+                    text: cell.glyph
+                    color: Theme.base00
+                    font.family: Theme.fontFamilyFallback
+                    font.pixelSize: Theme.dockIconSize * 0.6
+                }
+            }
         }
 
         Rectangle {
@@ -100,7 +134,7 @@ PanelWindow {
             color: Theme.base05
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 2
+            anchors.bottomMargin: 3
         }
 
         MouseArea { id: cellMA; anchors.fill: parent; hoverEnabled: true; onClicked: cell.activated() }
@@ -109,10 +143,10 @@ PanelWindow {
     Rectangle {
         id: dockBg
         height: Theme.dockIconSize + 22
-        width: dockRow.implicitWidth + 16
+        width: dockRow.implicitWidth + 18
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        radius: 20
+        radius: 22
         color: Theme.base01
         border.width: 1
         border.color: Theme.base02
@@ -120,10 +154,11 @@ PanelWindow {
         Row {
             id: dockRow
             anchors.centerIn: parent
-            spacing: 2
+            spacing: 4
 
             DockCell {
-                source: Quickshell.iconPath("view-app-grid-symbolic", "application-x-executable")
+                glyph: "󰀻"
+                glyphBg: Theme.base0D
                 tip: "Launcher"
                 onActivated: Globals.toggleLauncher()
             }
@@ -132,17 +167,20 @@ PanelWindow {
                 width: 1; height: Theme.dockIconSize * 0.7
                 anchors.verticalCenter: parent.verticalCenter
                 color: Theme.base03
-                visible: dock.apps.length > 0
+                visible: dock.items.length > 0
             }
 
             Repeater {
-                model: dock.apps
+                model: dock.items
                 delegate: DockCell {
                     required property var modelData
                     source: dock.iconFor(modelData.app_id)
                     tip: dock.labelFor(modelData.app_id)
-                    running: true
-                    onActivated: Niri.focusWindow(modelData.id)
+                    running: modelData.running
+                    onActivated: {
+                        if (modelData.id >= 0) Niri.focusWindow(modelData.id);
+                        else dock.launch(modelData.app_id);
+                    }
                 }
             }
         }
