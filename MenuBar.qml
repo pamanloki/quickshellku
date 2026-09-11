@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Services.SystemTray
 import "root:/services"
 
 // macOS-style top menu bar: Apple menu + focused app name on the left, status
@@ -83,6 +84,66 @@ PanelWindow {
         anchors.rightMargin: 8
         anchors.verticalCenter: parent.verticalCenter
         spacing: 1
+
+        // system stats (cpu + temp), click opens btop
+        Item2 {
+            icon: "󰻠"
+            iconColor: Theme.base0C
+            label: SystemStats.cpuPercent + "%" + (SystemStats.tempKnown ? "  " + SystemStats.tempC + "°" : "")
+            onClicked: Quickshell.execDetached(["footx", "-e", "-f", "btop"])
+        }
+
+        // XBPS updates (only when there are any)
+        Item2 {
+            visible: Updates.count > 0
+            icon: "󰚰"
+            iconColor: Theme.base0A
+            label: Updates.count + ""
+            onClicked: Updates.runUpdate()
+        }
+
+        // system tray
+        Row {
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 2
+            Repeater {
+                model: SystemTray.items
+                delegate: Item {
+                    id: tray
+                    required property var modelData
+                    width: 22
+                    height: Theme.menuBarHeight
+                    function showMenu() {
+                        if (tray.modelData.hasMenu && tray.modelData.menu)
+                            Globals.openTrayMenu(tray.modelData.menu, tray.mapToItem(null, tray.width / 2, 0).x);
+                        else
+                            tray.modelData.secondaryActivate();
+                    }
+                    Image {
+                        anchors.centerIn: parent
+                        width: 16; height: 16
+                        sourceSize.width: 16; sourceSize.height: 16
+                        source: tray.modelData.icon
+                        fillMode: Image.PreserveAspectFit
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
+                        onClicked: mouse => {
+                            if (mouse.button === Qt.LeftButton) {
+                                if (tray.modelData.onlyMenu) tray.showMenu();
+                                else tray.modelData.activate();
+                            } else if (mouse.button === Qt.MiddleButton) {
+                                tray.modelData.secondaryActivate();
+                            } else {
+                                tray.showMenu();
+                            }
+                        }
+                        onWheel: wheel => tray.modelData.scroll(wheel.angleDelta.y, false)
+                    }
+                }
+            }
+        }
 
         Item2 {
             icon: ""

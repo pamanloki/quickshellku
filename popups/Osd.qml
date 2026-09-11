@@ -16,7 +16,7 @@ Variants {
         screen: modelData
 
         anchors { bottom: true }
-        margins.bottom: 40
+        margins.bottom: Theme.dockIconSize + 44   // sit above the Dock
         implicitWidth: 280
         implicitHeight: 58
         color: "transparent"

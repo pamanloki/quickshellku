@@ -44,13 +44,13 @@ Variants {
             border.width: 1
             border.color: Theme.base02
 
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: Theme.barHeight + 6
+            anchors.top: parent.top
+            anchors.topMargin: Theme.menuBarHeight + 6
             x: Math.max(8, Math.min(Globals.trayMenuX - width / 2, parent.width - width - 8))
 
             opacity: win.visible ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.durEffects; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeEffects } }
-            transformOrigin: Item.Bottom
+            transformOrigin: Item.Top
             scale: win.visible ? 1 : 0.92
             Behavior on scale { NumberAnimation { duration: Theme.durSpatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeSpatial } }
 

@@ -201,7 +201,7 @@ Variants {
             height: 540
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: -40
+            anchors.verticalCenterOffset: -110
             color: Theme.base00
             border.color: Theme.base02
             border.width: 2

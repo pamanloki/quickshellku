@@ -15,7 +15,7 @@ Variants {
 
         anchors { top: true; bottom: true; left: true; right: true }
         color: "transparent"
-        visible: Globals.wifiOpen || slide.y < box.height
+        visible: Globals.wifiOpen || slide.y > -box.height
         exclusiveZone: 0
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
@@ -40,16 +40,16 @@ Variants {
             id: box
             transform: Translate {
                 id: slide
-                y: Globals.wifiOpen ? 0 : box.height
+                y: Globals.wifiOpen ? 0 : -box.height
                 Behavior on y { NumberAnimation { duration: Theme.durSlide; easing.type: Easing.OutCubic } }
             }
             width: 360
             height: 440
             anchors.right: parent.right
-            anchors.bottom: parent.bottom
+            anchors.top: parent.top
             anchors.rightMargin: 8
-            anchors.bottomMargin: 0
-            IslandBg { anchors.fill: parent; radius: 8 }
+            anchors.topMargin: Theme.menuBarHeight + 6
+            Rectangle { color: Theme.base00; border.width: 1; border.color: Theme.base02; anchors.fill: parent; radius: 8 }
 
             MouseArea { anchors.fill: parent }
 
