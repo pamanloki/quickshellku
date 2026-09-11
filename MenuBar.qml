@@ -163,6 +163,13 @@ PanelWindow {
             }
         }
 
+        // Now Playing (shows while media is available; opens Control Centre)
+        Item2 {
+            visible: Player.hasPlayer
+            icon: Player.isPlaying ? "󰎆" : "󰎊"
+            iconColor: Player.isPlaying ? Theme.base0D : Theme.base05
+            onClicked: Globals.toggleQuickSettings()
+        }
         Item2 {
             icon: ""   // nf-fa-search (Spotlight)
             onClicked: Globals.toggleLauncher()
