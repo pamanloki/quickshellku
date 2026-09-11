@@ -32,7 +32,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         height: Theme.barHeight - 2 * Theme.pillVMargin
         radius: Theme.radius
-        color: Theme.base03
+        color: Theme.base01
         width: Math.round(icons.implicitWidth) + 2 * Theme.pillHPad
 
         Row {
