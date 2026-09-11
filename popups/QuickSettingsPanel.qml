@@ -66,14 +66,18 @@ Variants {
             property string icon: ""
             property color accent: Theme.base0D
             property bool on: false
+            property real size: 58
             signal toggled()
             signal opened()
-            implicitWidth: 58; implicitHeight: 58
-            radius: 29
-            color: on ? accent : win.slotBg
-            Behavior on color { ColorAnimation { duration: 140 } }
+            implicitWidth: size; implicitHeight: size
+            radius: size / 2
+            color: on ? (rtMA.containsMouse ? Qt.lighter(accent, 1.18) : accent)
+                      : (rtMA.containsMouse ? Theme.base03 : win.slotBg)
+            Behavior on color { ColorAnimation { duration: 120 } }
             border.width: 1
             border.color: on ? "transparent" : win.hairline
+            scale: rtMA.containsMouse ? 1.06 : 1
+            Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutCubic } }
             Text {
                 anchors.centerIn: parent
                 text: rt.icon
@@ -82,9 +86,40 @@ Variants {
                 font.pixelSize: Theme.fontSize + 6
             }
             MouseArea {
+                id: rtMA
                 anchors.fill: parent
+                hoverEnabled: true
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: mouse => mouse.button === Qt.RightButton ? rt.opened() : rt.toggled()
+            }
+        }
+
+        // round toggle + caption (shows connected SSID / device name)
+        component ConnCell: Column {
+            property alias icon: tgl.icon
+            property alias accent: tgl.accent
+            property alias on: tgl.on
+            property string caption: ""
+            signal toggled()
+            signal opened()
+            width: 74
+            spacing: 4
+            RoundToggle {
+                id: tgl
+                anchors.horizontalCenter: parent.horizontalCenter
+                size: 52
+                onToggled: parent.toggled()
+                onOpened: parent.opened()
+            }
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                text: parent.caption
+                color: Theme.base04
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize - 6
+                elide: Text.ElideRight
             }
         }
 
@@ -223,43 +258,49 @@ Variants {
                     readonly property real colW: (width - 14) / 2
                     readonly property real blockH: 168
 
-                    // 2x2 round toggles
+                    // 2x2 round toggles, each with a caption (connected SSID /
+                    // device name shows here)
                     Rectangle {
                         width: parent.colW
                         height: parent.blockH
                         radius: 24
                         color: win.modBg
                         border.width: 1; border.color: win.hairline
+
                         Grid {
                             anchors.centerIn: parent
                             columns: 2
-                            rowSpacing: 12
-                            columnSpacing: 12
-                            RoundToggle {
+                            rowSpacing: 10
+                            columnSpacing: 8
+                            ConnCell {
                                 icon: Network.icon
                                 accent: Theme.base0B
                                 on: Network.radioOn
+                                caption: Network.connected ? Network.ssid : (Network.radioOn ? "Wi-Fi" : "Off")
                                 onToggled: Network.setRadio(!Network.radioOn)
                                 onOpened: Globals.toggleWifi()
                             }
-                            RoundToggle {
+                            ConnCell {
                                 icon: Bluetooth.icon
                                 accent: Theme.base0D
                                 on: Bluetooth.powered
+                                caption: Bluetooth.anyConnected ? Bluetooth.connectedName : (Bluetooth.powered ? "Bluetooth" : "Off")
                                 onToggled: Bluetooth.setPowered(!Bluetooth.powered)
                                 onOpened: Globals.toggleBluetooth()
                             }
-                            RoundToggle {
+                            ConnCell {
                                 icon: "󰃝"
                                 accent: Theme.base09
                                 on: Nightlight.active
+                                caption: Nightlight.active ? "Night Light" : "Off"
                                 onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
                                 onOpened: Globals.toggleNightlight()
                             }
-                            RoundToggle {
+                            ConnCell {
                                 icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"
                                 accent: Theme.base08
                                 on: Notifications.doNotDisturb
+                                caption: Notifications.doNotDisturb ? "DND" : "Off"
                                 onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
                                 onOpened: Notifications.doNotDisturb = !Notifications.doNotDisturb
                             }
