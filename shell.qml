@@ -39,4 +39,5 @@ ShellRoot {
     NotificationCenter {}
     TrayMenu {}
     ScreenshotMenu {}
+    ScreenCorners {}
 }
