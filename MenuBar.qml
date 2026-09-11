@@ -53,7 +53,16 @@ PanelWindow {
                 visible: text.length > 0
             }
         }
-        MouseArea { id: ma; anchors.fill: parent; hoverEnabled: true; onClicked: it.clicked() }
+        MouseArea {
+            id: ma
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: {
+                it.clicked();
+                // record this item's on-screen centre so the panel opens under it
+                Globals.panelX = it.mapToItem(null, it.width / 2, 0).x;
+            }
+        }
     }
 
     // ---------------- Left: apple + app name ----------------

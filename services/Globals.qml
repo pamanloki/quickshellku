@@ -57,6 +57,11 @@ Singleton {
         dockMenuOpen = true;
     }
 
+    // Screen-x (centre) of the menu-bar item that opened the current panel, so
+    // right-cluster dropdowns can appear under their icon instead of the corner.
+    // -1 = no anchor (hug the right edge).
+    property real panelX: -1
+
     // On-screen display (shared by volume + brightness)
     property string osdKind: ""     // "volume" | "brightness"
     property int osdValue: 0
@@ -82,6 +87,7 @@ Singleton {
         aboutOpen = false;
         audioOpen = false;
         batteryOpen = false;
+        panelX = -1;
     }
 
     function toggleLauncher() { const v = !launcherOpen; _closeAll(); launcherOpen = v; }

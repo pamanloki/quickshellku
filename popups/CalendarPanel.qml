@@ -64,9 +64,10 @@ Variants {
 
             width: 320
             height: col.implicitHeight + 24
-            anchors.right: parent.right
+            x: Globals.panelX < 0
+                ? (parent.width - width - 8)
+                : Math.max(8, Math.min(parent.width - width - 8, Globals.panelX - width / 2))
             anchors.top: parent.top
-            anchors.rightMargin: 8
             anchors.topMargin: Theme.menuBarHeight + 6
             Rectangle { anchors.fill: parent; radius: 18; color: Theme.base00; border.width: 1; border.color: Theme.base02 }
             MouseArea { anchors.fill: parent }
