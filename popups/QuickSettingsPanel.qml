@@ -54,7 +54,6 @@ Variants {
         onVisibleChanged: if (visible) { audioExpanded = false; Network.refresh(); Bluetooth.refresh(); Nightlight.refresh(); }
 
         // ---- palette (solid theme colours — iOS layout, no glass) ----
-        readonly property color cardBg: Theme.base00
         readonly property color modBg: Theme.base01
         readonly property color slotBg: Theme.base02
         readonly property color hairline: "transparent"
@@ -143,12 +142,9 @@ Variants {
             }
         }
 
-        // dim scrim + click-away
-        Rectangle { anchors.fill: parent; color: "#000000"; opacity: win.visible ? 0.22 : 0
-            Behavior on opacity { NumberAnimation { duration: Theme.durEffects } } }
         MouseArea { anchors.fill: parent; onClicked: Globals.quickSettingsOpen = false }
 
-        Rectangle {
+        Item {
             id: box
             opacity: win.visible ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.durEffects; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeEffects } }
@@ -157,16 +153,14 @@ Variants {
             Behavior on scale { NumberAnimation { duration: Theme.durSpatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeSpatial } }
 
             width: 372
-            height: contentCol.implicitHeight + 36
+            height: contentCol.implicitHeight + 30
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.rightMargin: 10
-            anchors.bottomMargin: 10
-            radius: 30
-            color: win.cardBg
-            border.width: 1
-            border.color: win.hairline
+            anchors.rightMargin: 8
+            anchors.bottomMargin: 0
 
+            // rounded top, open bottom → merges into the bar like the other panels
+            IslandBg { anchors.fill: parent; radius: 22 }
             MouseArea { anchors.fill: parent }
 
             Column {
