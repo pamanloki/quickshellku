@@ -34,6 +34,31 @@ Singleton {
     readonly property string artist: currentPlayer && currentPlayer.trackArtist ? currentPlayer.trackArtist : ""
     readonly property string artUrl: currentPlayer && currentPlayer.trackArtUrl ? currentPlayer.trackArtUrl : ""
 
+    // Position / length in seconds. MPRIS position isn't pushed automatically —
+    // a consumer (e.g. the Quick Settings panel while open) pokes refreshPosition
+    // on a timer so `position` re-reads without us polling all the time.
+    readonly property real length: currentPlayer && currentPlayer.length ? currentPlayer.length : 0
+    readonly property real position: currentPlayer && currentPlayer.position ? currentPlayer.position : 0
+    readonly property bool canSeek: currentPlayer ? currentPlayer.canSeek : false
+    readonly property real progress: length > 0 ? Math.max(0, Math.min(1, position / length)) : 0
+
+    function refreshPosition() {
+        if (currentPlayer)
+            currentPlayer.positionChanged();
+    }
+    function seek(frac) {
+        if (currentPlayer && currentPlayer.canSeek && currentPlayer.positionSupported)
+            currentPlayer.position = Math.max(0, Math.min(1, frac)) * currentPlayer.length;
+    }
+    function fmtTime(sec) {
+        if (!sec || sec < 0 || !isFinite(sec))
+            return "0:00";
+        sec = Math.floor(sec);
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return m + ":" + (s < 10 ? "0" : "") + s;
+    }
+
     function playPause() {
         if (currentPlayer && currentPlayer.canTogglePlaying)
             currentPlayer.togglePlaying();

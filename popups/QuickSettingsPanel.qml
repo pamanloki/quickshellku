@@ -26,7 +26,25 @@ Variants {
         readonly property var sink: Pipewire.defaultAudioSink
         readonly property int volume: sink && sink.audio ? Math.round(sink.audio.volume * 100) : 0
         readonly property bool muted: sink && sink.audio ? sink.audio.muted : false
+
+        // Audio output devices (real sinks, not per-app streams) for the switcher.
+        readonly property var sinks: {
+            const ns = (Pipewire.nodes && Pipewire.nodes.values) ? Pipewire.nodes.values : [];
+            const out = [];
+            for (let i = 0; i < ns.length; i++) {
+                const n = ns[i];
+                if (n && n.isSink && !n.isStream)
+                    out.push(n);
+            }
+            return out;
+        }
+        property bool audioExpanded: false
+        function nodeName(n) {
+            return n ? (n.description || n.nickname || n.name || "Unknown") : "None";
+        }
+
         PwObjectTracker { objects: win.sink ? [win.sink] : [] }
+        PwObjectTracker { objects: win.sinks }
 
         function setVolume(v) {
             if (!sink || !sink.audio) return;
@@ -34,7 +52,7 @@ Variants {
             sink.audio.volume = Math.max(0, Math.min(1, v / 100));
         }
 
-        onVisibleChanged: if (visible) { Network.refresh(); Bluetooth.refresh(); Nightlight.refresh(); }
+        onVisibleChanged: if (visible) { audioExpanded = false; Network.refresh(); Bluetooth.refresh(); Nightlight.refresh(); }
 
         // ---------- slider row: icon badge + track + value ----------
         component CtlSlider: Item {
@@ -247,91 +265,171 @@ Variants {
                 // music player (only when something is playing/paused)
                 Rectangle {
                     width: parent.width
-                    height: 66
+                    height: 88
                     radius: 12
                     color: Theme.base01
                     visible: Player.hasPlayer
 
-                    Row {
+                    // Keep the MPRIS position fresh while this panel is open and
+                    // playing (MPRIS doesn't push it). Only runs when visible, so
+                    // there's no background ticking.
+                    Timer {
+                        interval: 1000
+                        running: win.visible && Player.isPlaying
+                        repeat: true
+                        triggeredOnStart: true
+                        onTriggered: Player.refreshPosition()
+                    }
+
+                    Column {
                         anchors.fill: parent
                         anchors.margins: 9
-                        spacing: 10
-
-                        Rectangle {
-                            width: 48; height: 48; radius: 8
-                            anchors.verticalCenter: parent.verticalCenter
-                            color: Theme.base02
-                            clip: true
-                            Image {
-                                anchors.fill: parent
-                                source: Player.artUrl
-                                fillMode: Image.PreserveAspectCrop
-                                visible: Player.artUrl.length > 0
-                            }
-                            Text {
-                                anchors.centerIn: parent
-                                visible: Player.artUrl.length === 0
-                                text: "󰝚"
-                                color: Theme.base05
-                                font.family: Theme.fontFamilyFallback
-                                font.pixelSize: Theme.fontSize + 6
-                            }
-                        }
-
-                        Column {
-                            width: parent.width - 48 - 10 - (3 * 30 + 2 * 4) - 10
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 2
-                            Text {
-                                width: parent.width
-                                text: Player.title || "Nothing playing"
-                                color: Theme.base05
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize - 1
-                                font.weight: Theme.fontWeight
-                                elide: Text.ElideRight
-                            }
-                            Text {
-                                width: parent.width
-                                text: Player.artist
-                                color: Theme.base05
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize - 3
-                                elide: Text.ElideRight
-                                visible: text.length > 0
-                            }
-                        }
+                        spacing: 8
 
                         Row {
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 4
-                            Repeater {
-                                model: [
-                                    { icon: "󰒮", act: "prev" },
-                                    { icon: Player.isPlaying ? "󰏤" : "󰐊", act: "toggle" },
-                                    { icon: "󰒭", act: "next" }
-                                ]
-                                delegate: Rectangle {
-                                    required property var modelData
-                                    width: 30; height: 30; radius: 15
-                                    color: mh.hovered ? Theme.base02 : "transparent"
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: modelData.icon
-                                        color: Theme.base05
-                                        font.family: Theme.fontFamilyFallback
-                                        font.pixelSize: Theme.fontSize + (modelData.act === "toggle" ? 3 : 1)
-                                    }
-                                    HoverHandler { id: mh }
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        onClicked: {
-                                            if (modelData.act === "prev") Player.previous();
-                                            else if (modelData.act === "next") Player.next();
-                                            else Player.playPause();
+                            width: parent.width
+                            height: 48
+                            spacing: 10
+
+                            Rectangle {
+                                width: 48; height: 48; radius: 8
+                                anchors.verticalCenter: parent.verticalCenter
+                                color: Theme.base02
+                                clip: true
+                                Image {
+                                    anchors.fill: parent
+                                    source: Player.artUrl
+                                    fillMode: Image.PreserveAspectCrop
+                                    visible: Player.artUrl.length > 0
+                                }
+                                Text {
+                                    anchors.centerIn: parent
+                                    visible: Player.artUrl.length === 0
+                                    text: "󰝚"
+                                    color: Theme.base05
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize + 6
+                                }
+                            }
+
+                            Column {
+                                width: parent.width - 48 - 10 - (3 * 30 + 2 * 4) - 10
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 2
+                                Text {
+                                    width: parent.width
+                                    text: Player.title || "Nothing playing"
+                                    color: Theme.base05
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSize - 1
+                                    font.weight: Theme.fontWeight
+                                    elide: Text.ElideRight
+                                }
+                                Text {
+                                    width: parent.width
+                                    text: Player.artist
+                                    color: Theme.base05
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSize - 3
+                                    elide: Text.ElideRight
+                                    visible: text.length > 0
+                                }
+                            }
+
+                            Row {
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 4
+                                Repeater {
+                                    model: [
+                                        { icon: "󰒮", act: "prev" },
+                                        { icon: Player.isPlaying ? "󰏤" : "󰐊", act: "toggle" },
+                                        { icon: "󰒭", act: "next" }
+                                    ]
+                                    delegate: Rectangle {
+                                        required property var modelData
+                                        width: 30; height: 30; radius: 15
+                                        color: mh.hovered ? Theme.base02 : "transparent"
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: modelData.icon
+                                            color: Theme.base05
+                                            font.family: Theme.fontFamilyFallback
+                                            font.pixelSize: Theme.fontSize + (modelData.act === "toggle" ? 3 : 1)
+                                        }
+                                        HoverHandler { id: mh }
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            onClicked: {
+                                                if (modelData.act === "prev") Player.previous();
+                                                else if (modelData.act === "next") Player.next();
+                                                else Player.playPause();
+                                            }
                                         }
                                     }
                                 }
+                            }
+                        }
+
+                        // ---- seek bar: position | track | length ----
+                        Row {
+                            width: parent.width
+                            height: 14
+                            spacing: 6
+
+                            Text {
+                                width: 32; height: parent.height
+                                verticalAlignment: Text.AlignVCenter
+                                text: Player.fmtTime(seek.dragging ? seek.dragFrac * Player.length : Player.position)
+                                color: Theme.base04
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 5
+                                font.features: ({ "tnum": 1 })
+                            }
+
+                            Item {
+                                id: seek
+                                width: parent.width - 2 * 32 - 2 * 6
+                                height: parent.height
+                                property bool dragging: false
+                                property real dragFrac: 0
+                                readonly property real frac: dragging ? dragFrac : Player.progress
+
+                                Rectangle {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: parent.width; height: 4; radius: 2
+                                    color: Theme.base02
+                                    Rectangle {
+                                        height: parent.height; radius: 2
+                                        width: Math.round(parent.width * seek.frac)
+                                        color: Theme.base0D
+                                    }
+                                }
+                                Rectangle {
+                                    width: 10; height: 10; radius: 5
+                                    color: Theme.base0D
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    x: Math.round((parent.width - width) * seek.frac)
+                                    visible: Player.canSeek
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    enabled: Player.canSeek
+                                    function pick(mx) { seek.dragFrac = Math.max(0, Math.min(1, mx / seek.width)); }
+                                    onPressed: mouse => { seek.dragging = true; pick(mouse.x); }
+                                    onPositionChanged: mouse => { if (seek.dragging) pick(mouse.x); }
+                                    onReleased: { Player.seek(seek.dragFrac); seek.dragging = false; }
+                                }
+                            }
+
+                            Text {
+                                width: 32; height: parent.height
+                                horizontalAlignment: Text.AlignRight
+                                verticalAlignment: Text.AlignVCenter
+                                text: Player.fmtTime(Player.length)
+                                color: Theme.base04
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 5
+                                font.features: ({ "tnum": 1 })
                             }
                         }
                     }
@@ -351,6 +449,101 @@ Variants {
                     accent: Theme.base0E
                     onMoved: v => Brightness.set(v)
                     onBadgeClicked: {}
+                }
+
+                // ---- audio output switcher (collapsible) ----
+                Column {
+                    width: parent.width
+                    spacing: 6
+
+                    Rectangle {
+                        width: parent.width
+                        height: 38
+                        radius: 10
+                        color: outHdr.hovered ? Theme.base02 : Theme.base01
+                        Row {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 12
+                            anchors.right: chevron.left
+                            anchors.rightMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 10
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "󰓃"
+                                color: Theme.base0D
+                                font.family: Theme.fontFamilyFallback
+                                font.pixelSize: Theme.fontSize + 2
+                            }
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width - 34
+                                text: win.nodeName(win.sink)
+                                color: Theme.base05
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 2
+                                elide: Text.ElideRight
+                            }
+                        }
+                        Text {
+                            id: chevron
+                            anchors.right: parent.right
+                            anchors.rightMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: win.audioExpanded ? "󰅃" : "󰅀"
+                            color: Theme.base04
+                            font.family: Theme.fontFamilyFallback
+                            font.pixelSize: Theme.fontSize
+                        }
+                        HoverHandler { id: outHdr }
+                        MouseArea { anchors.fill: parent; onClicked: win.audioExpanded = !win.audioExpanded }
+                    }
+
+                    Column {
+                        width: parent.width
+                        spacing: 4
+                        visible: win.audioExpanded
+                        Repeater {
+                            model: win.sinks
+                            delegate: Rectangle {
+                                required property var modelData
+                                width: parent.width
+                                height: 32
+                                radius: 8
+                                readonly property bool isDefault: modelData === win.sink
+                                color: isDefault ? Theme.base02 : (devHover.hovered ? Theme.base01 : "transparent")
+                                Text {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 34
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 30
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: win.nodeName(modelData)
+                                    color: Theme.base05
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSize - 3
+                                    elide: Text.ElideRight
+                                }
+                                Text {
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: parent.isDefault ? "󰄬" : ""
+                                    color: Theme.base0B
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize - 1
+                                }
+                                HoverHandler { id: devHover }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        Pipewire.preferredDefaultAudioSink = modelData;
+                                        win.audioExpanded = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 Row {
@@ -392,15 +585,6 @@ Variants {
                         on: Notifications.doNotDisturb
                         onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
                         onOpened: Notifications.doNotDisturb = !Notifications.doNotDisturb
-                    }
-                    Tile {
-                        visible: PowerProfiles.available
-                        icon: PowerProfiles.icon
-                        label: PowerProfiles.label
-                        accent: Theme.base0A
-                        on: PowerProfiles.current === "performance"
-                        onToggled: PowerProfiles.cycle()
-                        onOpened: PowerProfiles.cycle()
                     }
                 }
 

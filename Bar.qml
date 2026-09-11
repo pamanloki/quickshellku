@@ -45,7 +45,6 @@ PanelWindow {
         spacing: Theme.pillGap
 
         StatCapsule {}
-        BatteryPill {}
         QuickSettingsButton {}
         Clock {}
         Tray {}
