@@ -28,7 +28,7 @@ Variants {
             onClicked: Globals.bluetoothOpen = false
         }
 
-        Item {
+        Rectangle {
             id: box
             transform: Translate {
                 id: slide
@@ -41,7 +41,10 @@ Variants {
             anchors.top: parent.top
             anchors.rightMargin: 8
             anchors.topMargin: Theme.menuBarHeight + 6
-            Rectangle { color: Theme.base00; border.width: 1; border.color: Theme.base02; anchors.fill: parent; radius: 16 }
+            radius: 20
+            color: Theme.base00
+            border.width: 1
+            border.color: Theme.base02
 
             MouseArea { anchors.fill: parent }
 
@@ -125,8 +128,9 @@ Variants {
                         required property var modelData
                         width: devList.width
                         height: 40
-                        color: modelData.connected ? Theme.base02 : Theme.base01
+                        color: modelData.connected ? Theme.base02 : (btRowHover.hovered ? Theme.base01 : "transparent")
                         radius: 10
+                        HoverHandler { id: btRowHover }
 
                         Row {
                             anchors.fill: parent
@@ -146,8 +150,16 @@ Variants {
                                 color: Theme.base05
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontSize - 1
-                                width: devList.width - 90
+                                width: devList.width - 116
                                 elide: Text.ElideRight
+                            }
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: modelData.connected ? "󰄬" : ""
+                                color: Theme.base0B
+                                font.family: Theme.fontFamilyFallback
+                                font.pixelSize: Theme.fontSize - 1
+                                visible: modelData.connected
                             }
                         }
 

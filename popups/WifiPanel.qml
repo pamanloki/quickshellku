@@ -36,7 +36,7 @@ Variants {
             onClicked: Globals.wifiOpen = false
         }
 
-        Item {
+        Rectangle {
             id: box
             transform: Translate {
                 id: slide
@@ -49,7 +49,10 @@ Variants {
             anchors.top: parent.top
             anchors.rightMargin: 8
             anchors.topMargin: Theme.menuBarHeight + 6
-            Rectangle { color: Theme.base00; border.width: 1; border.color: Theme.base02; anchors.fill: parent; radius: 16 }
+            radius: 20
+            color: Theme.base00
+            border.width: 1
+            border.color: Theme.base02
 
             MouseArea { anchors.fill: parent }
 
@@ -148,9 +151,10 @@ Variants {
                         width: netList.width
                         height: selected ? 78 : 38
                         readonly property bool selected: win.selectedSsid === modelData.ssid
-                        color: modelData.connected ? Theme.base02 : Theme.base01
+                        color: modelData.connected ? Theme.base02 : (rowHover.hovered ? Theme.base01 : "transparent")
                         radius: 10
                         Behavior on height { NumberAnimation { duration: 100 } }
+                        HoverHandler { id: rowHover }
 
                         Column {
                             anchors.fill: parent
@@ -158,12 +162,13 @@ Variants {
                             spacing: 6
                             Row {
                                 width: parent.width
+                                spacing: 6
                                 Text {
                                     text: (modelData.connected ? "󰤨  " : "󰤟  ") + modelData.ssid
                                     color: Theme.base05
                                     font.family: Theme.fontFamilyFallback
                                     font.pixelSize: Theme.fontSize - 1
-                                    width: parent.width - 60
+                                    width: parent.width - 84
                                     elide: Text.ElideRight
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
@@ -173,6 +178,14 @@ Variants {
                                     font.family: Theme.fontFamily
                                     font.pixelSize: Theme.fontSize - 4
                                     anchors.verticalCenter: parent.verticalCenter
+                                }
+                                Text {
+                                    text: modelData.connected ? "󰄬" : ""
+                                    color: Theme.base0B
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize - 1
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    visible: modelData.connected
                                 }
                             }
 
