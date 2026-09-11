@@ -57,21 +57,21 @@ Item {
             spacing: 14
 
             Seg {
-                icon: "󰘚"
+                icon: "󰻠"
                 value: SystemStats.cpuPercent + "%"
-                accent: Theme.base08
+                accent: Theme.base04
                 vmax: "100%"
             }
             Seg {
                 icon: "󰍛"
                 value: SystemStats.memText
-                accent: Theme.base0C
+                accent: Theme.base04
                 vmax: "99.9GiB"
             }
             Seg {
                 icon: "󰋊"
                 value: SystemStats.diskFree
-                accent: Theme.base0A
+                accent: Theme.base04
                 vmax: "999G"
             }
             Seg {

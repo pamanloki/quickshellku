@@ -4,9 +4,9 @@ import Quickshell.Wayland
 import Quickshell.Services.Pipewire
 import "root:/services"
 
-// Combined quick settings: volume + brightness sliders, and WiFi / Bluetooth /
-// Night light toggles. Left-click a tile toggles it; right-click opens its
-// detailed panel (network list, bluetooth devices, nightlight controls).
+// Quick settings: volume + brightness sliders and WiFi / Bluetooth / Night
+// light tiles. Styled after noctalia (icon badge + rounded slider with a
+// cut-out knob + value; big rounded toggle tiles).
 Variants {
     model: Quickshell.screens
 
@@ -36,62 +36,116 @@ Variants {
 
         onVisibleChanged: if (visible) { Network.refresh(); Bluetooth.refresh(); Nightlight.refresh(); }
 
-        // ---- reusable slider ----
-        component QSSlider: Item {
+        // ---------- slider row: icon badge + track + value ----------
+        component CtlSlider: Item {
             id: sl
+            property string icon: ""
             property int value: 0
             property color accent: Theme.base0D
+            property bool badgeActive: false
             signal moved(int v)
-            height: 22
+            signal badgeClicked()
+            width: parent ? parent.width : 0
+            height: 40
             property bool dragging: false
 
             Rectangle {
+                id: badge
+                width: 38; height: 38; radius: 19
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.width; height: 6; radius: 3; color: Theme.base02
+                color: sl.badgeActive ? sl.accent : Theme.base02
+                Text {
+                    anchors.centerIn: parent
+                    text: sl.icon
+                    color: sl.badgeActive ? Theme.base00 : sl.accent
+                    font.family: Theme.fontFamilyFallback
+                    font.pixelSize: Theme.fontSize + 5
+                }
+                MouseArea { anchors.fill: parent; onClicked: sl.badgeClicked() }
+            }
+
+            Item {
+                id: track
+                anchors.left: badge.right
+                anchors.leftMargin: 12
+                anchors.right: valLabel.left
+                anchors.rightMargin: 12
+                anchors.verticalCenter: parent.verticalCenter
+                height: 40
+
                 Rectangle {
-                    width: Math.round(parent.width * Math.max(0, Math.min(100, sl.value)) / 100)
-                    height: parent.height; radius: 3; color: sl.accent
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width; height: 8; radius: 4
+                    color: Theme.base02
+                    Rectangle {
+                        height: parent.height; radius: 4
+                        width: Math.round(parent.width * Math.max(0, Math.min(100, sl.value)) / 100)
+                        color: sl.accent
+                    }
+                }
+                Rectangle {
+                    id: knob
+                    width: knobHover.hovered || sl.dragging ? 22 : 18
+                    height: width; radius: width / 2
+                    color: sl.accent
+                    border.color: Theme.base00
+                    border.width: 3
+                    anchors.verticalCenter: parent.verticalCenter
+                    x: Math.round((parent.width - width) * Math.max(0, Math.min(100, sl.value)) / 100)
+                    Behavior on width { NumberAnimation { duration: 80 } }
+                    HoverHandler { id: knobHover }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    function pick(mx) {
+                        const v = Math.round(Math.max(0, Math.min(1, mx / track.width)) * 100);
+                        sl.value = v; sl.moved(v);
+                    }
+                    onPressed: mouse => { sl.dragging = true; pick(mouse.x); }
+                    onPositionChanged: mouse => { if (sl.dragging) pick(mouse.x); }
+                    onReleased: sl.dragging = false
                 }
             }
-            Rectangle {
-                width: 16; height: 16; radius: 8; color: sl.accent
-                border.color: Theme.base00; border.width: 2
+
+            Text {
+                id: valLabel
+                anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                x: Math.round((parent.width - width) * Math.max(0, Math.min(100, sl.value)) / 100)
-            }
-            MouseArea {
-                anchors.fill: parent
-                function pick(mx) {
-                    const v = Math.round(Math.max(0, Math.min(1, mx / sl.width)) * 100);
-                    sl.value = v; sl.moved(v);
-                }
-                onPressed: mouse => { sl.dragging = true; pick(mouse.x); }
-                onPositionChanged: mouse => { if (sl.dragging) pick(mouse.x); }
-                onReleased: sl.dragging = false
+                width: 46
+                horizontalAlignment: Text.AlignRight
+                text: sl.value + "%"
+                color: Theme.base05
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                font.weight: Theme.fontWeight
+                font.features: ({ "tnum": 1 })
             }
         }
 
-        // ---- reusable toggle tile ----
+        // ---------- toggle tile ----------
         component Tile: Rectangle {
             id: tile
             property string icon: ""
             property string label: ""
+            property color accent: Theme.base0D
             property bool on: false
             signal toggled()
             signal opened()
-            width: (box.width - 28 - 16) / 3
-            height: 66
-            radius: 10
-            color: on ? Theme.base0D : Theme.base02
+            width: (contentCol.width - 2 * 10) / 3
+            height: 88
+            radius: 14
+            color: on ? accent : Theme.base02
+            Behavior on color { ColorAnimation { duration: 120 } }
+
             Column {
                 anchors.centerIn: parent
-                spacing: 4
+                spacing: 8
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: tile.icon
-                    color: tile.on ? Theme.base00 : Theme.base05
+                    color: tile.on ? Theme.base00 : tile.accent
                     font.family: Theme.fontFamilyFallback
-                    font.pixelSize: Theme.fontSize + 6
+                    font.pixelSize: Theme.fontSize + 9
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -100,7 +154,7 @@ Variants {
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize - 4
                     elide: Text.ElideRight
-                    width: tile.width - 8
+                    width: tile.width - 12
                     horizontalAlignment: Text.AlignHCenter
                 }
             }
@@ -115,96 +169,49 @@ Variants {
 
         Rectangle {
             id: box
-            width: 360
-            height: 250
+            width: 380
+            height: contentCol.implicitHeight + 36
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.rightMargin: 8
-            anchors.bottomMargin: Theme.barHeight + 6
+            anchors.bottomMargin: Theme.barHeight + 8
             color: Theme.base00
             border.color: Theme.base02
-            border.width: 2
-            radius: 8
+            border.width: 1
+            radius: 16
             MouseArea { anchors.fill: parent }
 
             Column {
-                anchors.fill: parent
-                anchors.margins: 14
-                spacing: 14
+                id: contentCol
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: 18
+                spacing: 16
 
-                // Volume
+                CtlSlider {
+                    icon: win.muted || win.volume === 0 ? "󰖁" : (win.volume >= 50 ? "󰕾" : "󰖀")
+                    value: win.volume
+                    accent: Theme.base0D
+                    badgeActive: win.muted
+                    onMoved: v => win.setVolume(v)
+                    onBadgeClicked: if (win.sink && win.sink.audio) win.sink.audio.muted = !win.sink.audio.muted
+                }
+                CtlSlider {
+                    icon: "󰃠"
+                    value: Brightness.percent
+                    accent: Theme.base0E
+                    onMoved: v => Brightness.set(v)
+                    onBadgeClicked: {}
+                }
+
                 Row {
                     width: parent.width
                     spacing: 10
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 24
-                        text: win.muted || win.volume === 0 ? "󰖁" : (win.volume >= 50 ? "󰕾" : "󰖀")
-                        color: Theme.base0D
-                        font.family: Theme.fontFamilyFallback
-                        font.pixelSize: Theme.fontSize + 4
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: if (win.sink && win.sink.audio) win.sink.audio.muted = !win.sink.audio.muted
-                        }
-                    }
-                    QSSlider {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width - 24 - 10 - 44 - 10
-                        value: win.volume
-                        accent: Theme.base0D
-                        onMoved: v => win.setVolume(v)
-                    }
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 44
-                        horizontalAlignment: Text.AlignRight
-                        text: win.volume + "%"
-                        color: Theme.base05
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSize - 1
-                        font.features: ({ "tnum": 1 })
-                    }
-                }
-
-                // Brightness
-                Row {
-                    width: parent.width
-                    spacing: 10
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 24
-                        text: Brightness.icon
-                        color: Theme.base0E
-                        font.family: Theme.fontFamilyFallback
-                        font.pixelSize: Theme.fontSize + 4
-                    }
-                    QSSlider {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width - 24 - 10 - 44 - 10
-                        value: Brightness.percent
-                        accent: Theme.base0E
-                        onMoved: v => Brightness.set(v)
-                    }
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 44
-                        horizontalAlignment: Text.AlignRight
-                        text: Brightness.percent + "%"
-                        color: Theme.base05
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSize - 1
-                        font.features: ({ "tnum": 1 })
-                    }
-                }
-
-                // Toggle tiles
-                Row {
-                    width: parent.width
-                    spacing: 8
                     Tile {
                         icon: Network.icon
                         label: Network.connected ? Network.ssid : "Wi-Fi"
+                        accent: Theme.base0B
                         on: Network.radioOn
                         onToggled: Network.setRadio(!Network.radioOn)
                         onOpened: Globals.toggleWifi()
@@ -212,13 +219,15 @@ Variants {
                     Tile {
                         icon: Bluetooth.icon
                         label: Bluetooth.anyConnected ? Bluetooth.connectedName : "Bluetooth"
+                        accent: Theme.base0D
                         on: Bluetooth.powered
                         onToggled: Bluetooth.setPowered(!Bluetooth.powered)
                         onOpened: Globals.toggleBluetooth()
                     }
                     Tile {
-                        icon: "󰛨"
-                        label: "Night"
+                        icon: "󰃝"
+                        label: "Night Light"
+                        accent: Theme.base09
                         on: Nightlight.active
                         onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
                         onOpened: Globals.toggleNightlight()
@@ -228,7 +237,7 @@ Variants {
                 Text {
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter
-                    text: "click = toggle · right-click = open details"
+                    text: "click toggles · right-click opens details"
                     color: Theme.base03
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize - 4
