@@ -32,6 +32,19 @@ Singleton {
         root.pinned = root.pinned.filter(p => _norm(p) !== n);
         _save();
     }
+    // move a pinned app to a new index (drag reorder)
+    function moveTo(appId, idx) {
+        const n = _norm(appId);
+        const a = root.pinned.slice();
+        const i = a.findIndex(p => _norm(p) === n);
+        if (i < 0) return;
+        idx = Math.max(0, Math.min(a.length - 1, idx));
+        if (idx === i) return;
+        const it = a.splice(i, 1)[0];
+        a.splice(idx, 0, it);
+        root.pinned = a;
+        _save();
+    }
 
     FileView {
         id: file

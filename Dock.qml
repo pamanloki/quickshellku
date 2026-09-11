@@ -130,8 +130,12 @@ PanelWindow {
         property string tip: ""
         property bool running: false
         property int count: 0
+        property bool canDrag: false      // pinned apps can be dragged to reorder
+        property real dragDX: 0           // visual offset while dragging
+        property bool dragging: false
         signal activated()
         signal menuRequested()
+        signal reordered(real px)         // px = pointer x within dockRow at drop
         implicitWidth: Theme.dockIconSize + 10
         implicitHeight: Theme.dockIconSize + 22   // = dock background height
 
@@ -183,9 +187,13 @@ PanelWindow {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 9
             transformOrigin: Item.Bottom
-            scale: cell._mag
+            scale: cell.dragging ? 1.15 : cell._mag
+            z: cell.dragging ? 10 : 0
             Behavior on scale { enabled: !dock.dockHovering; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-            transform: Translate { y: cell.bounceY }
+            transform: [
+                Translate { y: cell.bounceY },
+                Translate { x: cell.dragDX }
+            ]
 
             Image {
                 anchors.fill: parent
@@ -227,7 +235,29 @@ PanelWindow {
             anchors.fill: parent
             hoverEnabled: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton
-            onClicked: mouse => mouse.button === Qt.RightButton ? cell.menuRequested() : cell.activated()
+            property real pressX: 0
+            onPressed: mouse => {
+                if (mouse.button === Qt.LeftButton && cell.canDrag)
+                    pressX = cell.mapToItem(dockRow, mouse.x, 0).x;
+            }
+            onPositionChanged: mouse => {
+                if (!pressed || !cell.canDrag) return;
+                const dx = cell.mapToItem(dockRow, mouse.x, 0).x - pressX;
+                if (Math.abs(dx) > 6) cell.dragging = true;
+                if (cell.dragging) cell.dragDX = dx;
+            }
+            onReleased: mouse => {
+                if (cell.dragging) {
+                    cell.reordered(cell.mapToItem(dockRow, mouse.x, 0).x);
+                    cell.dragDX = 0;
+                    cell.dragging = false;
+                }
+            }
+            onClicked: mouse => {
+                if (cell.dragging) { cell.dragging = false; return; }
+                if (mouse.button === Qt.RightButton) cell.menuRequested();
+                else cell.activated();
+            }
         }
     }
 
@@ -283,6 +313,13 @@ PanelWindow {
                     tip: dock.labelFor(modelData.app_id)
                     running: modelData.running
                     count: modelData.count
+                    canDrag: DockConfig.isPinned(modelData.app_id)
+                    onReordered: px => {
+                        const cw = Theme.dockIconSize + 10;
+                        const step = cw + 4;
+                        const startX = cw + 9;   // launcher + spacing + separator + spacing
+                        DockConfig.moveTo(modelData.app_id, Math.round((px - startX - cw / 2) / step));
+                    }
                     onActivated: {
                         if (modelData.running) dock.activateApp(modelData.norm);
                         else { dock.launch(modelData.app_id); dcell.bounce(); }
