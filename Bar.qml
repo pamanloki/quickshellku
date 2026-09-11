@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import "root:/services"
+import "root:/modules"
 
 // The bar: a faithful Quickshell port of your bottom Waybar dock.
 PanelWindow {
