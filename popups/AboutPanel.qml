@@ -81,8 +81,8 @@ Variants {
                 // logo
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: ""    // nf-fa-linux (Tux)
-                    color: Theme.base0D
+                    text: ""    // nf-linux-void
+                    color: Theme.base0B
                     font.family: Theme.fontFamilyFallback
                     font.pixelSize: 64
                     bottomPadding: 4

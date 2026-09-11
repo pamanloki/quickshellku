@@ -65,8 +65,8 @@ PanelWindow {
 
         // left: Apple menu
         Item2 {
-            icon: ""
-            iconColor: Theme.base05
+            icon: ""    // nf-linux-void
+            iconColor: Theme.base0B
             onClicked: Globals.toggleAppleMenu()
         }
         Item2 {
