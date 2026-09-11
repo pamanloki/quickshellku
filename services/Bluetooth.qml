@@ -6,12 +6,16 @@ import QtQuick
 
 // Bluetooth via `bluetoothctl` (bluez), matching your bluetui setup.
 //
-// Anti-flicker: refresh() runs every few seconds. It must NOT expose transient
-// states, or the bar pill's value flips width ("on" -> "BLAST") each cycle and
-// the right-anchored row reflows, making the clock jump. So we build the whole
-// device list (enriched with connected/paired) into a pending array and assign
-// `devices` exactly once, and only when a signature of the visible fields
-// actually changed. Same for `powered`.
+// Efficiency: the periodic poll used to spawn one `bluetoothctl info` process
+// per device every few seconds. Now it uses bluez's `devices Connected` /
+// `devices Paired` filters, so a full refresh is just four short commands total
+// regardless of how many devices are paired — far fewer wakeups on battery.
+//
+// Anti-flicker: refresh() runs on a timer. It must NOT expose transient states,
+// or the bar pill's value flips width ("on" -> "BLAST") each cycle and the
+// right-anchored row reflows, making the clock jump. So we build the whole
+// device list into a pending array and assign `devices` exactly once, and only
+// when a signature of the visible fields actually changed. Same for `powered`.
 Singleton {
     id: root
 
@@ -20,8 +24,9 @@ Singleton {
     property bool scanning: false
 
     property string _sig: ""
-    property var _pending: []
-    property int _enrichIndex: 0
+    property var _all: []             // [{mac, name}] from `devices`
+    property var _connected: ({})     // mac -> true
+    property var _paired: ({})        // mac -> true
 
     readonly property bool anyConnected: {
         for (const d of devices)
@@ -43,7 +48,7 @@ Singleton {
 
     function refresh() {
         showProc.running = true;
-        devProc.running = true;
+        devProc.running = true;   // chains: devices -> connected -> paired -> apply
     }
 
     function setPowered(on) {
@@ -71,6 +76,30 @@ Singleton {
         actProc.running = true;
     }
 
+    function _macsFrom(text) {
+        const set = ({});
+        const lines = text.split("\n");
+        for (const l of lines) {
+            const m = l.match(/^Device\s+(\S+)\s+/);
+            if (m) set[m[1]] = true;
+        }
+        return set;
+    }
+
+    function _merge() {
+        const out = [];
+        for (let i = 0; i < root._all.length; i++) {
+            const d = root._all[i];
+            out.push({
+                mac: d.mac,
+                name: d.name,
+                connected: root._connected[d.mac] === true,
+                paired: root._paired[d.mac] === true
+            });
+        }
+        _applyDevices(out);
+    }
+
     function _applyDevices(list) {
         let sig = "";
         for (let i = 0; i < list.length; i++)
@@ -89,49 +118,40 @@ Singleton {
         }
     }
 
-    // List devices, then enrich each into _pending; assign once when done.
+    // All known devices, then the connected/paired subsets (one call each).
     Process {
         id: devProc
         command: ["sh", "-c", "bluetoothctl devices"]
         stdout: StdioCollector {
             onStreamFinished: {
-                const lines = text.split("\n");
                 const out = [];
-                for (const l of lines) {
+                for (const l of text.split("\n")) {
                     const m = l.match(/^Device\s+(\S+)\s+(.+)$/);
                     if (m)
-                        out.push({ mac: m[1], name: m[2], connected: false, paired: false });
+                        out.push({ mac: m[1], name: m[2] });
                 }
-                root._pending = out;
-                root._enrichIndex = 0;
-                if (out.length === 0)
-                    root._applyDevices([]);
-                else
-                    root._enrichNext();
+                root._all = out;
+                connProc.running = true;
             }
         }
     }
-
-    function _enrichNext() {
-        if (_enrichIndex >= _pending.length) {
-            _applyDevices(_pending.slice());
-            return;
-        }
-        infoProc.command = ["sh", "-c", "bluetoothctl info " + _pending[_enrichIndex].mac];
-        infoProc.running = true;
-    }
-
     Process {
-        id: infoProc
+        id: connProc
+        command: ["sh", "-c", "bluetoothctl devices Connected 2>/dev/null"]
         stdout: StdioCollector {
             onStreamFinished: {
-                const d = root._pending[root._enrichIndex];
-                if (d) {
-                    d.connected = /Connected:\s+yes/i.test(text);
-                    d.paired = /Paired:\s+yes/i.test(text);
-                }
-                root._enrichIndex++;
-                root._enrichNext();
+                root._connected = root._macsFrom(text);
+                pairProc.running = true;
+            }
+        }
+    }
+    Process {
+        id: pairProc
+        command: ["sh", "-c", "bluetoothctl devices Paired 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root._paired = root._macsFrom(text);
+                root._merge();
             }
         }
     }
@@ -144,7 +164,7 @@ Singleton {
     Process { id: actProc; onExited: root.refresh() }
 
     Timer {
-        interval: 6000
+        interval: 10000
         running: true
         repeat: true
         triggeredOnStart: true

@@ -382,6 +382,28 @@ Variants {
                     }
                 }
 
+                Row {
+                    width: parent.width
+                    spacing: 10
+                    Tile {
+                        icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"
+                        label: "Do Not Disturb"
+                        accent: Theme.base08
+                        on: Notifications.doNotDisturb
+                        onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
+                        onOpened: Notifications.doNotDisturb = !Notifications.doNotDisturb
+                    }
+                    Tile {
+                        visible: PowerProfiles.available
+                        icon: PowerProfiles.icon
+                        label: PowerProfiles.label
+                        accent: Theme.base0A
+                        on: PowerProfiles.current === "performance"
+                        onToggled: PowerProfiles.cycle()
+                        onOpened: PowerProfiles.cycle()
+                    }
+                }
+
                 Text {
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter

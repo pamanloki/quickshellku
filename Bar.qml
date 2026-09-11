@@ -34,8 +34,6 @@ PanelWindow {
         Workspaces {}
         Separator {}
         Taskbar {}
-        Separator { visible: Niri.windowList.length > 0 }
-        WindowTitle {}
     }
 
     // ---------------- Right ----------------
@@ -47,6 +45,7 @@ PanelWindow {
         spacing: Theme.pillGap
 
         StatCapsule {}
+        BatteryPill {}
         QuickSettingsButton {}
         Clock {}
         Tray {}
