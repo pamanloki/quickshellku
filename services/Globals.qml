@@ -17,6 +17,7 @@ Singleton {
     property bool wifiOpen: false
     property bool bluetoothOpen: false
     property bool nightlightOpen: false
+    property bool quickSettingsOpen: false
     property bool powerOpen: false
 
     // On-screen display (shared by volume + brightness)
@@ -31,6 +32,7 @@ Singleton {
         wifiOpen = false;
         bluetoothOpen = false;
         nightlightOpen = false;
+        quickSettingsOpen = false;
         powerOpen = false;
     }
 
@@ -38,6 +40,7 @@ Singleton {
     function toggleWifi()     { const v = !wifiOpen;     _closeAll(); wifiOpen = v; }
     function toggleBluetooth(){ const v = !bluetoothOpen;_closeAll(); bluetoothOpen = v; }
     function toggleNightlight(){ const v = !nightlightOpen; _closeAll(); nightlightOpen = v; }
+    function toggleQuickSettings(){ const v = !quickSettingsOpen; _closeAll(); quickSettingsOpen = v; }
     function togglePower()    { const v = !powerOpen;    _closeAll(); powerOpen = v; }
 
     Timer {
@@ -70,6 +73,10 @@ Singleton {
     IpcHandler {
         target: "nightlight"
         function toggle() { root.toggleNightlight(); }
+    }
+    IpcHandler {
+        target: "quicksettings"
+        function toggle() { root.toggleQuickSettings(); }
     }
     IpcHandler {
         target: "power"

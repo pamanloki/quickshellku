@@ -24,6 +24,7 @@ ShellRoot {
     WifiPanel {}
     BluetoothPanel {}
     NightlightPanel {}
+    QuickSettingsPanel {}
     PowerMenu {}
     Osd {}
     NotificationToasts {}

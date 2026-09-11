@@ -46,31 +46,9 @@ PanelWindow {
         anchors.verticalCenter: parent.verticalCenter
         spacing: Theme.pillGap
 
-        StatPill {
-            icon: "󰘚"
-            value: SystemStats.cpuPercent + "%"
-            accent: Theme.base08
-            valueMax: "100%"
-        }
-        StatPill {
-            icon: "󰍛"
-            value: SystemStats.memText
-            accent: Theme.base0C
-            valueMax: "99.9GiB"
-            onClicked: Quickshell.execDetached(["footx", "-e", "-f", "btop"])
-        }
-        StatPill {
-            icon: "󰋊"
-            value: SystemStats.diskFree
-            accent: Theme.base0A
-            valueMax: "999G"
-        }
-        TempPill {}
-        BacklightPill {}
-        VolumePill {}
+        StatCapsule {}
+        QuickSettingsButton {}
         Clock {}
-        BluetoothPill {}
-        NetworkPill {}
         Tray {}
         PowerButton {}
     }

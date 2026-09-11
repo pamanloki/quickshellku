@@ -71,6 +71,7 @@ binds {
     Mod+W       { spawn "qs" "ipc" "call" "wifi" "toggle"; }
     Mod+B       { spawn "qs" "ipc" "call" "bluetooth" "toggle"; }
     Mod+N       { spawn "qs" "ipc" "call" "nightlight" "toggle"; }
+    Mod+S       { spawn "qs" "ipc" "call" "quicksettings" "toggle"; }
     Mod+Escape  { spawn "qs" "ipc" "call" "power" "toggle"; }
 
     // brightness via the shell (the OSD pops up automatically)
@@ -90,11 +91,11 @@ parts and just use `qs`.)
 You can also click the bar:
 
 - **Menu button** (left, orange) → launcher
-- **Wi-Fi pill** → panel · right-click → impala
-- **Bluetooth pill** → panel · right-click → bluetui
-- **Backlight pill** → night light panel · scroll → brightness
-- **Volume pill** → pavucontrol · scroll → volume · right-click → mute
-- **CPU/Mem/Disk/Temp** → mem/temp open `btop`
+- **Stats capsule** (cpu/mem/disk/temp) → opens `btop`
+- **Control cluster** (volume/wifi/bt icons) → Quick Settings panel · scroll → volume
+- **Quick Settings panel**: volume + brightness sliders, and WiFi / Bluetooth /
+  Night light tiles — click a tile toggles it, right-click opens its detailed
+  panel (network list / bluetooth devices / nightlight)
 - **Power button** (right, red) → power menu
 - **Clock** → toggle time / full date
 
