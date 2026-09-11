@@ -23,7 +23,7 @@ Variants {
 
         function run(item) {
             if (item.act === "about")
-                Quickshell.execDetached(["footx", "-e", "-f", "sh", "-c", "fastfetch 2>/dev/null || neofetch 2>/dev/null || uname -a; printf '\\nEnter...'; read _"]);
+                Quickshell.execDetached(["footx", "-e", "-f", "sh", "-c", "nitch; printf '\\nEnter...'; read _"]);
             else if (item.flag)
                 Quickshell.execDetached(["power-fuzzel", item.flag]);
             Globals.appleMenuOpen = false;

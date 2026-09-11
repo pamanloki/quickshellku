@@ -65,7 +65,7 @@ PanelWindow {
 
         // left: Apple menu
         Item2 {
-            icon: ""
+            icon: ""
             iconColor: Theme.base05
             onClicked: Globals.toggleAppleMenu()
         }
@@ -176,12 +176,6 @@ PanelWindow {
             icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"
             iconColor: Notifications.unread > 0 ? Theme.base0A : Theme.base05
             onClicked: Globals.toggleNotifs()
-        }
-        // right: power / session
-        Item2 {
-            icon: "󰐥"
-            iconColor: Theme.base08
-            onClicked: Globals.togglePower()
         }
     }
 }
