@@ -30,11 +30,12 @@ Singleton {
     property color base0F: "#a16946" // brown
 
     // ---- Fonts (from your Waybar style.css) ----
-    property string fontFamily: "Jetsevka"
-    property string fontFamilyFallback: "JetBrainsMono Nerd Font Propo"
+    property string fontFamily: "SF Pro Text"          // macOS UI text
+    property string fontFamilyDisplay: "SF Pro Display" // macOS large/title text
+    property string fontFamilyFallback: "JetBrainsMono Nerd Font Propo" // icons/glyphs
     readonly property var fontList: [fontFamily, fontFamilyFallback]
     property int fontSize: 17
-    property int fontWeight: Font.Bold
+    property int fontWeight: Font.Medium
 
     // ---- Bar geometry (bump barHeight/fontSize if it looks tiny on HiDPI) ----
     property int barHeight: 40
