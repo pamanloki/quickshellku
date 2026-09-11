@@ -45,6 +45,7 @@ PanelWindow {
         spacing: Theme.pillGap
 
         StatCapsule {}
+        UpdatesPill {}
         QuickSettingsButton {}
         NotifButton {}
         Clock {}
