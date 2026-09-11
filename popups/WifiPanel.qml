@@ -40,13 +40,15 @@ Variants {
             id: box
             opacity: win.visible ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
-            transform: Translate { y: win.visible ? 0 : 14; Behavior on y { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } } }
+            transformOrigin: Item.BottomRight
+            scale: win.visible ? 1 : 0.9
+            Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
             width: 360
             height: 440
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.rightMargin: 8
-            anchors.bottomMargin: Theme.barHeight + 6
+            anchors.bottomMargin: Theme.barHeight
             color: Theme.base00
             border.color: Theme.base02
             border.width: 2

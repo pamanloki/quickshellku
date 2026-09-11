@@ -37,24 +37,23 @@ Variants {
             anchors.fill: parent
             onClicked: Globals.powerOpen = false
         }
-        Rectangle {
-            anchors.fill: parent
-            color: "#000000"
-            opacity: 0.4
-        }
 
         Rectangle {
-            anchors.centerIn: parent
-            width: grid.width + 40
-            height: grid.height + 40
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.rightMargin: 8
+            anchors.bottomMargin: Theme.barHeight
+            width: grid.width + 32
+            height: grid.height + 32
             opacity: win.visible ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
-            scale: win.visible ? 1 : 0.94
-            Behavior on scale { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+            transformOrigin: Item.BottomRight
+            scale: win.visible ? 1 : 0.9
+            Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
             color: Theme.base00
             border.color: Theme.base02
-            border.width: 2
-            radius: 10
+            border.width: 1
+            radius: 16
             MouseArea { anchors.fill: parent }
 
             Grid {
