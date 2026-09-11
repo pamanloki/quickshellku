@@ -49,6 +49,9 @@ Singleton {
     // borderThickness to 0 to disable the frame entirely.
     property int borderThickness: 10   // margin reserved on each edge
     property int borderRounding: 20    // inner corner radius of the frame
+    property color borderColor: base00 // frame colour (= bar colour, so the
+                                       // frame merges into the bar; try base02
+                                       // or an accent for a visible border)
 
     // ---- Animation (Material 3 "expressive" motion, from caelestia) ----
     // Spatial = movement/scale/size; it overshoots slightly (y goes past 1) for

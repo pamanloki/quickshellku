@@ -5,17 +5,21 @@ import Quickshell.Wayland
 import "root:/services"
 
 // caelestia-style screen border. Two jobs, per monitor:
-//   1. Four thin, click-through layer surfaces reserve `borderThickness` px on
-//      each edge (exclusive zones), so tiled windows inset away from the edge —
-//      the same trick caelestia uses in modules/drawers/Exclusions.qml.
-//   2. One decorative full-screen overlay paints a `base00` frame with rounded
-//      inner corners over that reserved margin, so the wallpaper (and maximised
-//      windows) get a clean inset with rounded corners instead of bleeding to
-//      the edge.
+//   1. Thin, click-through layer surfaces reserve `borderThickness` px on the
+//      top/left/right edges (the bar reserves the bottom itself), so tiled
+//      windows inset away from the screen edge — the same exclusion-zone trick
+//      as caelestia's modules/drawers/Exclusions.qml.
+//   2. One full-screen overlay paints a `borderColor` frame with rounded TOP
+//      corners over that margin. The frame is OPEN at the bottom: its sides run
+//      straight down into the bar, so (with borderColor == the bar colour) the
+//      border and the bar read as one continuous surface — the same trick
+//      IslandBg uses for the panels. The overlay must IGNORE other surfaces'
+//      exclusive zones (ExclusionMode.Ignore) or the compositor shrinks it to
+//      the inner area and the margin shows the bare compositor backdrop instead.
 // The overlay's input region is empty, so it never eats clicks. Set
 // Theme.borderThickness to 0 to turn the whole thing off.
 Scope {
-    // ---- edge exclusion zones (reserve the margin) ----
+    // ---- edge exclusion zones (reserve the top/side margins) ----
     Variants {
         model: Quickshell.screens
         PanelWindow {
@@ -61,23 +65,6 @@ Scope {
             WlrLayershell.namespace: "quickshell:border-x"
         }
     }
-    // Bottom gap sits *above* the bar (the bar reserves its own height), so the
-    // desktop floats off the bar too.
-    Variants {
-        model: Quickshell.screens
-        PanelWindow {
-            required property var modelData
-            screen: modelData
-            anchors { bottom: true; left: true; right: true }
-            implicitHeight: Theme.borderThickness
-            exclusiveZone: Theme.borderThickness
-            visible: Theme.borderThickness > 0
-            color: "transparent"
-            mask: Region {}
-            WlrLayershell.layer: WlrLayer.Bottom
-            WlrLayershell.namespace: "quickshell:border-x"
-        }
-    }
 
     // ---- decorative frame overlay ----
     Variants {
@@ -89,31 +76,32 @@ Scope {
 
             anchors { top: true; bottom: true; left: true; right: true }
             color: "transparent"
-            exclusiveZone: 0
             visible: Theme.borderThickness > 0
-            mask: Region {}   // fully click-through — purely decorative
+            mask: Region {}                       // fully click-through
+            exclusionMode: ExclusionMode.Ignore   // span the whole output
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.namespace: "quickshell:border"
 
             readonly property real t: Theme.borderThickness
-            // area the desktop occupies (above the bar)
+            // desktop area sits above the bar; the frame is open at the bottom
+            // so it flows into the bar.
             readonly property real outerH: height - Theme.barHeight
             readonly property real innerW: width - 2 * t
-            readonly property real innerH: outerH - 2 * t
+            readonly property real innerH: outerH - t
             readonly property real r: Math.max(0, Math.min(Theme.borderRounding,
                 Math.min(innerW, innerH) / 2))
 
             Shape {
-                width: win.width
-                height: win.outerH
+                anchors.fill: parent
                 preferredRendererType: Shape.CurveRenderer
                 antialiasing: true
 
-                // Outer rectangle minus an inner rounded rectangle (odd-even
-                // fill) leaves just the frame ring, filling only the reserved
-                // margin — no window pixels are covered.
+                // Outer rectangle (down to the bar) minus an inner rect with
+                // rounded TOP corners and an open bottom (odd-even fill). Only
+                // the top + side margins are painted; the sides run down to the
+                // bar so the frame and bar merge.
                 ShapePath {
-                    fillColor: Theme.base00
+                    fillColor: Theme.borderColor
                     strokeWidth: 0
                     fillRule: ShapePath.OddEvenFill
 
@@ -124,14 +112,12 @@ Scope {
                     PathLine { x: 0; y: win.outerH }
                     PathLine { x: 0; y: 0 }
 
-                    // inner rounded rect (the hole)
+                    // inner cut-out: rounded top corners, square open bottom
                     PathMove { x: win.t + win.r; y: win.t }
                     PathLine { x: win.width - win.t - win.r; y: win.t }
                     PathArc { x: win.width - win.t; y: win.t + win.r; radiusX: win.r; radiusY: win.r }
-                    PathLine { x: win.width - win.t; y: win.outerH - win.t - win.r }
-                    PathArc { x: win.width - win.t - win.r; y: win.outerH - win.t; radiusX: win.r; radiusY: win.r }
-                    PathLine { x: win.t + win.r; y: win.outerH - win.t }
-                    PathArc { x: win.t; y: win.outerH - win.t - win.r; radiusX: win.r; radiusY: win.r }
+                    PathLine { x: win.width - win.t; y: win.outerH }
+                    PathLine { x: win.t; y: win.outerH }
                     PathLine { x: win.t; y: win.t + win.r }
                     PathArc { x: win.t + win.r; y: win.t; radiusX: win.r; radiusY: win.r }
                 }

@@ -2,7 +2,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import "root:/services"
-import "root:/modules"
 
 // The bar: a faithful Quickshell port of your bottom Waybar dock.
 PanelWindow {
@@ -26,7 +25,7 @@ PanelWindow {
     Row {
         id: leftRow
         anchors.left: parent.left
-        anchors.leftMargin: 8
+        anchors.leftMargin: 8 + Theme.borderThickness
         anchors.verticalCenter: parent.verticalCenter
         spacing: Theme.pillGap
 
@@ -42,7 +41,7 @@ PanelWindow {
     Row {
         id: rightRow
         anchors.right: parent.right
-        anchors.rightMargin: 8
+        anchors.rightMargin: 8 + Theme.borderThickness
         anchors.verticalCenter: parent.verticalCenter
         spacing: Theme.pillGap
 
