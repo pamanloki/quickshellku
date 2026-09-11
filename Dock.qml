@@ -26,25 +26,45 @@ PanelWindow {
 
     function _norm(s) { return (s || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
 
-    // pinned apps that aren't running (as launchers), then EVERY open window
-    // (one icon per window, so 2 foot windows show 2 icons).
+    // macOS-style: one icon per app. Pinned first (matched to running so they
+    // don't double up), then any other running apps.
     readonly property var items: {
         const list = Niri.windowList || [];
-        const runningNorms = ({});
-        for (let i = 0; i < list.length; i++)
-            runningNorms[dock._norm(list[i].app_id || "?")] = true;
-
+        const groups = ({});
+        const order = [];
+        for (let i = 0; i < list.length; i++) {
+            const n = dock._norm(list[i].app_id || "?");
+            if (!(n in groups)) { groups[n] = { app_id: list[i].app_id || "?", norm: n }; order.push(n); }
+        }
         const out = [];
+        const used = ({});
         for (const p of dock.pinned) {
             const pn = dock._norm(p);
-            let running = false;
-            for (const n in runningNorms)
-                if (n === pn || n.indexOf(pn) === 0 || pn.indexOf(n) === 0) { running = true; break; }
-            if (!running) out.push({ app_id: p, id: -1, running: false });
+            let m = null;
+            for (const n in groups)
+                if (n === pn || n.indexOf(pn) === 0 || pn.indexOf(n) === 0) { m = n; break; }
+            if (m) { out.push({ app_id: groups[m].app_id, norm: m, running: true }); used[m] = true; }
+            else { out.push({ app_id: p, norm: pn, running: false }); }
         }
-        for (let i = 0; i < list.length; i++)
-            out.push({ app_id: list[i].app_id || "?", id: list[i].id, running: true });
+        for (const n of order)
+            if (!used[n]) out.push({ app_id: groups[n].app_id, norm: n, running: true });
         return out;
+    }
+
+    // window ids of a given app (normalized), in order
+    function windowsOf(norm) {
+        const list = Niri.windowList || [];
+        const ids = [];
+        for (let i = 0; i < list.length; i++)
+            if (dock._norm(list[i].app_id || "?") === norm) ids.push(list[i].id);
+        return ids;
+    }
+    // click a running app: focus its next window (cycle through them)
+    function activateApp(norm) {
+        const ids = windowsOf(norm);
+        if (ids.length === 0) return;
+        const idx = ids.indexOf(Niri.focusedWindowId);
+        Niri.focusWindow(ids[(idx + 1) % ids.length]);
     }
 
     function iconFor(appId) {
@@ -182,7 +202,7 @@ PanelWindow {
                     tip: dock.labelFor(modelData.app_id)
                     running: modelData.running
                     onActivated: {
-                        if (modelData.id >= 0) Niri.focusWindow(modelData.id);
+                        if (modelData.running) dock.activateApp(modelData.norm);
                         else dock.launch(modelData.app_id);
                     }
                 }
