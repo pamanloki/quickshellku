@@ -155,7 +155,7 @@ PanelWindow {
         }
 
         Item2 {
-            icon: ""
+            icon: ""   // nf-fa-search (Spotlight)
             onClicked: Globals.toggleLauncher()
         }
         Item2 {
