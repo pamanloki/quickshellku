@@ -34,7 +34,8 @@ PanelWindow {
         const order = [];
         for (let i = 0; i < list.length; i++) {
             const n = dock._norm(list[i].app_id || "?");
-            if (!(n in groups)) { groups[n] = { app_id: list[i].app_id || "?", norm: n }; order.push(n); }
+            if (!(n in groups)) { groups[n] = { app_id: list[i].app_id || "?", norm: n, count: 0 }; order.push(n); }
+            groups[n].count++;
         }
         const out = [];
         const used = ({});
@@ -43,11 +44,11 @@ PanelWindow {
             let m = null;
             for (const n in groups)
                 if (n === pn || n.indexOf(pn) === 0 || pn.indexOf(n) === 0) { m = n; break; }
-            if (m) { out.push({ app_id: groups[m].app_id, norm: m, running: true }); used[m] = true; }
-            else { out.push({ app_id: p, norm: pn, running: false }); }
+            if (m) { out.push({ app_id: groups[m].app_id, norm: m, running: true, count: groups[m].count }); used[m] = true; }
+            else { out.push({ app_id: p, norm: pn, running: false, count: 0 }); }
         }
         for (const n of order)
-            if (!used[n]) out.push({ app_id: groups[n].app_id, norm: n, running: true });
+            if (!used[n]) out.push({ app_id: groups[n].app_id, norm: n, running: true, count: groups[n].count });
         return out;
     }
 
@@ -93,7 +94,9 @@ PanelWindow {
         property color glyphBg: Theme.base0D
         property string tip: ""
         property bool running: false
+        property int count: 0
         signal activated()
+        signal menuRequested()
         implicitWidth: Theme.dockIconSize + 10
         implicitHeight: Theme.dockIconSize + 22   // = dock background height
 
@@ -152,16 +155,25 @@ PanelWindow {
             }
         }
 
-        Rectangle {
+        Row {
             visible: cell.running
-            width: 4; height: 4; radius: 2
-            color: Theme.base05
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 3
+            spacing: 3
+            Repeater {
+                model: Math.min(cell.count, 4)
+                delegate: Rectangle { width: 4; height: 4; radius: 2; color: Theme.base05 }
+            }
         }
 
-        MouseArea { id: cellMA; anchors.fill: parent; hoverEnabled: true; onClicked: cell.activated() }
+        MouseArea {
+            id: cellMA
+            anchors.fill: parent
+            hoverEnabled: true
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: mouse => mouse.button === Qt.RightButton ? cell.menuRequested() : cell.activated()
+        }
     }
 
     Rectangle {
@@ -197,13 +209,24 @@ PanelWindow {
             Repeater {
                 model: dock.items
                 delegate: DockCell {
+                    id: dcell
                     required property var modelData
                     source: dock.iconFor(modelData.app_id)
                     tip: dock.labelFor(modelData.app_id)
                     running: modelData.running
+                    count: modelData.count
                     onActivated: {
                         if (modelData.running) dock.activateApp(modelData.norm);
                         else dock.launch(modelData.app_id);
+                    }
+                    onMenuRequested: {
+                        if (!modelData.running) return;
+                        const list = Niri.windowList || [];
+                        const wins = [];
+                        for (let i = 0; i < list.length; i++)
+                            if (dock._norm(list[i].app_id || "?") === modelData.norm)
+                                wins.push({ id: list[i].id, title: (list[i].title && list[i].title.length ? list[i].title : dock.labelFor(list[i].app_id)) });
+                        Globals.openDockMenu(wins, dcell.mapToItem(null, dcell.width / 2, 0).x);
                     }
                 }
             }

@@ -38,6 +38,7 @@ ShellRoot {
     NotificationToasts {}
     NotificationCenter {}
     TrayMenu {}
+    DockMenu {}
     ScreenshotMenu {}
     ScreenCorners {}
 }

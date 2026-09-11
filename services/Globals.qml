@@ -36,6 +36,17 @@ Singleton {
         trayMenuOpen = true;
     }
 
+    // Dock window menu (right-click a dock icon → pick a window).
+    property bool dockMenuOpen: false
+    property var dockMenuWindows: []
+    property real dockMenuX: 0
+    function openDockMenu(wins, x) {
+        _closeAll();
+        dockMenuWindows = wins;
+        dockMenuX = x;
+        dockMenuOpen = true;
+    }
+
     // On-screen display (shared by volume + brightness)
     property string osdKind: ""     // "volume" | "brightness"
     property int osdValue: 0
@@ -55,6 +66,7 @@ Singleton {
         powerOpen = false;
         notifsOpen = false;
         trayMenuOpen = false;
+        dockMenuOpen = false;
         screenshotOpen = false;
     }
 
