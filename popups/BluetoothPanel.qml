@@ -54,18 +54,33 @@ Variants {
                 anchors.margins: 14
                 spacing: 10
 
+                // Header: title + scan + power toggle
                 Row {
                     width: parent.width
+                    spacing: 8
                     Text {
-                        text: "󰂯  Bluetooth"
+                        text: "Bluetooth"
                         color: Theme.base05
-                        font.family: Theme.fontFamilyFallback
+                        font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontSize + 2
                         font.weight: Theme.fontWeight
-                        width: parent.width - 60
+                        width: parent.width - 96
                         anchors.verticalCenter: parent.verticalCenter
                     }
-                    Rectangle {
+                    Rectangle {   // scan
+                        width: 28; height: 26; radius: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: btScanMA.containsMouse ? Theme.base02 : "transparent"
+                        Text {
+                            anchors.centerIn: parent
+                            text: "󰑐"
+                            color: Bluetooth.scanning ? Theme.base0B : Theme.base05
+                            font.family: Theme.fontFamilyFallback
+                            font.pixelSize: Theme.fontSize
+                        }
+                        MouseArea { id: btScanMA; anchors.fill: parent; hoverEnabled: true; onClicked: Bluetooth.toggleScan() }
+                    }
+                    Rectangle {   // power toggle
                         width: 52; height: 26; radius: 13
                         color: Bluetooth.powered ? Theme.base0B : Theme.base03
                         anchors.verticalCenter: parent.verticalCenter
@@ -82,45 +97,10 @@ Variants {
                     }
                 }
 
-                Row {
-                    width: parent.width
-                    spacing: 8
-                    Rectangle {
-                        width: (parent.width - 8) / 2; height: 32; radius: 10
-                        color: Theme.base02
-                        Text {
-                            anchors.centerIn: parent
-                            text: Bluetooth.scanning ? "Scanning…" : "󰑐  Scan"
-                            color: Theme.base05
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: Theme.fontSize - 2
-                        }
-                        MouseArea { anchors.fill: parent; onClicked: Bluetooth.toggleScan() }
-                    }
-                    Rectangle {
-                        width: (parent.width - 8) / 2; height: 32; radius: 10
-                        color: Theme.base02
-                        Text {
-                            anchors.centerIn: parent
-                            text: "  bluetui"
-                            color: Theme.base05
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: Theme.fontSize - 2
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                Quickshell.execDetached(["footx", "-f", "-e", "bluetui"]);
-                                Globals.bluetoothOpen = false;
-                            }
-                        }
-                    }
-                }
-
                 ListView {
                     id: devList
                     width: parent.width
-                    height: parent.height - 130
+                    height: parent.height - 80
                     clip: true
                     model: Bluetooth.devices
                     spacing: 4

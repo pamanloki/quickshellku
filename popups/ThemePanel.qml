@@ -66,9 +66,9 @@ Variants {
                 Row {
                     width: parent.width
                     Text {
-                        text: "󰸌  Theme"
+                        text: "Theme"
                         color: Theme.base05
-                        font.family: Theme.fontFamilyFallback
+                        font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontSize + 2
                         font.weight: Theme.fontWeight
                         width: parent.width - 96
@@ -78,12 +78,21 @@ Variants {
                         width: 96; height: 30; radius: 8
                         color: togH.hovered ? Theme.base02 : Theme.base01
                         anchors.verticalCenter: parent.verticalCenter
-                        Text {
+                        Row {
                             anchors.centerIn: parent
-                            text: "󰔎  Toggle"
-                            color: Theme.base05
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: Theme.fontSize - 3
+                            spacing: 6
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "󰔎"; color: Theme.base05
+                                font.family: Theme.fontFamilyFallback
+                                font.pixelSize: Theme.fontSize - 3
+                            }
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "Toggle"; color: Theme.base05
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 3
+                            }
                         }
                         HoverHandler { id: togH }
                         MouseArea { anchors.fill: parent; onClicked: Flavours.toggle() }

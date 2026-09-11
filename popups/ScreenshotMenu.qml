@@ -65,9 +65,9 @@ Variants {
                 spacing: 4
 
                 Text {
-                    text: "󰹑  Screenshot"
+                    text: "Screenshot"
                     color: Theme.base05
-                    font.family: Theme.fontFamilyFallback
+                    font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize + 1
                     font.weight: Theme.fontWeight
                     leftPadding: 6

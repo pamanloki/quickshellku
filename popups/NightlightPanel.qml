@@ -74,9 +74,9 @@ Variants {
                 Row {
                     width: parent.width
                     Text {
-                        text: "󰛨  Night Light"
+                        text: "Night Light"
                         color: Theme.base05
-                        font.family: Theme.fontFamilyFallback
+                        font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontSize + 2
                         font.weight: Theme.fontWeight
                         width: parent.width - 60
@@ -188,24 +188,42 @@ Variants {
                     Rectangle {
                         width: (parent.width - 8) / 2; height: 32; radius: 10
                         color: Theme.base02
-                        Text {
+                        Row {
                             anchors.centerIn: parent
-                            text: "󰈸  Warmer"
-                            color: Theme.base05
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: Theme.fontSize - 2
+                            spacing: 6
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "󰈸"; color: Theme.base05
+                                font.family: Theme.fontFamilyFallback
+                                font.pixelSize: Theme.fontSize - 2
+                            }
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "Warmer"; color: Theme.base05
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 2
+                            }
                         }
                         MouseArea { anchors.fill: parent; onClicked: Nightlight.warmer() }
                     }
                     Rectangle {
                         width: (parent.width - 8) / 2; height: 32; radius: 10
                         color: Theme.base02
-                        Text {
+                        Row {
                             anchors.centerIn: parent
-                            text: "󰜗  Cooler"
-                            color: Theme.base05
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: Theme.fontSize - 2
+                            spacing: 6
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "󰜗"; color: Theme.base05
+                                font.family: Theme.fontFamilyFallback
+                                font.pixelSize: Theme.fontSize - 2
+                            }
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "Cooler"; color: Theme.base05
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 2
+                            }
                         }
                         MouseArea { anchors.fill: parent; onClicked: Nightlight.cooler() }
                     }
@@ -218,24 +236,42 @@ Variants {
                     Rectangle {
                         width: (parent.width - 8) / 2; height: 32; radius: 10
                         color: Theme.base01
-                        Text {
+                        Row {
                             anchors.centerIn: parent
-                            text: "󰃭  Auto"
-                            color: Theme.base05
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: Theme.fontSize - 2
+                            spacing: 6
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "󰃭"; color: Theme.base05
+                                font.family: Theme.fontFamilyFallback
+                                font.pixelSize: Theme.fontSize - 2
+                            }
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "Auto"; color: Theme.base05
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 2
+                            }
                         }
                         MouseArea { anchors.fill: parent; onClicked: Nightlight.scheduleAuto() }
                     }
                     Rectangle {
                         width: (parent.width - 8) / 2; height: 32; radius: 10
                         color: Theme.base01
-                        Text {
+                        Row {
                             anchors.centerIn: parent
-                            text: "󰃰  Manual"
-                            color: Theme.base05
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: Theme.fontSize - 2
+                            spacing: 6
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "󰃰"; color: Theme.base05
+                                font.family: Theme.fontFamilyFallback
+                                font.pixelSize: Theme.fontSize - 2
+                            }
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "Manual"; color: Theme.base05
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 2
+                            }
                         }
                         MouseArea { anchors.fill: parent; onClicked: Nightlight.scheduleManual() }
                     }

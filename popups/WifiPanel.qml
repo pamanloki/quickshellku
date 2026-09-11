@@ -62,19 +62,33 @@ Variants {
                 anchors.margins: 14
                 spacing: 10
 
-                // Header + radio toggle
+                // Header: title + refresh + radio toggle
                 Row {
                     width: parent.width
+                    spacing: 8
                     Text {
-                        text: "󰤨  Wi-Fi"
+                        text: "Wi-Fi"
                         color: Theme.base05
-                        font.family: Theme.fontFamilyFallback
+                        font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontSize + 2
                         font.weight: Theme.fontWeight
-                        width: parent.width - 60
+                        width: parent.width - 96
                         anchors.verticalCenter: parent.verticalCenter
                     }
-                    Rectangle {
+                    Rectangle {   // refresh / scan
+                        width: 28; height: 26; radius: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: rescanMA.containsMouse ? Theme.base02 : "transparent"
+                        Text {
+                            anchors.centerIn: parent
+                            text: "󰑐"
+                            color: Network.scanning ? Theme.base0B : Theme.base05
+                            font.family: Theme.fontFamilyFallback
+                            font.pixelSize: Theme.fontSize
+                        }
+                        MouseArea { id: rescanMA; anchors.fill: parent; hoverEnabled: true; onClicked: Network.scan() }
+                    }
+                    Rectangle {   // radio toggle
                         width: 52; height: 26; radius: 13
                         color: Network.radioOn ? Theme.base0B : Theme.base03
                         anchors.verticalCenter: parent.verticalCenter
@@ -102,46 +116,11 @@ Variants {
                     elide: Text.ElideRight
                 }
 
-                // Scan + manage buttons
-                Row {
-                    width: parent.width
-                    spacing: 8
-                    Rectangle {
-                        width: (parent.width - 8) / 2; height: 32; radius: 10
-                        color: Theme.base02
-                        Text {
-                            anchors.centerIn: parent
-                            text: Network.scanning ? "Scanning…" : "󰑐  Scan"
-                            color: Theme.base05
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: Theme.fontSize - 2
-                        }
-                        MouseArea { anchors.fill: parent; onClicked: Network.scan() }
-                    }
-                    Rectangle {
-                        width: (parent.width - 8) / 2; height: 32; radius: 10
-                        color: Theme.base02
-                        Text {
-                            anchors.centerIn: parent
-                            text: "  impala"
-                            color: Theme.base05
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: Theme.fontSize - 2
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                Quickshell.execDetached(["footx", "-e", "-f", "impala"]);
-                                Globals.wifiOpen = false;
-                            }
-                        }
-                    }
-                }
 
                 ListView {
                     id: netList
                     width: parent.width
-                    height: parent.height - 170
+                    height: parent.height - 120
                     clip: true
                     model: Network.networks
                     spacing: 4
@@ -165,11 +144,18 @@ Variants {
                                 width: parent.width
                                 spacing: 6
                                 Text {
-                                    text: (modelData.connected ? "󰤨  " : "󰤟  ") + modelData.ssid
+                                    text: modelData.connected ? "󰤨" : "󰤟"
                                     color: Theme.base05
                                     font.family: Theme.fontFamilyFallback
                                     font.pixelSize: Theme.fontSize - 1
-                                    width: parent.width - 84
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                Text {
+                                    text: modelData.ssid
+                                    color: Theme.base05
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSize - 1
+                                    width: parent.width - 104
                                     elide: Text.ElideRight
                                     anchors.verticalCenter: parent.verticalCenter
                                 }

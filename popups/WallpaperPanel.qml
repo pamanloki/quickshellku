@@ -52,9 +52,9 @@ Variants {
                 spacing: 10
 
                 Text {
-                    text: "󰸉  Wallpaper"
+                    text: "Wallpaper"
                     color: Theme.base05
-                    font.family: Theme.fontFamilyFallback
+                    font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize + 2
                     font.weight: Theme.fontWeight
                 }
