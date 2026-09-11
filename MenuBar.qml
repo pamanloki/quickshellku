@@ -63,10 +63,11 @@ PanelWindow {
         anchors.verticalCenter: parent.verticalCenter
         spacing: 2
 
+        // left: Apple/launcher (Finder-style) → opens the launcher
         Item2 {
             icon: ""
             iconColor: Theme.base05
-            onClicked: Globals.togglePower()
+            onClicked: Globals.toggleLauncher()
         }
         Item2 {
             label: {
@@ -175,6 +176,12 @@ PanelWindow {
             icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"
             iconColor: Notifications.unread > 0 ? Theme.base0A : Theme.base05
             onClicked: Globals.toggleNotifs()
+        }
+        // right: power / session
+        Item2 {
+            icon: "󰐥"
+            iconColor: Theme.base08
+            onClicked: Globals.togglePower()
         }
     }
 }

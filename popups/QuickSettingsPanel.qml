@@ -122,54 +122,57 @@ Variants {
             }
         }
 
-        component VSlider: Item {
-            id: vs
+        // Horizontal slider (macOS Control Centre style): rounded track, fill
+        // from the left, icon inside on the left.
+        component HSlider: Item {
+            id: hs
             property string icon: ""
             property int value: 0
-            property color accent: Theme.base05
+            property color accent: Theme.base0D
             property bool badgeMuted: false
             signal moved(int v)
             property bool dragging: false
             property int dragValue: 0
             readonly property int shown: dragging ? dragValue : value
+            height: 40
 
             Rectangle {
-                id: vtrack
+                id: htrack
                 anchors.fill: parent
-                radius: 18
+                radius: 13
                 color: win.slotBg
 
                 Rectangle {
                     anchors.left: parent.left
-                    anchors.right: parent.right
+                    anchors.top: parent.top
                     anchors.bottom: parent.bottom
-                    radius: vtrack.radius
-                    height: Math.max(vs.shown > 0 ? radius : 0,
-                        Math.round(parent.height * Math.max(0, Math.min(100, vs.shown)) / 100))
-                    color: vs.badgeMuted ? Theme.base08 : vs.accent
-                    Behavior on height { enabled: !vs.dragging; NumberAnimation { duration: 90 } }
+                    radius: htrack.radius
+                    width: Math.max(hs.shown > 0 ? 2 * radius : 0,
+                        Math.round(parent.width * Math.max(0, Math.min(100, hs.shown)) / 100))
+                    color: hs.badgeMuted ? Theme.base08 : hs.accent
+                    Behavior on width { enabled: !hs.dragging; NumberAnimation { duration: 90 } }
                 }
                 Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 12
-                    text: vs.icon
-                    color: vs.shown > 14 ? Theme.base00 : Theme.base05
+                    anchors.left: parent.left
+                    anchors.leftMargin: 13
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: hs.icon
+                    color: hs.shown > 6 ? Theme.base00 : Theme.base05
                     font.family: Theme.fontFamilyFallback
-                    font.pixelSize: Theme.fontSize + 6
+                    font.pixelSize: Theme.fontSize + 4
                 }
             }
 
             MouseArea {
                 anchors.fill: parent
                 preventStealing: true    // don't let the pager steal a slider drag
-                function pick(my) {
-                    vs.dragValue = Math.round(Math.max(0, Math.min(1, 1 - my / height)) * 100);
-                    vs.moved(vs.dragValue);
+                function pick(mx) {
+                    hs.dragValue = Math.round(Math.max(0, Math.min(1, mx / width)) * 100);
+                    hs.moved(hs.dragValue);
                 }
-                onPressed: mouse => { vs.dragging = true; pick(mouse.y); }
-                onPositionChanged: mouse => { if (vs.dragging) pick(mouse.y); }
-                onReleased: vs.dragging = false
+                onPressed: mouse => { hs.dragging = true; pick(mouse.x); }
+                onPositionChanged: mouse => { if (hs.dragging) pick(mouse.x); }
+                onReleased: hs.dragging = false
             }
         }
 
@@ -275,80 +278,65 @@ Variants {
                                 }
                             }
 
-                            // connectivity cluster + vertical sliders
-                            Row {
+                            // connectivity card (row of 4 toggles, macOS-style)
+                            Rectangle {
                                 width: parent.width
-                                spacing: 14
-                                readonly property real colW: (width - 14) / 2
-                                readonly property real blockH: 168
-
-                                Rectangle {
-                                    width: parent.colW
-                                    height: parent.blockH
-                                    radius: 24
-                                    color: win.modBg
-                                    Grid {
-                                        anchors.centerIn: parent
-                                        columns: 2
-                                        rowSpacing: 10
-                                        columnSpacing: 8
-                                        ConnCell {
-                                            icon: Network.icon
-                                            accent: Theme.base0B
-                                            on: Network.radioOn
-                                            caption: Network.connected ? Network.ssid : (Network.radioOn ? "Wi-Fi" : "Off")
-                                            onToggled: Network.setRadio(!Network.radioOn)
-                                            onOpened: Globals.toggleWifi()
-                                        }
-                                        ConnCell {
-                                            icon: Bluetooth.icon
-                                            accent: Theme.base0D
-                                            on: Bluetooth.powered
-                                            caption: Bluetooth.anyConnected ? Bluetooth.connectedName : (Bluetooth.powered ? "Bluetooth" : "Off")
-                                            onToggled: Bluetooth.setPowered(!Bluetooth.powered)
-                                            onOpened: Globals.toggleBluetooth()
-                                        }
-                                        ConnCell {
-                                            icon: "󰃝"
-                                            accent: Theme.base09
-                                            on: Nightlight.active
-                                            caption: Nightlight.active ? "On" : "Off"
-                                            onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
-                                            onOpened: Globals.toggleNightlight()
-                                        }
-                                        ConnCell {
-                                            icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"
-                                            accent: Theme.base08
-                                            on: Notifications.doNotDisturb
-                                            caption: Notifications.doNotDisturb ? "On" : "Off"
-                                            onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
-                                            onOpened: Notifications.doNotDisturb = !Notifications.doNotDisturb
-                                        }
-                                    }
-                                }
-
+                                height: 92
+                                radius: 20
+                                color: win.modBg
                                 Row {
-                                    width: parent.colW
-                                    height: parent.blockH
-                                    spacing: 14
-                                    VSlider {
-                                        width: (parent.width - 14) / 2
-                                        height: parent.height
-                                        icon: Brightness.icon
-                                        value: Brightness.percent
-                                        accent: Theme.base0E
-                                        onMoved: v => Brightness.set(v)
+                                    anchors.centerIn: parent
+                                    spacing: 6
+                                    ConnCell {
+                                        icon: Network.icon
+                                        accent: Theme.base0B
+                                        on: Network.radioOn
+                                        caption: Network.connected ? Network.ssid : (Network.radioOn ? "Wi-Fi" : "Off")
+                                        onToggled: Network.setRadio(!Network.radioOn)
+                                        onOpened: Globals.toggleWifi()
                                     }
-                                    VSlider {
-                                        width: (parent.width - 14) / 2
-                                        height: parent.height
-                                        icon: win.muted || win.volume === 0 ? "󰖁" : (win.volume >= 50 ? "󰕾" : "󰖀")
-                                        value: win.volume
+                                    ConnCell {
+                                        icon: Bluetooth.icon
                                         accent: Theme.base0D
-                                        badgeMuted: win.muted
-                                        onMoved: v => win.setVolume(v)
+                                        on: Bluetooth.powered
+                                        caption: Bluetooth.anyConnected ? Bluetooth.connectedName : (Bluetooth.powered ? "Bluetooth" : "Off")
+                                        onToggled: Bluetooth.setPowered(!Bluetooth.powered)
+                                        onOpened: Globals.toggleBluetooth()
+                                    }
+                                    ConnCell {
+                                        icon: "󰃝"
+                                        accent: Theme.base09
+                                        on: Nightlight.active
+                                        caption: Nightlight.active ? "On" : "Off"
+                                        onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
+                                        onOpened: Globals.toggleNightlight()
+                                    }
+                                    ConnCell {
+                                        icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"
+                                        accent: Theme.base08
+                                        on: Notifications.doNotDisturb
+                                        caption: Notifications.doNotDisturb ? "On" : "Off"
+                                        onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
+                                        onOpened: Notifications.doNotDisturb = !Notifications.doNotDisturb
                                     }
                                 }
+                            }
+
+                            // Display + Sound (horizontal sliders)
+                            HSlider {
+                                width: parent.width
+                                icon: Brightness.icon
+                                value: Brightness.percent
+                                accent: Theme.base0E
+                                onMoved: v => Brightness.set(v)
+                            }
+                            HSlider {
+                                width: parent.width
+                                icon: win.muted || win.volume === 0 ? "󰖁" : (win.volume >= 50 ? "󰕾" : "󰖀")
+                                value: win.volume
+                                accent: Theme.base0D
+                                badgeMuted: win.muted
+                                onMoved: v => win.setVolume(v)
                             }
 
                             // audio output switcher (collapsible)

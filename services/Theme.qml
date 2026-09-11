@@ -39,7 +39,7 @@ Singleton {
     // ---- Bar geometry (bump barHeight/fontSize if it looks tiny on HiDPI) ----
     property int barHeight: 40
     property int menuBarHeight: 28     // macOS-style top menu bar
-    property int dockIconSize: 44      // macOS-style dock icon
+    property int dockIconSize: 36      // macOS-style dock icon
     property int pillVMargin: 6        // vertical margin around pills
     property int pillHPad: 8           // horizontal padding inside pills
     property int pillGap: 5            // gap between module groups
