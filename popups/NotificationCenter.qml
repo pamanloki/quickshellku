@@ -16,7 +16,7 @@ Variants {
 
         anchors { top: true; bottom: true; left: true; right: true }
         color: "transparent"
-        visible: Globals.notifsOpen || slide.y < box.height
+        visible: Globals.notifsOpen || slide.y > -box.height
         exclusiveZone: 0
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
@@ -40,17 +40,17 @@ Variants {
             id: box
             transform: Translate {
                 id: slide
-                y: Globals.notifsOpen ? 0 : box.height
+                y: Globals.notifsOpen ? 0 : -box.height
                 Behavior on y { NumberAnimation { duration: Theme.durSlide; easing.type: Easing.OutCubic } }
             }
 
             width: 384
             height: 500
             anchors.right: parent.right
-            anchors.bottom: parent.bottom
+            anchors.top: parent.top
             anchors.rightMargin: 8
-            anchors.bottomMargin: 0
-            IslandBg { anchors.fill: parent; radius: 16 }
+            anchors.topMargin: Theme.menuBarHeight + 6
+            Rectangle { anchors.fill: parent; radius: 18; color: Theme.base00; border.width: 1; border.color: Theme.base02 }
             MouseArea { anchors.fill: parent }
 
             Column {

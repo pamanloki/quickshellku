@@ -15,7 +15,7 @@ Variants {
         screen: modelData
 
         anchors { top: true; right: true }
-        margins.top: 10
+        margins.top: Theme.menuBarHeight + 8
         margins.right: 10
         implicitWidth: 370
         implicitHeight: Math.max(1, col.implicitHeight)

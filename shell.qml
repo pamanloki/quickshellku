@@ -14,10 +14,14 @@ ShellRoot {
         Notifications, Player, Flavours, Time, Wallpaper, Audio, Screenshot, Updates
     ]
 
-    // One bar per monitor.
+    // macOS-style top menu bar + bottom dock, per monitor.
     Variants {
         model: Quickshell.screens
-        Bar {}
+        MenuBar {}
+    }
+    Variants {
+        model: Quickshell.screens
+        Dock {}
     }
 
     // Popups / overlays (each handles its own per-screen instancing + visibility).
