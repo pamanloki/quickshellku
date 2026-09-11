@@ -141,22 +141,24 @@ Variants {
                         id: card
                         required property var modelData
                         width: list.width
-                        implicitHeight: Math.max(58, bodyT.y + bodyT.paintedHeight + 10)
-                        radius: 12
+                        implicitHeight: content.y + content.implicitHeight + 10
+                        radius: 16
                         color: Theme.base01
-                        border.width: 2
+                        border.width: 1
                         border.color: card.modelData.urgency === NotificationUrgency.Critical
-                            ? Theme.base08 : "transparent"
+                            ? Theme.base08 : Theme.base02
+
+                        HoverHandler { id: cardH }
 
                         Rectangle {
                             id: ic
                             x: 10; y: 10
-                            width: 34; height: 34; radius: 8
+                            width: 36; height: 36; radius: 9
                             color: Theme.base02
                             Image {
                                 anchors.centerIn: parent
-                                width: 24; height: 24
-                                sourceSize.width: 24; sourceSize.height: 24
+                                width: 26; height: 26
+                                sourceSize.width: 26; sourceSize.height: 26
                                 fillMode: Image.PreserveAspectFit
                                 source: {
                                     if (card.modelData.image && card.modelData.image.length > 0)
@@ -168,35 +170,16 @@ Variants {
                             }
                         }
 
-                        Text {
-                            id: appT
-                            x: ic.x + ic.width + 10
-                            y: 10
-                            width: parent.width - x - 76
-                            text: card.modelData.appName
-                            color: Theme.base0D
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize - 4
-                            font.weight: Theme.fontWeight
-                            elide: Text.ElideRight
-                        }
-                        Text {
-                            id: timeT
-                            anchors.right: closeB.left
-                            anchors.rightMargin: 6
-                            y: 10
-                            text: win.ago(card.modelData.time)
-                            color: Theme.base04
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize - 4
-                        }
+                        // close button — only on hover, macOS-style
                         Rectangle {
                             id: closeB
                             anchors.right: parent.right
-                            anchors.rightMargin: 8
-                            y: 8
+                            anchors.top: parent.top
+                            anchors.margins: 8
                             width: 20; height: 20; radius: 10
-                            color: xH.hovered ? Theme.base08 : "transparent"
+                            visible: cardH.hovered
+                            z: 2
+                            color: xH.hovered ? Theme.base08 : Theme.base02
                             Text {
                                 anchors.centerIn: parent; text: "󰅖"
                                 color: xH.hovered ? Theme.base00 : Theme.base05
@@ -207,33 +190,56 @@ Variants {
                             MouseArea { anchors.fill: parent; onClicked: Notifications.removeHistory(card.modelData.id) }
                         }
 
-                        Text {
-                            id: sumT
-                            x: appT.x
-                            y: appT.y + appT.paintedHeight + 2
+                        Column {
+                            id: content
+                            x: ic.x + ic.width + 10
+                            y: 10
                             width: parent.width - x - 12
-                            text: card.modelData.summary
-                            color: Theme.base05
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize - 2
-                            font.weight: Theme.fontWeight
-                            elide: Text.ElideRight
-                            visible: text.length > 0
-                        }
-                        Text {
-                            id: bodyT
-                            x: appT.x
-                            y: sumT.visible ? sumT.y + sumT.paintedHeight + 2 : sumT.y
-                            width: parent.width - x - 12
-                            text: card.modelData.body
-                            color: Theme.base04
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize - 3
-                            textFormat: Text.StyledText
-                            wrapMode: Text.WordWrap
-                            maximumLineCount: 4
-                            elide: Text.ElideRight
-                            visible: text.length > 0
+                            spacing: 2
+
+                            Row {
+                                width: parent.width
+                                spacing: 6
+                                Text {
+                                    text: card.modelData.appName
+                                    color: card.modelData.urgency === NotificationUrgency.Critical
+                                        ? Theme.base08 : Theme.base04
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSize - 4
+                                    font.weight: Theme.fontWeight
+                                    elide: Text.ElideRight
+                                    width: parent.width - timeT.implicitWidth - 26
+                                }
+                                Text {
+                                    id: timeT
+                                    text: "· " + win.ago(card.modelData.time)
+                                    color: Theme.base04
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSize - 4
+                                }
+                            }
+                            Text {
+                                width: parent.width
+                                text: card.modelData.summary
+                                color: Theme.base05
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 1
+                                font.weight: Theme.fontWeight
+                                elide: Text.ElideRight
+                                visible: text.length > 0
+                            }
+                            Text {
+                                width: parent.width
+                                text: card.modelData.body
+                                color: Theme.base04
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 3
+                                textFormat: Text.StyledText
+                                wrapMode: Text.WordWrap
+                                maximumLineCount: 4
+                                elide: Text.ElideRight
+                                visible: text.length > 0
+                            }
                         }
                     }
                 }
