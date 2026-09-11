@@ -16,20 +16,23 @@ Singleton {
     property bool launcherOpen: false
     property bool wifiOpen: false
     property bool bluetoothOpen: false
+    property bool nightlightOpen: false
     property bool powerOpen: false
     property bool brightnessOsd: false
 
-    // Only one popup panel at a time (launcher/wifi/bt/power are exclusive).
+    // Only one popup panel at a time (launcher/wifi/bt/nightlight/power).
     function _closeAll() {
         launcherOpen = false;
         wifiOpen = false;
         bluetoothOpen = false;
+        nightlightOpen = false;
         powerOpen = false;
     }
 
     function toggleLauncher() { const v = !launcherOpen; _closeAll(); launcherOpen = v; }
     function toggleWifi()     { const v = !wifiOpen;     _closeAll(); wifiOpen = v; }
     function toggleBluetooth(){ const v = !bluetoothOpen;_closeAll(); bluetoothOpen = v; }
+    function toggleNightlight(){ const v = !nightlightOpen; _closeAll(); nightlightOpen = v; }
     function togglePower()    { const v = !powerOpen;    _closeAll(); powerOpen = v; }
 
     Timer {
@@ -55,6 +58,10 @@ Singleton {
     IpcHandler {
         target: "bluetooth"
         function toggle() { root.toggleBluetooth(); }
+    }
+    IpcHandler {
+        target: "nightlight"
+        function toggle() { root.toggleNightlight(); }
     }
     IpcHandler {
         target: "power"

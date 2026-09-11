@@ -68,6 +68,7 @@ binds {
     Mod+D       { spawn "qs" "ipc" "call" "launcher" "toggle"; }
     Mod+W       { spawn "qs" "ipc" "call" "wifi" "toggle"; }
     Mod+B       { spawn "qs" "ipc" "call" "bluetooth" "toggle"; }
+    Mod+N       { spawn "qs" "ipc" "call" "nightlight" "toggle"; }
     Mod+Escape  { spawn "qs" "ipc" "call" "power" "toggle"; }
 
     // brightness keys also nudge the on-screen display
@@ -84,7 +85,7 @@ You can also click the bar:
 - **Menu button** (left, orange) → launcher
 - **Wi-Fi pill** → panel · right-click → impala
 - **Bluetooth pill** → panel · right-click → bluetui
-- **Backlight pill** → nightlight menu · scroll → brightness
+- **Backlight pill** → night light panel · scroll → brightness
 - **Volume pill** → pavucontrol · scroll → volume · right-click → mute
 - **CPU/Mem/Disk/Temp** → mem/temp open `btop`
 - **Power button** (right, red) → power menu
