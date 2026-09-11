@@ -29,13 +29,17 @@ Scope {
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "quickshell:corner"
 
+        // Match the shell frame colour (bar/dock/panels) so the corners read as
+        // part of the shell, not stray black blobs over the bar/wallpaper.
+        readonly property color fill: Theme.base00
         Canvas {
+            id: cv
             anchors.fill: parent
             onPaint: {
                 const R = width;
                 const ctx = getContext("2d");
                 ctx.reset();
-                ctx.fillStyle = "#000000";
+                ctx.fillStyle = cwin.fill;
                 ctx.fillRect(0, 0, R, R);
                 // clear the quarter disc centred on the inner corner
                 const cx = (cwin.edge === "tl" || cwin.edge === "bl") ? R : 0;
@@ -46,6 +50,10 @@ Scope {
                 ctx.fill();
             }
             Component.onCompleted: requestPaint()
+            Connections {
+                target: Theme
+                function onBase00Changed() { cv.requestPaint(); }
+            }
         }
     }
 
