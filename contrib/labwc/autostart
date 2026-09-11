@@ -1,0 +1,15 @@
+# labwc autostart for quickshellku
+# Copy to ~/.config/labwc/autostart
+
+# The shell (menu bar + dock + panels). Use `-c quickshellku` if you keep the
+# config in ~/.config/quickshell/quickshellku instead of the default dir.
+quickshell >/dev/null 2>&1 &
+
+# Wallpaper daemon (the shell's Wallpaper.qml calls `awww img ...`, an swww
+# wrapper). Start whichever daemon `awww` drives:
+swww-daemon >/dev/null 2>&1 &
+
+# Notes:
+# - Night Light is handled by the shell (Nightlight.qml runs wlsunset), so do
+#   NOT start wlsunset here.
+# - Notifications, tray, clipboard etc. are all provided by quickshellku.
