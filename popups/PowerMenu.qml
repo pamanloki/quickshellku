@@ -50,19 +50,7 @@ Variants {
             transformOrigin: Item.BottomRight
             scale: win.visible ? 1 : 0.9
             Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
-            color: Theme.base00
-            border.color: Theme.base02
-            border.width: 1
-            radius: 16
-            
-            // square off the bottom so the panel merges flush into the bar
-            Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                height: parent.radius
-                color: Theme.base00
-            }
+            IslandBg { anchors.fill: parent; radius: 16 }
             MouseArea { anchors.fill: parent }
 
             Grid {

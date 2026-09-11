@@ -45,7 +45,7 @@ Variants {
             onClicked: Globals.nightlightOpen = false
         }
 
-        Rectangle {
+        Item {
             id: box
             opacity: win.visible ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
@@ -58,19 +58,7 @@ Variants {
             anchors.bottom: parent.bottom
             anchors.rightMargin: 8
             anchors.bottomMargin: 0
-            color: Theme.base00
-            border.color: Theme.base02
-            border.width: 2
-            radius: 8
-            
-            // square off the bottom so the panel merges flush into the bar
-            Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                height: parent.radius
-                color: Theme.base00
-            }
+            IslandBg { anchors.fill: parent; radius: 8 }
 
             MouseArea { anchors.fill: parent }
 
