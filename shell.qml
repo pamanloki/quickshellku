@@ -41,6 +41,7 @@ ShellRoot {
     DockMenu {}
     AppleMenu {}
     AboutPanel {}
+    AudioPanel {}
     ScreenshotMenu {}
     ScreenCorners {}
 }

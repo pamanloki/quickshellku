@@ -170,7 +170,7 @@ PanelWindow {
         }
         Item2 {
             icon: Audio.muted || Audio.volume === 0 ? "󰖁" : (Audio.volume >= 50 ? "󰕾" : "󰖀")
-            onClicked: Globals.toggleQuickSettings()
+            onClicked: Globals.toggleAudio()
         }
         Item2 {
             icon: "󰕮"
