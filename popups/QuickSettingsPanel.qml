@@ -207,7 +207,7 @@ Variants {
                         }
                         Text {
                             text: Qt.formatDate(Time.now, "d MMMM yyyy")
-                            color: Theme.base03
+                            color: Theme.base05
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSize - 2
                         }
