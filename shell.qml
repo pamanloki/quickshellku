@@ -33,4 +33,5 @@ ShellRoot {
     Osd {}
     NotificationToasts {}
     NotificationCenter {}
+    TrayMenu {}
 }

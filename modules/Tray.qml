@@ -31,9 +31,17 @@ Item {
             Repeater {
                 model: SystemTray.items
                 delegate: Item {
+                    id: trayItem
                     required property var modelData
                     width: 20
                     height: 20
+
+                    function showMenu() {
+                        if (modelData.hasMenu && modelData.menu)
+                            Globals.openTrayMenu(modelData.menu, trayItem.mapToItem(null, trayItem.width / 2, 0).x);
+                        else
+                            modelData.secondaryActivate();
+                    }
 
                     Image {
                         anchors.fill: parent
@@ -48,15 +56,19 @@ Item {
                         acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
                         onClicked: mouse => {
                             if (mouse.button === Qt.LeftButton) {
-                                if (modelData.onlyMenu)
-                                    modelData.secondaryActivate();
+                                // Left-click: activate, or open the menu for menu-only items.
+                                if (trayItem.modelData.onlyMenu)
+                                    trayItem.showMenu();
                                 else
-                                    modelData.activate();
+                                    trayItem.modelData.activate();
+                            } else if (mouse.button === Qt.MiddleButton) {
+                                trayItem.modelData.secondaryActivate();
                             } else {
-                                modelData.secondaryActivate();
+                                // Right-click: the app's context menu.
+                                trayItem.showMenu();
                             }
                         }
-                        onWheel: wheel => modelData.scroll(wheel.angleDelta.y, false)
+                        onWheel: wheel => trayItem.modelData.scroll(wheel.angleDelta.y, false)
                     }
                 }
             }

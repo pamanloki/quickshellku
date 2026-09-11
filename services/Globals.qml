@@ -24,6 +24,17 @@ Singleton {
     property bool powerOpen: false
     property bool notifsOpen: false
 
+    // Tray context menu (right-click a tray icon).
+    property bool trayMenuOpen: false
+    property var trayMenuHandle: null
+    property real trayMenuX: 0
+    function openTrayMenu(handle, x) {
+        _closeAll();
+        trayMenuHandle = handle;
+        trayMenuX = x;
+        trayMenuOpen = true;
+    }
+
     // On-screen display (shared by volume + brightness)
     property string osdKind: ""     // "volume" | "brightness"
     property int osdValue: 0
@@ -42,6 +53,7 @@ Singleton {
         wallpaperOpen = false;
         powerOpen = false;
         notifsOpen = false;
+        trayMenuOpen = false;
     }
 
     function toggleLauncher() { const v = !launcherOpen; _closeAll(); launcherOpen = v; }

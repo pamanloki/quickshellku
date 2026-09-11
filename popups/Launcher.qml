@@ -31,6 +31,35 @@ Variants {
         property var usage: ({})
 
         readonly property bool commandMode: search.text.startsWith(">")
+        readonly property bool clipMode: search.text.startsWith(";")
+        property var clipResults: []   // [{id, preview}] from cliphist
+
+        // ---------- clipboard history (cliphist) ----------
+        function copyClip(id) {
+            clipCopyProc.command = ["sh", "-c", "cliphist decode \"$1\" | wl-copy", "sh", String(id)];
+            clipCopyProc.running = true;
+        }
+        Process { id: clipCopyProc }
+        Process {
+            id: clipListProc
+            command: ["sh", "-c", "cliphist list 2>/dev/null"]
+            stdout: StdioCollector {
+                onStreamFinished: {
+                    const q = search.text.slice(1).toLowerCase().trim();
+                    const out = [];
+                    for (const l of text.split("\n")) {
+                        if (!l.length) continue;
+                        const tab = l.indexOf("\t");
+                        const id = tab >= 0 ? l.slice(0, tab) : l;
+                        const preview = tab >= 0 ? l.slice(tab + 1) : l;
+                        if (!q || preview.toLowerCase().indexOf(q) >= 0)
+                            out.push({ id: id, preview: preview });
+                    }
+                    win.clipResults = out;
+                    win.selectedIndex = 0;
+                }
+            }
+        }
 
         // ---------- usage persistence ----------
         property string usagePath: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")) + "/quickshellku/launcher_usage.json"
@@ -85,6 +114,10 @@ Variants {
                 win.selectedIndex = 0;
                 return;
             }
+            if (win.clipMode) {
+                clipListProc.running = true;   // parsed + filtered in its collector
+                return;
+            }
             const q = search.text.toLowerCase().trim();
             const apps = DesktopEntries.applications;
             const all = apps && apps.values !== undefined ? apps.values : apps;
@@ -120,6 +153,12 @@ Variants {
                 Globals.launcherOpen = false;
                 return;
             }
+            if (win.clipMode) {
+                const c = win.clipResults[win.selectedIndex];
+                if (c) win.copyClip(c.id);
+                Globals.launcherOpen = false;
+                return;
+            }
             const e = win.results[win.selectedIndex];
             if (e) {
                 win.bumpUsage(e.id);
@@ -129,11 +168,12 @@ Variants {
         }
 
         function move(delta) {
-            const n = win.results.length;
+            const n = win.clipMode ? win.clipResults.length : win.results.length;
             if (n === 0) return;
             win.ignoreHover = true;
             win.selectedIndex = Math.max(0, Math.min(n - 1, win.selectedIndex + delta));
-            list.positionViewAtIndex(win.selectedIndex, ListView.Contain);
+            const lv = win.clipMode ? clipList : list;
+            lv.positionViewAtIndex(win.selectedIndex, ListView.Contain);
         }
 
         onVisibleChanged: {
@@ -187,8 +227,8 @@ Variants {
                         anchors.left: parent.left
                         anchors.leftMargin: 14
                         anchors.verticalCenter: parent.verticalCenter
-                        text: win.commandMode ? "󰅱" : ""
-                        color: win.commandMode ? Theme.base09 : Theme.base0D
+                        text: win.clipMode ? "󰅍" : win.commandMode ? "󰅱" : ""
+                        color: win.clipMode ? Theme.base0C : win.commandMode ? Theme.base09 : Theme.base0D
                         font.family: Theme.fontFamilyFallback
                         font.pixelSize: Theme.fontSize + 2
                     }
@@ -207,7 +247,7 @@ Variants {
 
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
-                            text: "Search apps…  (type > to run a command)"
+                            text: "Search apps…   ( >  run command  ·  ;  clipboard )"
                             color: Theme.base03
                             font: search.font
                             visible: search.text.length === 0
@@ -228,7 +268,7 @@ Variants {
                         anchors.right: parent.right
                         anchors.rightMargin: 14
                         anchors.verticalCenter: parent.verticalCenter
-                        text: win.commandMode ? "run" : win.results.length + ""
+                        text: win.clipMode ? (win.clipResults.length + "") : win.commandMode ? "run" : win.results.length + ""
                         color: Theme.base03
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontSize - 2
@@ -241,6 +281,7 @@ Variants {
                     width: parent.width
                     height: parent.height - 46 - 12 - 22 - 12
                     clip: true
+                    visible: !win.clipMode
                     model: win.commandMode ? 0 : win.results
                     boundsBehavior: Flickable.StopAtBounds
                     spacing: 2
@@ -333,6 +374,62 @@ Variants {
                             }
                             onEntered: if (!win.ignoreHover) win.selectedIndex = row.index
                             onClicked: { win.selectedIndex = row.index; win.activate(); }
+                        }
+                    }
+                }
+
+                // ---- clipboard results ----
+                ListView {
+                    id: clipList
+                    width: parent.width
+                    height: parent.height - 46 - 12 - 22 - 12
+                    clip: true
+                    visible: win.clipMode
+                    model: win.clipResults
+                    boundsBehavior: Flickable.StopAtBounds
+                    spacing: 2
+                    cacheBuffer: 400
+
+                    Text {
+                        anchors.centerIn: parent
+                        visible: win.clipMode && win.clipResults.length === 0
+                        text: "Clipboard empty\n(needs cliphist + wl-clipboard)"
+                        color: Theme.base03
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+
+                    delegate: Rectangle {
+                        id: crow
+                        required property var modelData
+                        required property int index
+                        width: clipList.width
+                        height: 44
+                        radius: 8
+                        readonly property bool selected: index === win.selectedIndex
+                        color: selected ? Theme.base02 : "transparent"
+                        Behavior on color { ColorAnimation { duration: 90 } }
+
+                        Text {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 14
+                            anchors.right: parent.right
+                            anchors.rightMargin: 14
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: crow.modelData.preview
+                            color: Theme.base05
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize - 1
+                            elide: Text.ElideRight
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onPositionChanged: { win.ignoreHover = false; win.selectedIndex = crow.index; }
+                            onEntered: if (!win.ignoreHover) win.selectedIndex = crow.index
+                            onClicked: { win.selectedIndex = crow.index; win.activate(); }
                         }
                     }
                 }

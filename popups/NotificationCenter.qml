@@ -76,7 +76,7 @@ Variants {
                         // DND toggle
                         Rectangle {
                             width: 68; height: 28; radius: 8
-                            color: Notifications.doNotDisturb ? Theme.base08 : Theme.base01
+                            color: Notifications.doNotDisturb ? Theme.base08 : (dndMA.containsMouse ? Theme.base02 : Theme.base01)
                             Text {
                                 anchors.centerIn: parent
                                 text: Notifications.doNotDisturb ? "󰂛 DND" : "󰂚 DND"
@@ -84,21 +84,30 @@ Variants {
                                 font.family: Theme.fontFamilyFallback
                                 font.pixelSize: Theme.fontSize - 4
                             }
-                            MouseArea { anchors.fill: parent; onClicked: Notifications.doNotDisturb = !Notifications.doNotDisturb }
+                            MouseArea {
+                                id: dndMA
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onClicked: Notifications.doNotDisturb = !Notifications.doNotDisturb
+                            }
                         }
                         // clear all
                         Rectangle {
                             width: 66; height: 28; radius: 8
-                            color: clH.hovered ? Theme.base08 : Theme.base01
+                            color: clMA.containsMouse ? Theme.base08 : Theme.base01
                             Text {
                                 anchors.centerIn: parent
                                 text: "󰎟  Clear"
-                                color: clH.hovered ? Theme.base00 : Theme.base05
+                                color: clMA.containsMouse ? Theme.base00 : Theme.base05
                                 font.family: Theme.fontFamilyFallback
                                 font.pixelSize: Theme.fontSize - 4
                             }
-                            HoverHandler { id: clH }
-                            MouseArea { anchors.fill: parent; onClicked: Notifications.clearHistory() }
+                            MouseArea {
+                                id: clMA
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onClicked: Notifications.clearHistory()
+                            }
                         }
                     }
                 }
