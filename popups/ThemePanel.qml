@@ -41,9 +41,10 @@ Variants {
             id: box
             opacity: win.visible ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.durEffects; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeEffects } }
-            transformOrigin: Item.BottomRight
-            scale: win.visible ? 1 : 0.9
-            Behavior on scale { NumberAnimation { duration: Theme.durSpatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeSpatial } }
+            transform: Translate {
+                y: win.visible ? 0 : 28
+                Behavior on y { NumberAnimation { duration: Theme.durSpatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeSpatial } }
+            }
 
             width: 340
             height: 440
