@@ -48,7 +48,7 @@ Variants {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.rightMargin: 8
-            anchors.bottomMargin: Theme.barHeight
+            anchors.bottomMargin: 0
             color: Theme.base00
             border.color: Theme.base02
             border.width: 2

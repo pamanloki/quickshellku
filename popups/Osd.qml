@@ -16,7 +16,7 @@ Variants {
         screen: modelData
 
         anchors { bottom: true }
-        margins.bottom: Theme.barHeight + 70
+        margins.bottom: 40
         implicitWidth: 280
         implicitHeight: 58
         color: "transparent"

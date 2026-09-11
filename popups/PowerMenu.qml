@@ -42,7 +42,7 @@ Variants {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.rightMargin: 8
-            anchors.bottomMargin: Theme.barHeight
+            anchors.bottomMargin: 0
             width: grid.width + 32
             height: grid.height + 32
             opacity: win.visible ? 1 : 0
