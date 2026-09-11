@@ -50,7 +50,7 @@ Variants {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.rightMargin: 8
-            anchors.topMargin: Theme.menuBarHeight + 6
+            anchors.topMargin: Theme.menuBarHeight + 1
 
             Rectangle { color: Theme.base00; border.width: 1; border.color: Theme.base02; anchors.fill: parent; radius: 16 }
             MouseArea { anchors.fill: parent }

@@ -50,7 +50,7 @@ Variants {
                 ? (parent.width - width - 8)
                 : Math.max(8, Math.min(parent.width - width - 8, Globals.panelX - width / 2))
             anchors.top: parent.top
-            anchors.topMargin: Theme.menuBarHeight + 6
+            anchors.topMargin: Theme.menuBarHeight + 1
             Rectangle { anchors.fill: parent; radius: 18; color: Theme.base00; border.width: 1; border.color: Theme.base02 }
             MouseArea { anchors.fill: parent }
 

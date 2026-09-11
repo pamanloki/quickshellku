@@ -45,7 +45,7 @@ Variants {
             border.color: Theme.base02
 
             anchors.top: parent.top
-            anchors.topMargin: Theme.menuBarHeight + 6
+            anchors.topMargin: Theme.menuBarHeight + 1
             x: Math.max(8, Math.min(Globals.trayMenuX - width / 2, parent.width - width - 8))
 
             opacity: win.visible ? 1 : 0
