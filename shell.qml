@@ -32,4 +32,5 @@ ShellRoot {
     PowerMenu {}
     Osd {}
     NotificationToasts {}
+    NotificationCenter {}
 }

@@ -46,6 +46,7 @@ PanelWindow {
 
         StatCapsule {}
         QuickSettingsButton {}
+        NotifButton {}
         Clock {}
         Tray {}
         PowerButton {}

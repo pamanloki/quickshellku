@@ -22,6 +22,7 @@ Singleton {
     property bool themeOpen: false
     property bool wallpaperOpen: false
     property bool powerOpen: false
+    property bool notifsOpen: false
 
     // On-screen display (shared by volume + brightness)
     property string osdKind: ""     // "volume" | "brightness"
@@ -40,6 +41,7 @@ Singleton {
         themeOpen = false;
         wallpaperOpen = false;
         powerOpen = false;
+        notifsOpen = false;
     }
 
     function toggleLauncher() { const v = !launcherOpen; _closeAll(); launcherOpen = v; }
@@ -51,6 +53,7 @@ Singleton {
     function toggleTheme()   { const v = !themeOpen;    _closeAll(); themeOpen = v; }
     function toggleWallpaper(){ const v = !wallpaperOpen; _closeAll(); wallpaperOpen = v; }
     function togglePower()    { const v = !powerOpen;    _closeAll(); powerOpen = v; }
+    function toggleNotifs()   { const v = !notifsOpen;   _closeAll(); notifsOpen = v; }
 
     Timer {
         id: osdTimer
@@ -102,5 +105,9 @@ Singleton {
     IpcHandler {
         target: "power"
         function toggle() { root.togglePower(); }
+    }
+    IpcHandler {
+        target: "notifications"
+        function toggle() { root.toggleNotifs(); }
     }
 }
