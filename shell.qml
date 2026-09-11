@@ -43,6 +43,7 @@ ShellRoot {
     AppleMenu {}
     AboutPanel {}
     SystemPanel {}
+    MusicPanel {}
     AudioPanel {}
     BatteryPanel {}
     BatteryAlert {}

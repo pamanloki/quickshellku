@@ -180,7 +180,7 @@ Variants {
                     anchors.left: parent.left; anchors.leftMargin: 14
                     anchors.verticalCenter: parent.verticalCenter
                     text: icon
-                    color: value > 8 ? Theme.base00 : Theme.base05
+                    color: Theme.base00
                     font.family: Theme.fontFamilyFallback
                     font.pixelSize: Theme.fontSize + 4
                 }
@@ -280,6 +280,24 @@ Variants {
                         on: Notifications.doNotDisturb
                         accent: Theme.base0E
                         onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
+                    }
+                }
+
+                // ---- Wallpaper + Theme ----
+                Row {
+                    width: parent.width
+                    spacing: 10
+                    Tile {
+                        width: (parent.width - 10) / 2
+                        icon: "󰸉"; label: "Wallpaper"; state: "Choose"
+                        accent: Theme.base0C
+                        onToggled: Globals.toggleWallpaper()
+                    }
+                    Tile {
+                        width: (parent.width - 10) / 2
+                        icon: "󰸌"; label: "Theme"; state: "Flavours"
+                        accent: Theme.base0E
+                        onToggled: Globals.toggleTheme()
                     }
                 }
 
@@ -390,79 +408,6 @@ Variants {
                     }
                 }
 
-                // ---- Now Playing ----
-                Card {
-                    width: parent.width
-                    height: 96
-                    visible: Player.hasPlayer
-                    Row {
-                        anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 12
-                        Rectangle {
-                            width: 72; height: 72; radius: 10
-                            color: Theme.base02
-                            anchors.verticalCenter: parent.verticalCenter
-                            clip: true
-                            Image {
-                                anchors.fill: parent
-                                source: Player.artUrl
-                                fillMode: Image.PreserveAspectCrop
-                                visible: Player.artUrl.length > 0
-                            }
-                            Text {
-                                anchors.centerIn: parent
-                                text: "󰎈"
-                                color: Theme.base05
-                                font.family: Theme.fontFamilyFallback
-                                font.pixelSize: 28
-                                visible: Player.artUrl.length === 0
-                            }
-                        }
-                        Column {
-                            width: parent.width - 84
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 4
-                            Text {
-                                text: Player.title || "Not Playing"
-                                color: Theme.base05
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize - 1
-                                font.weight: Theme.fontWeight
-                                elide: Text.ElideRight
-                                width: parent.width
-                            }
-                            Text {
-                                text: Player.artist
-                                color: Theme.base04
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize - 3
-                                elide: Text.ElideRight
-                                width: parent.width
-                                visible: text.length > 0
-                            }
-                            Row {
-                                spacing: 22
-                                topPadding: 2
-                                Text {
-                                    text: "󰒮"; color: Theme.base05
-                                    font.family: Theme.fontFamilyFallback; font.pixelSize: Theme.fontSize + 4
-                                    MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: Player.previous() }
-                                }
-                                Text {
-                                    text: Player.isPlaying ? "󰏤" : "󰐊"; color: Theme.base05
-                                    font.family: Theme.fontFamilyFallback; font.pixelSize: Theme.fontSize + 8
-                                    MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: Player.playPause() }
-                                }
-                                Text {
-                                    text: "󰒭"; color: Theme.base05
-                                    font.family: Theme.fontFamilyFallback; font.pixelSize: Theme.fontSize + 4
-                                    MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: Player.next() }
-                                }
-                            }
-                        }
-                    }
-                }
             }
         }
     }

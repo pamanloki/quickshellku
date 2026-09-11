@@ -168,7 +168,7 @@ PanelWindow {
             visible: Player.hasPlayer
             icon: Player.isPlaying ? "󰎆" : "󰎊"
             iconColor: Player.isPlaying ? Theme.base0D : Theme.base05
-            onClicked: Globals.toggleQuickSettings()
+            onClicked: Globals.toggleMusic()
         }
         Item2 {
             icon: ""   // nf-fa-search (Spotlight)
