@@ -41,7 +41,7 @@ Variants {
             id: card
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
-            anchors.topMargin: Theme.menuBarHeight + 24
+            anchors.topMargin: 24
             width: row.implicitWidth + 40
             height: 80
             radius: 20

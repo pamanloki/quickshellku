@@ -39,7 +39,7 @@ Variants {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.rightMargin: 8
-            anchors.topMargin: Theme.menuBarHeight + 1
+            anchors.topMargin: 4
             radius: 20
             color: Theme.base00
             border.width: 1
