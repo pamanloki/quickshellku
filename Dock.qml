@@ -17,7 +17,7 @@ PanelWindow {
     anchors { bottom: true }
     margins.bottom: 6
     implicitWidth: Math.max(1, dockBg.width)
-    implicitHeight: Theme.dockIconSize + 22 + 24   // extra top for tooltip
+    implicitHeight: Theme.dockIconSize + 22 + 42   // extra top for tooltip + magnify
     exclusiveZone: Theme.dockIconSize + 22 + 6
     color: "transparent"
 
@@ -26,30 +26,24 @@ PanelWindow {
 
     function _norm(s) { return (s || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
 
-    // pinned first (matched to running windows so e.g. "brave" == "Brave-browser"
-    // and never doubles up), then any other running apps.
+    // pinned apps that aren't running (as launchers), then EVERY open window
+    // (one icon per window, so 2 foot windows show 2 icons).
     readonly property var items: {
         const list = Niri.windowList || [];
-        const runByNorm = ({});
-        const order = [];
-        for (let i = 0; i < list.length; i++) {
-            const a = list[i].app_id || "?";
-            const n = dock._norm(a);
-            if (!(n in runByNorm)) { runByNorm[n] = { app_id: a, id: list[i].id }; order.push(n); }
-        }
+        const runningNorms = ({});
+        for (let i = 0; i < list.length; i++)
+            runningNorms[dock._norm(list[i].app_id || "?")] = true;
+
         const out = [];
-        const used = ({});
         for (const p of dock.pinned) {
             const pn = dock._norm(p);
-            let match = null;
-            for (const n in runByNorm) {
-                if (n === pn || n.indexOf(pn) === 0 || pn.indexOf(n) === 0) { match = n; break; }
-            }
-            if (match) { out.push({ app_id: runByNorm[match].app_id, id: runByNorm[match].id, running: true }); used[match] = true; }
-            else { out.push({ app_id: p, id: -1, running: false }); }
+            let running = false;
+            for (const n in runningNorms)
+                if (n === pn || n.indexOf(pn) === 0 || pn.indexOf(n) === 0) { running = true; break; }
+            if (!running) out.push({ app_id: p, id: -1, running: false });
         }
-        for (const n of order)
-            if (!used[n]) out.push({ app_id: runByNorm[n].app_id, id: runByNorm[n].id, running: true });
+        for (let i = 0; i < list.length; i++)
+            out.push({ app_id: list[i].app_id || "?", id: list[i].id, running: true });
         return out;
     }
 
