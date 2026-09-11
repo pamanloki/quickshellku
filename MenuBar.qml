@@ -63,11 +63,11 @@ PanelWindow {
         anchors.verticalCenter: parent.verticalCenter
         spacing: 2
 
-        // left: Apple/launcher (Finder-style) → opens the launcher
+        // left: Apple menu
         Item2 {
             icon: ""
             iconColor: Theme.base05
-            onClicked: Globals.toggleLauncher()
+            onClicked: Globals.toggleAppleMenu()
         }
         Item2 {
             label: {

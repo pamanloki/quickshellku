@@ -39,6 +39,7 @@ ShellRoot {
     NotificationCenter {}
     TrayMenu {}
     DockMenu {}
+    AppleMenu {}
     ScreenshotMenu {}
     ScreenCorners {}
 }

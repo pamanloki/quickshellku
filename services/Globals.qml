@@ -24,6 +24,7 @@ Singleton {
     property bool powerOpen: false
     property bool notifsOpen: false
     property bool screenshotOpen: false
+    property bool appleMenuOpen: false
 
     // Tray context menu (right-click a tray icon).
     property bool trayMenuOpen: false
@@ -68,6 +69,7 @@ Singleton {
         trayMenuOpen = false;
         dockMenuOpen = false;
         screenshotOpen = false;
+        appleMenuOpen = false;
     }
 
     function toggleLauncher() { const v = !launcherOpen; _closeAll(); launcherOpen = v; }
@@ -81,6 +83,7 @@ Singleton {
     function togglePower()    { const v = !powerOpen;    _closeAll(); powerOpen = v; }
     function toggleNotifs()   { const v = !notifsOpen;   _closeAll(); notifsOpen = v; }
     function toggleScreenshot(){ const v = !screenshotOpen; _closeAll(); screenshotOpen = v; }
+    function toggleAppleMenu() { const v = !appleMenuOpen; _closeAll(); appleMenuOpen = v; }
 
     Timer {
         id: osdTimer
