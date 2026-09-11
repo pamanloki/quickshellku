@@ -179,7 +179,7 @@ PanelWindow {
                 : Battery.low ? Theme.base0A
                 : Battery.charging ? Theme.base0B : Theme.base05
             label: Battery.percent + "%"
-            onClicked: Globals.toggleQuickSettings()
+            onClicked: Globals.toggleBattery()
         }
         Item2 {
             icon: "󰕮"

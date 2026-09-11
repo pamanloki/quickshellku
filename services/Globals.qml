@@ -27,6 +27,7 @@ Singleton {
     property bool appleMenuOpen: false
     property bool aboutOpen: false
     property bool audioOpen: false
+    property bool batteryOpen: false
 
     // Tray context menu (right-click a tray icon).
     property bool trayMenuOpen: false
@@ -74,6 +75,7 @@ Singleton {
         appleMenuOpen = false;
         aboutOpen = false;
         audioOpen = false;
+        batteryOpen = false;
     }
 
     function toggleLauncher() { const v = !launcherOpen; _closeAll(); launcherOpen = v; }
@@ -90,6 +92,7 @@ Singleton {
     function toggleAppleMenu() { const v = !appleMenuOpen; _closeAll(); appleMenuOpen = v; }
     function showAbout()       { _closeAll(); aboutOpen = true; }
     function toggleAudio()     { const v = !audioOpen;     _closeAll(); audioOpen = v; }
+    function toggleBattery()   { const v = !batteryOpen;   _closeAll(); batteryOpen = v; }
 
     Timer {
         id: osdTimer
@@ -149,5 +152,9 @@ Singleton {
     IpcHandler {
         target: "screenshot"
         function toggle() { root.toggleScreenshot(); }
+    }
+    IpcHandler {
+        target: "battery"
+        function toggle() { root.toggleBattery(); }
     }
 }
