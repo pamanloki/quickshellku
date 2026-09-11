@@ -15,7 +15,7 @@ Variants {
 
         anchors { top: true; bottom: true; left: true; right: true }
         color: "transparent"
-        visible: Globals.powerOpen
+        visible: Globals.powerOpen || slide.y < box.height
         exclusiveZone: 0
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
@@ -39,11 +39,10 @@ Variants {
 
         Item {
             id: box
-            opacity: win.visible ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: Theme.durEffects; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeEffects } }
             transform: Translate {
-                y: win.visible ? 0 : 28
-                Behavior on y { NumberAnimation { duration: Theme.durSpatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeSpatial } }
+                id: slide
+                y: Globals.powerOpen ? 0 : box.height
+                Behavior on y { NumberAnimation { duration: Theme.durSlide; easing.type: Easing.OutCubic } }
             }
 
             width: 260

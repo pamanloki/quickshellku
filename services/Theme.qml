@@ -51,6 +51,7 @@ Singleton {
     readonly property var easeEmphasized: [0.05, 0, 2.0/15.0, 0.06, 1.0/6.0, 0.4, 5.0/24.0, 0.82, 0.25, 1, 1, 1]
     property int durSpatial: 500        // popup open/scale
     property int durEffects: 200        // fades
+    property int durSlide: 320          // panel slide up/down
 
     // Path to the Flavours colors file (same one Waybar imports).
     property string colorsPath: Quickshell.env("HOME") + "/.config/waybar/colors.css"
