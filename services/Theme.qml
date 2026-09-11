@@ -43,6 +43,22 @@ Singleton {
     property int pillGap: 5            // gap between module groups
     property int radius: 0             // Waybar uses square corners here
 
+    // ---- Screen border (caelestia-style inset frame) ----
+    // The desktop/wallpaper gets a coloured margin on every edge with rounded
+    // inner corners, so it no longer bleeds to the screen edge. Set
+    // borderThickness to 0 to disable the frame entirely.
+    property int borderThickness: 10   // margin reserved on each edge
+    property int borderRounding: 20    // inner corner radius of the frame
+
+    // ---- Animation (Material 3 "expressive" motion, from caelestia) ----
+    // Spatial = movement/scale/size; it overshoots slightly (y goes past 1) for
+    // a lively spring feel. Effects = fades; no overshoot.
+    readonly property var easeSpatial: [0.38, 1.21, 0.22, 1, 1, 1]
+    readonly property var easeEffects: [0.34, 0.80, 0.34, 1, 1, 1]
+    readonly property var easeEmphasized: [0.05, 0, 2.0/15.0, 0.06, 1.0/6.0, 0.4, 5.0/24.0, 0.82, 0.25, 1, 1, 1]
+    property int durSpatial: 500        // popup open/scale
+    property int durEffects: 200        // fades
+
     // Path to the Flavours colors file (same one Waybar imports).
     property string colorsPath: Quickshell.env("HOME") + "/.config/waybar/colors.css"
 

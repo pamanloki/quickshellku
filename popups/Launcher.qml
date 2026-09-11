@@ -153,8 +153,10 @@ Variants {
         Rectangle {
             id: box
             opacity: win.visible ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
-            transform: Translate { y: win.visible ? 0 : 14; Behavior on y { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } } }
+            Behavior on opacity { NumberAnimation { duration: Theme.durEffects; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeEffects } }
+            scale: win.visible ? 1 : 0.96
+            Behavior on scale { NumberAnimation { duration: Theme.durSpatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeSpatial } }
+            transform: Translate { y: win.visible ? 0 : 18; Behavior on y { NumberAnimation { duration: Theme.durSpatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeSpatial } } }
             width: 560
             height: 540
             anchors.horizontalCenter: parent.horizontalCenter

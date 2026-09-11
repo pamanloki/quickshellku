@@ -14,6 +14,9 @@ ShellRoot {
         Notifications, Player, Flavours, Time, Wallpaper, Audio
     ]
 
+    // Inset frame around the desktop (reserves an edge margin + rounds corners).
+    Border {}
+
     // One bar per monitor.
     Variants {
         model: Quickshell.screens

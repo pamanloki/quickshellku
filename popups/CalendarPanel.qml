@@ -57,10 +57,10 @@ Variants {
         Item {
             id: box
             opacity: win.visible ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+            Behavior on opacity { NumberAnimation { duration: Theme.durEffects; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeEffects } }
             transformOrigin: Item.BottomRight
             scale: win.visible ? 1 : 0.9
-            Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
+            Behavior on scale { NumberAnimation { duration: Theme.durSpatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeSpatial } }
 
             width: 320
             height: col.implicitHeight + 24

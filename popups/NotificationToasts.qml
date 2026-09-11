@@ -53,7 +53,7 @@ Variants {
                     x: 20
                     Component.onCompleted: { opacity = 1; x = 0; }
                     Behavior on opacity { NumberAnimation { duration: 140 } }
-                    Behavior on x { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                    Behavior on x { NumberAnimation { duration: Theme.durSpatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeSpatial } }
 
                     // auto-dismiss (paused while hovered; never for critical)
                     Timer {
