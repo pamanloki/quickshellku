@@ -20,6 +20,7 @@ Singleton {
     property bool quickSettingsOpen: false
     property bool calendarOpen: false
     property bool themeOpen: false
+    property bool wallpaperOpen: false
     property bool powerOpen: false
 
     // On-screen display (shared by volume + brightness)
@@ -37,6 +38,7 @@ Singleton {
         quickSettingsOpen = false;
         calendarOpen = false;
         themeOpen = false;
+        wallpaperOpen = false;
         powerOpen = false;
     }
 
@@ -47,6 +49,7 @@ Singleton {
     function toggleQuickSettings(){ const v = !quickSettingsOpen; _closeAll(); quickSettingsOpen = v; }
     function toggleCalendar(){ const v = !calendarOpen; _closeAll(); calendarOpen = v; }
     function toggleTheme()   { const v = !themeOpen;    _closeAll(); themeOpen = v; }
+    function toggleWallpaper(){ const v = !wallpaperOpen; _closeAll(); wallpaperOpen = v; }
     function togglePower()    { const v = !powerOpen;    _closeAll(); powerOpen = v; }
 
     Timer {
@@ -91,6 +94,10 @@ Singleton {
     IpcHandler {
         target: "theme"
         function toggle() { root.toggleTheme(); }
+    }
+    IpcHandler {
+        target: "wallpaper"
+        function toggle() { root.toggleWallpaper(); }
     }
     IpcHandler {
         target: "power"

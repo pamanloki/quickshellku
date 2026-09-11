@@ -23,8 +23,8 @@ Variants {
 
         readonly property var filtered: {
             const q = filter.text.toLowerCase().trim();
-            if (q.length === 0) return Flavours.schemes;
-            return Flavours.schemes.filter(s => s.toLowerCase().includes(q));
+            if (q.length === 0) return Flavours.families;
+            return Flavours.families.filter(s => s.toLowerCase().includes(q));
         }
 
         onVisibleChanged: {
@@ -135,14 +135,14 @@ Variants {
                         width: list.width
                         height: 36
                         radius: 8
-                        readonly property bool isCurrent: Flavours.current === modelData
+                        readonly property bool isCurrent: Flavours.currentFamily === modelData
                         color: isCurrent ? Theme.base02 : (rowH.hovered ? Theme.base01 : "transparent")
 
                         Text {
                             anchors.left: parent.left; anchors.leftMargin: 12
                             anchors.verticalCenter: parent.verticalCenter
                             width: parent.width - 44
-                            text: modelData
+                            text: Flavours.title(modelData)
                             color: Theme.base05
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSize - 1
@@ -158,7 +158,7 @@ Variants {
                         }
 
                         HoverHandler { id: rowH }
-                        MouseArea { anchors.fill: parent; onClicked: Flavours.apply(modelData) }
+                        MouseArea { anchors.fill: parent; onClicked: Flavours.applyFamily(modelData) }
                     }
                 }
             }

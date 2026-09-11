@@ -195,7 +195,7 @@ Variants {
                 Row {
                     width: parent.width
                     Column {
-                        width: parent.width - 44
+                        width: parent.width - 92
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: 1
                         Text {
@@ -212,19 +212,35 @@ Variants {
                             font.pixelSize: Theme.fontSize - 2
                         }
                     }
-                    Rectangle {
-                        width: 40; height: 40; radius: 20
+                    Row {
                         anchors.verticalCenter: parent.verticalCenter
-                        color: themeH.hovered ? Theme.base02 : Theme.base01
-                        Text {
-                            anchors.centerIn: parent
-                            text: "󰸌"
-                            color: Theme.base0E
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: Theme.fontSize + 4
+                        spacing: 8
+                        Rectangle {
+                            width: 40; height: 40; radius: 20
+                            color: wallH.hovered ? Theme.base02 : Theme.base01
+                            Text {
+                                anchors.centerIn: parent
+                                text: "󰸉"
+                                color: Theme.base0C
+                                font.family: Theme.fontFamilyFallback
+                                font.pixelSize: Theme.fontSize + 4
+                            }
+                            HoverHandler { id: wallH }
+                            MouseArea { anchors.fill: parent; onClicked: Globals.toggleWallpaper() }
                         }
-                        HoverHandler { id: themeH }
-                        MouseArea { anchors.fill: parent; onClicked: Globals.toggleTheme() }
+                        Rectangle {
+                            width: 40; height: 40; radius: 20
+                            color: themeH.hovered ? Theme.base02 : Theme.base01
+                            Text {
+                                anchors.centerIn: parent
+                                text: "󰸌"
+                                color: Theme.base0E
+                                font.family: Theme.fontFamilyFallback
+                                font.pixelSize: Theme.fontSize + 4
+                            }
+                            HoverHandler { id: themeH }
+                            MouseArea { anchors.fill: parent; onClicked: Globals.toggleTheme() }
+                        }
                     }
                 }
 
@@ -278,7 +294,7 @@ Variants {
                             Text {
                                 width: parent.width
                                 text: Player.artist
-                                color: Theme.base03
+                                color: Theme.base05
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontSize - 3
                                 elide: Text.ElideRight

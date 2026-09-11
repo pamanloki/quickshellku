@@ -119,7 +119,7 @@ Variants {
                             width: (col.width) / 7
                             horizontalAlignment: Text.AlignHCenter
                             text: modelData
-                            color: Theme.base03
+                            color: Theme.base05
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSize - 4
                             font.weight: Theme.fontWeight

@@ -59,19 +59,19 @@ Item {
             Seg {
                 icon: "󰻠"
                 value: SystemStats.cpuPercent + "%"
-                accent: Theme.base04
+                accent: Theme.base08
                 vmax: "100%"
             }
             Seg {
                 icon: "󰍛"
                 value: SystemStats.memText
-                accent: Theme.base04
+                accent: Theme.base0C
                 vmax: "99.9GiB"
             }
             Seg {
                 icon: "󰋊"
                 value: SystemStats.diskFree
-                accent: Theme.base04
+                accent: Theme.base0A
                 vmax: "999G"
             }
             Seg {

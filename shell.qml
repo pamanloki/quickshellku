@@ -11,7 +11,7 @@ ShellRoot {
     // IpcHandlers, so they're live from startup (not just on first reference).
     readonly property var _services: [
         Globals, Theme, Niri, SystemStats, Brightness, Network, Bluetooth, Nightlight,
-        Notifications, Player, Flavours, Time
+        Notifications, Player, Flavours, Time, Wallpaper
     ]
 
     // One bar per monitor.
@@ -28,6 +28,7 @@ ShellRoot {
     QuickSettingsPanel {}
     CalendarPanel {}
     ThemePanel {}
+    WallpaperPanel {}
     PowerMenu {}
     Osd {}
     NotificationToasts {}

@@ -312,7 +312,7 @@ Variants {
                                 }
                                 Text {
                                     text: row.modelData.genericName || row.modelData.comment || ""
-                                    color: Theme.base03
+                                    color: Theme.base04
                                     font.family: Theme.fontFamily
                                     font.pixelSize: Theme.fontSize - 3
                                     visible: text.length > 0
