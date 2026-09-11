@@ -4,6 +4,8 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 
+// (IpcHandler declared at the bottom for niri keybinds)
+
 // Backlight control via `light` (your setup).
 //   light -G      -> current brightness as a percent (float)
 //   light -S N    -> set to N percent
@@ -64,5 +66,13 @@ Singleton {
         running: true
         repeat: true
         onTriggered: root.refresh()
+    }
+
+    // Keybinds: qs ipc call brightness up|down (the OSD reacts to percent).
+    IpcHandler {
+        target: "brightness"
+        function up() { root.raise(); }
+        function down() { root.lower(); }
+        function refresh() { root.refresh(); }
     }
 }

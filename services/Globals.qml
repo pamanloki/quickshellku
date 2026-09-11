@@ -18,7 +18,12 @@ Singleton {
     property bool bluetoothOpen: false
     property bool nightlightOpen: false
     property bool powerOpen: false
-    property bool brightnessOsd: false
+
+    // On-screen display (shared by volume + brightness)
+    property string osdKind: ""     // "volume" | "brightness"
+    property int osdValue: 0
+    property bool osdMuted: false
+    property bool osdVisible: false
 
     // Only one popup panel at a time (launcher/wifi/bt/nightlight/power).
     function _closeAll() {
@@ -38,10 +43,13 @@ Singleton {
     Timer {
         id: osdTimer
         interval: 1500
-        onTriggered: root.brightnessOsd = false
+        onTriggered: root.osdVisible = false
     }
-    function showBrightnessOsd() {
-        root.brightnessOsd = true;
+    function showOsd(kind, value, muted) {
+        root.osdKind = kind;
+        root.osdValue = value;
+        root.osdMuted = muted === true;
+        root.osdVisible = true;
         osdTimer.restart();
     }
 
@@ -66,9 +74,5 @@ Singleton {
     IpcHandler {
         target: "power"
         function toggle() { root.togglePower(); }
-    }
-    IpcHandler {
-        target: "brightness"
-        function osd() { root.showBrightnessOsd(); }
     }
 }

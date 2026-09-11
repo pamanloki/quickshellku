@@ -17,6 +17,8 @@ Flavours), reusing the same tools I already run:
 | Bluetooth | `bluetoothctl` (bluez) — panel + fallback to **bluetui** |
 | Launcher | native, reads `.desktop` files (like fuzzel) |
 | Power | native grid → delegates to your `power-fuzzel` script |
+| Notifications | native daemon + toast popups (org.freedesktop.Notifications) |
+| OSD | unified volume + brightness on-screen display |
 | Tray | StatusNotifierItem (native) |
 
 ## Dependencies
@@ -71,9 +73,14 @@ binds {
     Mod+N       { spawn "qs" "ipc" "call" "nightlight" "toggle"; }
     Mod+Escape  { spawn "qs" "ipc" "call" "power" "toggle"; }
 
-    // brightness keys also nudge the on-screen display
-    XF86MonBrightnessUp   { spawn "sh" "-c" "light -A 5; qs ipc call brightness osd"; }
-    XF86MonBrightnessDown { spawn "sh" "-c" "light -U 5; qs ipc call brightness osd"; }
+    // brightness via the shell (the OSD pops up automatically)
+    XF86MonBrightnessUp   { spawn "qs" "ipc" "call" "brightness" "up"; }
+    XF86MonBrightnessDown { spawn "qs" "ipc" "call" "brightness" "down"; }
+
+    // volume keys (wpctl) — the OSD pops up automatically on the change
+    XF86AudioRaiseVolume { spawn "wpctl" "set-volume" "-l" "1" "@DEFAULT_AUDIO_SINK@" "5%+"; }
+    XF86AudioLowerVolume { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
+    XF86AudioMute        { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
 }
 ```
 

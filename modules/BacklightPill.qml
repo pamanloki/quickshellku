@@ -11,6 +11,6 @@ StatPill {
     accent: Theme.base0E
 
     onClicked: Globals.toggleNightlight()
-    onScrollUp: { Brightness.raise(); Globals.showBrightnessOsd(); }
-    onScrollDown: { Brightness.lower(); Globals.showBrightnessOsd(); }
+    onScrollUp: Brightness.raise()
+    onScrollDown: Brightness.lower()
 }
