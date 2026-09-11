@@ -156,6 +156,22 @@ Variants {
                         : "Calculating…"
                     visible: Battery.present && Battery.status !== "Full" && Battery.percent < 100
                 }
+                KV {
+                    k: "Condition"
+                    v: Battery.condition
+                    vColor: Battery.healthPercent >= 80 ? Theme.base0B : Theme.base0A
+                    visible: Battery.condition.length > 0
+                }
+                KV {
+                    k: "Maximum Capacity"
+                    v: Battery.healthPercent + "%"
+                    visible: Battery.healthPercent > 0
+                }
+                KV {
+                    k: "Cycle Count"
+                    v: Battery.cycleCount + ""
+                    visible: Battery.cycleCount > 0
+                }
             }
         }
     }

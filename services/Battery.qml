@@ -18,6 +18,14 @@ Singleton {
     readonly property bool low: present && !charging && percent <= 20
     readonly property bool critical: present && !charging && percent <= 10
 
+    // Battery health (macOS "Condition"): full-charge vs design capacity.
+    property int cycleCount: 0
+    property int healthPercent: 0
+    readonly property string condition: {
+        if (!present || healthPercent <= 0) return "";
+        return healthPercent >= 80 ? "Normal" : "Service Recommended";
+    }
+
     // Fires once when the battery drops past 20% and again past 10% while
     // discharging. Resets after charging or rising back above the threshold.
     signal lowWarning(int level)
@@ -80,6 +88,14 @@ Singleton {
         }
         root.timeHours = (hrs > 0 && hrs < 48) ? hrs : 0;
 
+        // health: full-charge capacity vs design capacity
+        root.cycleCount = Math.round(_n(s[8]));
+        const eDes = _n(s[9]), cDes = _n(s[10]);
+        let h = 0;
+        if (eFull > 0 && eDes > 0) h = eFull / eDes * 100;
+        else if (cFull > 0 && cDes > 0) h = cFull / cDes * 100;
+        root.healthPercent = (h > 0 && h <= 100) ? Math.round(h) : 0;
+
         // low-battery warning with hysteresis
         if (root.charging || root.percent > 22) {
             root._warnedAt = 0;
@@ -99,7 +115,7 @@ Singleton {
         command: ["sh", "-c",
             "for d in /sys/class/power_supply/*; do " +
             "  [ \"$(cat \"$d/type\" 2>/dev/null)\" = Battery ] || continue; " +
-            "  printf '%s@@@%s@@@%s@@@%s@@@%s@@@%s@@@%s@@@%s' " +
+            "  printf '%s@@@%s@@@%s@@@%s@@@%s@@@%s@@@%s@@@%s@@@%s@@@%s@@@%s' " +
             "    \"$(cat \"$d/capacity\" 2>/dev/null)\" " +
             "    \"$(cat \"$d/status\" 2>/dev/null)\" " +
             "    \"$(cat \"$d/energy_now\" 2>/dev/null)\" " +
@@ -107,7 +123,10 @@ Singleton {
             "    \"$(cat \"$d/power_now\" 2>/dev/null)\" " +
             "    \"$(cat \"$d/charge_now\" 2>/dev/null)\" " +
             "    \"$(cat \"$d/charge_full\" 2>/dev/null)\" " +
-            "    \"$(cat \"$d/current_now\" 2>/dev/null)\"; " +
+            "    \"$(cat \"$d/current_now\" 2>/dev/null)\" " +
+            "    \"$(cat \"$d/cycle_count\" 2>/dev/null)\" " +
+            "    \"$(cat \"$d/energy_full_design\" 2>/dev/null)\" " +
+            "    \"$(cat \"$d/charge_full_design\" 2>/dev/null)\"; " +
             "  break; " +
             "done"]
         stdout: StdioCollector {
