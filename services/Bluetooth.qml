@@ -137,7 +137,9 @@ Singleton {
     }
 
     Process { id: powerProc; onExited: root.refresh() }
-    Process { id: scanOnProc; command: ["sh", "-c", "bluetoothctl --timeout 10 scan on"] }
+    // `--timeout 10` makes scan on exit by itself after 10s; clear the flag so
+    // the panel button doesn't stay stuck on "Scanning…".
+    Process { id: scanOnProc; command: ["sh", "-c", "bluetoothctl --timeout 10 scan on"]; onExited: { root.scanning = false; root.refresh(); } }
     Process { id: scanOffProc; command: ["sh", "-c", "bluetoothctl scan off"] }
     Process { id: actProc; onExited: root.refresh() }
 

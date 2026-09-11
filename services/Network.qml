@@ -87,7 +87,6 @@ Singleton {
             onStreamFinished: {
                 const lines = root._stripAnsi(text).split("\n");
                 for (const l of lines) {
-                    const m = l.match(/^\s*(wlan\S+|wlp\S+|\S+)\s+.*station/i);
                     // Prefer explicit station rows.
                     if (/station/i.test(l)) {
                         const parts = l.trim().split(/\s+/);

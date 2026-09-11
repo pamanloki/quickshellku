@@ -187,7 +187,7 @@ Variants {
                         color: Theme.base02
                         Text {
                             anchors.centerIn: parent
-                            text: "󰈈  Warmer"
+                            text: "󰈸  Warmer"
                             color: Theme.base05
                             font.family: Theme.fontFamilyFallback
                             font.pixelSize: Theme.fontSize - 2
@@ -199,7 +199,7 @@ Variants {
                         color: Theme.base02
                         Text {
                             anchors.centerIn: parent
-                            text: "󰈈  Cooler"
+                            text: "󰜗  Cooler"
                             color: Theme.base05
                             font.family: Theme.fontFamilyFallback
                             font.pixelSize: Theme.fontSize - 2
