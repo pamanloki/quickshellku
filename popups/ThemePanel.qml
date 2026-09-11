@@ -37,7 +37,7 @@ Variants {
 
         MouseArea { anchors.fill: parent; onClicked: Globals.themeOpen = false }
 
-        Item {
+        Rectangle {
             id: box
             transform: Translate {
                 id: slide
@@ -51,7 +51,10 @@ Variants {
             anchors.top: parent.top
             anchors.rightMargin: 8
             anchors.topMargin: Theme.menuBarHeight + 6
-            Rectangle { color: Theme.base00; border.width: 1; border.color: Theme.base02; anchors.fill: parent; radius: 16 }
+            radius: 20
+            color: Theme.base00
+            border.width: 1
+            border.color: Theme.base02
             MouseArea { anchors.fill: parent }
 
             Column {

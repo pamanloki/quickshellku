@@ -45,7 +45,7 @@ Variants {
             onClicked: Globals.nightlightOpen = false
         }
 
-        Item {
+        Rectangle {
             id: box
             transform: Translate {
                 id: slide
@@ -58,7 +58,10 @@ Variants {
             anchors.top: parent.top
             anchors.rightMargin: 8
             anchors.topMargin: Theme.menuBarHeight + 6
-            Rectangle { color: Theme.base00; border.width: 1; border.color: Theme.base02; anchors.fill: parent; radius: 8 }
+            radius: 20
+            color: Theme.base00
+            border.width: 1
+            border.color: Theme.base02
 
             MouseArea { anchors.fill: parent }
 
@@ -183,7 +186,7 @@ Variants {
                     width: parent.width
                     spacing: 8
                     Rectangle {
-                        width: (parent.width - 8) / 2; height: 32; radius: 4
+                        width: (parent.width - 8) / 2; height: 32; radius: 10
                         color: Theme.base02
                         Text {
                             anchors.centerIn: parent
@@ -195,7 +198,7 @@ Variants {
                         MouseArea { anchors.fill: parent; onClicked: Nightlight.warmer() }
                     }
                     Rectangle {
-                        width: (parent.width - 8) / 2; height: 32; radius: 4
+                        width: (parent.width - 8) / 2; height: 32; radius: 10
                         color: Theme.base02
                         Text {
                             anchors.centerIn: parent
@@ -213,7 +216,7 @@ Variants {
                     width: parent.width
                     spacing: 8
                     Rectangle {
-                        width: (parent.width - 8) / 2; height: 32; radius: 4
+                        width: (parent.width - 8) / 2; height: 32; radius: 10
                         color: Theme.base01
                         Text {
                             anchors.centerIn: parent
@@ -225,7 +228,7 @@ Variants {
                         MouseArea { anchors.fill: parent; onClicked: Nightlight.scheduleAuto() }
                     }
                     Rectangle {
-                        width: (parent.width - 8) / 2; height: 32; radius: 4
+                        width: (parent.width - 8) / 2; height: 32; radius: 10
                         color: Theme.base01
                         Text {
                             anchors.centerIn: parent
