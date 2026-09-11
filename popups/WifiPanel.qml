@@ -159,12 +159,14 @@ Variants {
                                     elide: Text.ElideRight
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
-                                Text {
-                                    text: modelData.security || ""
-                                    color: Theme.base03
-                                    font.family: Theme.fontFamily
-                                    font.pixelSize: Theme.fontSize - 4
+                                Text {   // lock icon for secured networks (macOS-style)
+                                    readonly property string _sec: (modelData.security || "").toLowerCase()
+                                    text: "󰌾"
+                                    color: Theme.base04
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize - 2
                                     anchors.verticalCenter: parent.verticalCenter
+                                    visible: _sec.length > 0 && _sec !== "open" && _sec !== "none" && _sec !== "--"
                                 }
                                 Text {
                                     text: modelData.connected ? "󰄬" : ""
