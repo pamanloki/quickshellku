@@ -81,12 +81,13 @@ PanelWindow {
         property bool running: false
         signal activated()
         implicitWidth: Theme.dockIconSize + 10
-        implicitHeight: dock.implicitHeight
+        implicitHeight: Theme.dockIconSize + 22   // = dock background height
 
-        Rectangle {   // tooltip
+        Rectangle {   // tooltip (floats above the cell, into the headroom)
             visible: cellMA.containsMouse && cell.tip.length > 0
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
+            anchors.bottom: parent.top
+            anchors.bottomMargin: 8
             width: tipText.implicitWidth + 16
             height: tipText.implicitHeight + 8
             radius: 6
