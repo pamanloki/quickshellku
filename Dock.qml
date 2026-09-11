@@ -310,7 +310,8 @@ PanelWindow {
             DockCell {
                 source: Quickshell.iconPath("user-trash", "user-trash")
                 tip: "Trash"
-                onActivated: Quickshell.execDetached(["xdg-open", "trash:///"])
+                onActivated: Quickshell.execDetached(["sh", "-c",
+                    "pcmanfm trash:/// || xdg-open trash:/// || gio open trash:///"])
             }
         }
     }
