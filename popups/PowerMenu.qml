@@ -3,9 +3,8 @@ import Quickshell
 import Quickshell.Wayland
 import "root:/services"
 
-// Native power menu. Delegates the actual actions to your existing
-// `power-fuzzel` script (so privilege escalation / niri logout stay identical),
-// just with a nicer native grid instead of the fuzzel list.
+// Power menu — a compact vertical list attached to the bar, matching the other
+// panels. Actions delegate to the existing power-fuzzel script.
 Variants {
     model: Quickshell.screens
 
@@ -38,26 +37,31 @@ Variants {
             onClicked: Globals.powerOpen = false
         }
 
-        Rectangle {
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.rightMargin: 8
-            anchors.bottomMargin: 0
-            width: grid.width + 32
-            height: grid.height + 32
+        Item {
+            id: box
             opacity: win.visible ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
             transformOrigin: Item.BottomRight
             scale: win.visible ? 1 : 0.9
             Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
+
+            width: 260
+            height: col.implicitHeight + 24
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.rightMargin: 8
+            anchors.bottomMargin: 0
+
             IslandBg { anchors.fill: parent; radius: 16 }
             MouseArea { anchors.fill: parent }
 
-            Grid {
-                id: grid
-                anchors.centerIn: parent
-                columns: 3
-                spacing: 16
+            Column {
+                id: col
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: 12
+                spacing: 4
 
                 Repeater {
                     model: [
@@ -70,27 +74,37 @@ Variants {
                     ]
                     delegate: Rectangle {
                         required property var modelData
-                        width: 120
-                        height: 100
-                        radius: 8
-                        color: hover.hovered ? Theme.base02 : Theme.base01
+                        width: col.width
+                        height: 46
+                        radius: 10
+                        color: hover.hovered ? Theme.base02 : "transparent"
+                        Behavior on color { ColorAnimation { duration: 90 } }
 
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 8
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: modelData.icon
-                                color: modelData.accent
-                                font.family: Theme.fontFamilyFallback
-                                font.pixelSize: 34
+                        Row {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 12
+
+                            Rectangle {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 34; height: 34; radius: 17
+                                color: hover.hovered ? modelData.accent : Theme.base02
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: modelData.icon
+                                    color: hover.hovered ? Theme.base00 : modelData.accent
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize + 2
+                                }
                             }
                             Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.verticalCenter: parent.verticalCenter
                                 text: modelData.label
                                 color: Theme.base05
                                 font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize - 1
+                                font.pixelSize: Theme.fontSize
+                                font.weight: Theme.fontWeight
                             }
                         }
 
