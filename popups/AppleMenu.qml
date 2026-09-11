@@ -22,9 +22,11 @@ Variants {
         WlrLayershell.namespace: "quickshell:applemenu"
 
         function run(item) {
-            if (item.act === "about")
-                Quickshell.execDetached(["footx", "-e", "-f", "sh", "-c", "nitch; printf '\\nEnter...'; read _"]);
-            else if (item.flag)
+            if (item.act === "about") {
+                Globals.showAbout();
+                return;
+            }
+            if (item.flag)
                 Quickshell.execDetached(["power-fuzzel", item.flag]);
             Globals.appleMenuOpen = false;
         }
