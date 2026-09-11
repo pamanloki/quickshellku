@@ -25,7 +25,8 @@ Singleton {
     }
 
     function set(p) {
-        p = Math.max(1, Math.min(100, Math.round(p)));
+        // allow 0 so the panel can dim all the way to off, like Waybar+light did
+        p = Math.max(0, Math.min(100, Math.round(p)));
         _run(["light", "-S", String(p)]);
     }
 
