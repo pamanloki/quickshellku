@@ -184,7 +184,7 @@ Variants {
             }
 
             width: 372
-            height: 336
+            height: 404
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.rightMargin: 8
@@ -204,10 +204,17 @@ Variants {
                 contentWidth: width
                 contentHeight: height * 2
                 property int page: 0
+                property real pressY: 0
 
                 function goTo(p) { page = p; snapAnim.to = p * height; snapAnim.restart(); }
-                onMovementEnded: goTo(contentY > height / 2 ? 1 : 0)
-                NumberAnimation { id: snapAnim; target: pager; property: "contentY"; duration: 260; easing.type: Easing.OutCubic }
+                onMovementStarted: pressY = contentY
+                onMovementEnded: {
+                    const delta = contentY - pressY;    // includes flick momentum
+                    if (delta > height * 0.16) goTo(1);
+                    else if (delta < -height * 0.16) goTo(0);
+                    else goTo(page);                    // snap back
+                }
+                NumberAnimation { id: snapAnim; target: pager; property: "contentY"; duration: 240; easing.type: Easing.OutCubic }
 
                 Column {
                     width: pager.width
@@ -444,41 +451,44 @@ Variants {
                         Column {
                             anchors.left: parent.left
                             anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.margins: 20
-                            spacing: 16
+                            anchors.top: parent.top
+                            anchors.margins: 18
+                            spacing: 12
 
-                            // art + title/artist
+                            // big album art
+                            Rectangle {
+                                width: parent.width
+                                height: 168
+                                radius: 16
+                                color: win.slotBg
+                                clip: true
+                                Image {
+                                    anchors.fill: parent
+                                    source: Player.artUrl
+                                    fillMode: Image.PreserveAspectCrop
+                                    visible: Player.artUrl.length > 0
+                                }
+                                Text {
+                                    anchors.centerIn: parent
+                                    visible: Player.artUrl.length === 0
+                                    text: "󰝚"; color: Theme.base05
+                                    font.family: Theme.fontFamilyFallback; font.pixelSize: Theme.fontSize + 30
+                                }
+                            }
+
+                            // title + artist
                             Row {
                                 width: parent.width
-                                spacing: 14
-                                Rectangle {
-                                    width: 88; height: 88; radius: 14
-                                    color: win.slotBg
-                                    clip: true
-                                    Image {
-                                        anchors.fill: parent
-                                        source: Player.artUrl
-                                        fillMode: Image.PreserveAspectCrop
-                                        visible: Player.artUrl.length > 0
-                                    }
-                                    Text {
-                                        anchors.centerIn: parent
-                                        visible: Player.artUrl.length === 0
-                                        text: "󰝚"; color: Theme.base05
-                                        font.family: Theme.fontFamilyFallback; font.pixelSize: Theme.fontSize + 16
-                                    }
-                                }
                                 Column {
-                                    width: parent.width - 88 - 14
+                                    width: parent.width - 30
                                     anchors.verticalCenter: parent.verticalCenter
-                                    spacing: 4
+                                    spacing: 3
                                     Text {
                                         width: parent.width
                                         text: Player.title || "Not Playing"
                                         color: Theme.base05
                                         font.family: Theme.fontFamily
-                                        font.pixelSize: Theme.fontSize + 3
+                                        font.pixelSize: Theme.fontSize + 4
                                         font.weight: Theme.fontWeight
                                         elide: Text.ElideRight
                                     }
@@ -487,10 +497,17 @@ Variants {
                                         text: Player.artist
                                         color: Theme.base04
                                         font.family: Theme.fontFamily
-                                        font.pixelSize: Theme.fontSize
+                                        font.pixelSize: Theme.fontSize - 1
                                         elide: Text.ElideRight
                                         visible: text.length > 0
                                     }
+                                }
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "󰎈"
+                                    color: Theme.base0E
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize + 4
                                 }
                             }
 
