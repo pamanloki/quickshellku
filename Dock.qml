@@ -14,6 +14,12 @@ PanelWindow {
     // Pinned app ids (edit to taste; matches .desktop / window app_id).
     property var pinned: ["brave", "foot"]
 
+    // parabolic magnify state (cursor x within the dock row)
+    property real hoverX: -1
+    property bool dockHovering: false
+    readonly property real magRadius: 110   // influence distance
+    readonly property real magBoost: 0.6    // peak extra scale at the cursor
+
     anchors { bottom: true }
     margins.bottom: 6
     implicitWidth: Math.max(1, dockBg.width)
@@ -100,6 +106,15 @@ PanelWindow {
         implicitWidth: Theme.dockIconSize + 10
         implicitHeight: Theme.dockIconSize + 22   // = dock background height
 
+        // parabolic magnification based on cursor distance
+        readonly property real _mag: {
+            if (!dock.dockHovering) return 1;
+            const d = Math.abs((x + width / 2) - dock.hoverX);
+            if (d >= dock.magRadius) return 1;
+            const t = 1 - d / dock.magRadius;
+            return 1 + dock.magBoost * t * t;
+        }
+
         Rectangle {   // tooltip (floats above the cell, into the headroom)
             visible: cellMA.containsMouse && cell.tip.length > 0 && !Globals.dockMenuOpen
             anchors.horizontalCenter: parent.horizontalCenter
@@ -129,8 +144,8 @@ PanelWindow {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 9
             transformOrigin: Item.Bottom
-            scale: cellMA.containsMouse ? 1.35 : 1
-            Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+            scale: cell._mag
+            Behavior on scale { enabled: !dock.dockHovering; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
 
             Image {
                 anchors.fill: parent
@@ -191,6 +206,12 @@ PanelWindow {
             id: dockRow
             anchors.centerIn: parent
             spacing: 4
+
+            HoverHandler {
+                id: rowHover
+                onPointChanged: dock.hoverX = point.position.x
+                onHoveredChanged: dock.dockHovering = hovered
+            }
 
             DockCell {
                 glyph: "󰀻"
