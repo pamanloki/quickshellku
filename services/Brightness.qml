@@ -17,8 +17,8 @@ Singleton {
     property int percent: 0
     property int step: 5
 
-    // Icon ramp matching your Waybar backlight (dim -> mid -> bright).
-    readonly property string icon: percent >= 66 ? "󰃠" : (percent >= 33 ? "󰃟" : "󰃞")
+    // Clean sun glyph (level is shown by the value/percent).
+    readonly property string icon: "󰖨"
 
     function refresh() {
         getProc.running = true;

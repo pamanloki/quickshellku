@@ -50,7 +50,7 @@ Variants {
         readonly property bool isVol: Globals.osdKind === "volume"
         readonly property string osdIcon: isVol
             ? (Globals.osdMuted || Globals.osdValue === 0 ? "󰖁" : Globals.osdValue >= 50 ? "󰕾" : "󰖀")
-            : (Globals.osdValue >= 66 ? "󰃠" : Globals.osdValue >= 33 ? "󰃟" : "󰃞")
+            : "󰖨"
         readonly property color osdColor: isVol ? Theme.base0D : Theme.base0E
 
         Rectangle {

@@ -198,7 +198,7 @@ Variants {
                     onBadgeClicked: if (win.sink && win.sink.audio) win.sink.audio.muted = !win.sink.audio.muted
                 }
                 CtlSlider {
-                    icon: "󰃠"
+                    icon: Brightness.icon
                     value: Brightness.percent
                     accent: Theme.base0E
                     onMoved: v => Brightness.set(v)

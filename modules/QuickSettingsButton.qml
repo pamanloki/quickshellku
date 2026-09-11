@@ -49,6 +49,13 @@ Item {
             }
             Text {
                 anchors.verticalCenter: parent.verticalCenter
+                text: Brightness.icon
+                color: Theme.base0E
+                font.family: Theme.fontFamilyFallback
+                font.pixelSize: Theme.fontSize
+            }
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
                 text: Network.icon
                 color: Network.connected ? Theme.base0A : Theme.base08
                 font.family: Theme.fontFamilyFallback
