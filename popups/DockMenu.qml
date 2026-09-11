@@ -17,9 +17,12 @@ Variants {
         visible: Globals.dockMenuOpen
         exclusiveZone: 0
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
         WlrLayershell.namespace: "quickshell:dockmenu"
 
+        // Escape to close
+        Item { anchors.fill: parent; focus: true; Keys.onEscapePressed: Globals.dockMenuOpen = false }
+        // click-away
         MouseArea { anchors.fill: parent; onClicked: Globals.dockMenuOpen = false }
 
         Rectangle {
@@ -107,7 +110,10 @@ Variants {
                                 hoverEnabled: true
                                 onClicked: {
                                     Niri.closeWindow(modelData.id);
-                                    Globals.dockMenuOpen = false;
+                                    // drop just this row; keep the panel open
+                                    const rem = Globals.dockMenuWindows.filter(w => w.id !== modelData.id);
+                                    Globals.dockMenuWindows = rem;
+                                    if (rem.length === 0) Globals.dockMenuOpen = false;
                                 }
                             }
                         }
