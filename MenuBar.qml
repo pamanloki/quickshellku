@@ -90,7 +90,15 @@ PanelWindow {
         Item2 {
             icon: "󰻠"
             iconColor: Theme.base0C
-            label: SystemStats.cpuPercent + "%" + (SystemStats.tempKnown ? "  " + SystemStats.tempC + "°" : "")
+            label: SystemStats.cpuPercent + "%"
+            onClicked: Quickshell.execDetached(["footx", "-e", "-f", "btop"])
+        }
+        Item2 {
+            visible: SystemStats.tempKnown
+            icon: SystemStats.tempClass === "critical" ? "󰸁" : (SystemStats.tempClass === "warm" ? "󱃂" : "󰔏")
+            iconColor: SystemStats.tempClass === "critical" ? Theme.base08
+                : SystemStats.tempClass === "warm" ? Theme.base0A : Theme.base0B
+            label: SystemStats.tempC + "°"
             onClicked: Quickshell.execDetached(["footx", "-e", "-f", "btop"])
         }
 
