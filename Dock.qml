@@ -135,6 +135,16 @@ PanelWindow {
         implicitWidth: Theme.dockIconSize + 10
         implicitHeight: Theme.dockIconSize + 22   // = dock background height
 
+        // macOS launch bounce
+        property real bounceY: 0
+        function bounce() { bounceAnim.restart(); }
+        SequentialAnimation {
+            id: bounceAnim
+            loops: 2
+            NumberAnimation { target: cell; property: "bounceY"; from: 0; to: -18; duration: 240; easing.type: Easing.OutQuad }
+            NumberAnimation { target: cell; property: "bounceY"; to: 0; duration: 300; easing.type: Easing.OutBounce }
+        }
+
         // parabolic magnification based on cursor distance
         readonly property real _mag: {
             if (!dock.dockHovering) return 1;
@@ -175,6 +185,7 @@ PanelWindow {
             transformOrigin: Item.Bottom
             scale: cell._mag
             Behavior on scale { enabled: !dock.dockHovering; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+            transform: Translate { y: cell.bounceY }
 
             Image {
                 anchors.fill: parent
@@ -274,7 +285,7 @@ PanelWindow {
                     count: modelData.count
                     onActivated: {
                         if (modelData.running) dock.activateApp(modelData.norm);
-                        else dock.launch(modelData.app_id);
+                        else { dock.launch(modelData.app_id); dcell.bounce(); }
                     }
                     onMenuRequested: {
                         if (!modelData.running) return;
