@@ -53,6 +53,15 @@ Variants {
             border.color: Theme.base02
             border.width: 2
             radius: 8
+            
+            // square off the bottom so the panel merges flush into the bar
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                height: parent.radius
+                color: Theme.base00
+            }
 
             MouseArea { anchors.fill: parent }
 
