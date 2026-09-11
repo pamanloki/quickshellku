@@ -32,7 +32,7 @@ Variants {
             border.color: Theme.base02
 
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: Theme.dockIconSize + 22 + 18
+            anchors.bottomMargin: 10   // parent already ends at the dock's top edge
             x: Math.max(8, Math.min(Globals.dockMenuX - width / 2, parent.width - width - 8))
 
             opacity: win.visible ? 1 : 0
