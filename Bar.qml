@@ -26,7 +26,7 @@ PanelWindow {
     Row {
         id: leftRow
         anchors.left: parent.left
-        anchors.leftMargin: 8 + Theme.borderThickness
+        anchors.leftMargin: 8
         anchors.verticalCenter: parent.verticalCenter
         spacing: Theme.pillGap
 
@@ -42,7 +42,7 @@ PanelWindow {
     Row {
         id: rightRow
         anchors.right: parent.right
-        anchors.rightMargin: 8 + Theme.borderThickness
+        anchors.rightMargin: 8
         anchors.verticalCenter: parent.verticalCenter
         spacing: Theme.pillGap
 

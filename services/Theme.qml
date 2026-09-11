@@ -43,16 +43,6 @@ Singleton {
     property int pillGap: 5            // gap between module groups
     property int radius: 0             // Waybar uses square corners here
 
-    // ---- Screen border (caelestia-style inset frame) ----
-    // The desktop/wallpaper gets a coloured margin on every edge with rounded
-    // inner corners, so it no longer bleeds to the screen edge. Set
-    // borderThickness to 0 to disable the frame entirely.
-    property int borderThickness: 10   // margin reserved on each edge
-    property int borderRounding: 20    // inner corner radius of the frame
-    property color borderColor: base00 // frame colour (= bar colour, so the
-                                       // frame merges into the bar; try base02
-                                       // or an accent for a visible border)
-
     // ---- Animation (Material 3 "expressive" motion, from caelestia) ----
     // Spatial = movement/scale/size; it overshoots slightly (y goes past 1) for
     // a lively spring feel. Effects = fades; no overshoot.
