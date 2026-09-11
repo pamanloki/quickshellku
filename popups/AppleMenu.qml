@@ -26,6 +26,11 @@ Variants {
                 Globals.showAbout();
                 return;
             }
+            if (item.act === "dockhide") {
+                Globals.toggleDockAutoHide();
+                Globals.appleMenuOpen = false;
+                return;
+            }
             if (item.flag)
                 Quickshell.execDetached(["power-fuzzel", item.flag]);
             Globals.appleMenuOpen = false;
@@ -67,6 +72,8 @@ Variants {
                     model: [
                         { label: "About This System", act: "about" },
                         { sep: true },
+                        { act: "dockhide" },
+                        { sep: true },
                         { label: "Lock Screen", flag: "--lock" },
                         { label: "Sleep", flag: "--suspend" },
                         { sep: true },
@@ -97,7 +104,9 @@ Variants {
                             Text {
                                 anchors.left: parent.left; anchors.leftMargin: 12
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: mi.modelData.label || ""
+                                text: mi.modelData.act === "dockhide"
+                                    ? (Globals.dockAutoHide ? "Turn Dock Hiding Off" : "Turn Dock Hiding On")
+                                    : (mi.modelData.label || "")
                                 color: itemMA.containsMouse ? Theme.base00 : Theme.base05
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontSize - 2

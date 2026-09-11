@@ -20,15 +20,44 @@ PanelWindow {
     readonly property real magRadius: 110   // influence distance
     readonly property real magBoost: 0.6    // peak extra scale at the cursor
 
+    // auto-hide (macOS): slide off-screen unless revealed by the bottom edge
+    readonly property bool autoHide: Globals.dockAutoHide
+    property bool _revealHover: false
+    property bool _dockAreaHover: false
+    readonly property bool wantShown: !autoHide || _revealHover || _dockAreaHover
+        || dockHovering || Globals.dockMenuOpen
+    property bool shown: true
+    onAutoHideChanged: if (!autoHide) shown = true
+    onWantShownChanged: {
+        if (wantShown) { hideTimer.stop(); shown = true; }
+        else hideTimer.restart();
+    }
+    Timer { id: hideTimer; interval: 450; onTriggered: dock.shown = false }
+
     anchors { bottom: true }
     margins.bottom: 6
     implicitWidth: Math.max(1, dockBg.width)
     implicitHeight: Theme.dockIconSize + 22 + 42   // extra top for tooltip + magnify
-    exclusiveZone: Theme.dockIconSize + 22 + 6
+    exclusiveZone: autoHide ? 0 : (Theme.dockIconSize + 22 + 6)
     color: "transparent"
+
+    // While hidden, only a thin strip at the very bottom stays interactive so
+    // the cursor can reveal the dock; the rest is click-through to apps behind.
+    mask: (autoHide && !shown) ? stripRegion : null
+    Region { id: stripRegion; item: revealStrip }
 
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.namespace: "quickshell:dock"
+
+    // bottom-edge reveal trigger
+    Item {
+        id: revealStrip
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: 4
+        HoverHandler { onHoveredChanged: dock._revealHover = hovered }
+    }
 
     function _norm(s) { return (s || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
 
@@ -201,6 +230,13 @@ PanelWindow {
         color: Theme.base01
         border.width: 1
         border.color: Theme.base02
+
+        // slide off the bottom edge when auto-hidden
+        transform: Translate {
+            y: dock.shown ? 0 : (dockBg.height + dock.margins.bottom + 8)
+            Behavior on y { NumberAnimation { duration: Theme.durSlide; easing.type: Easing.OutCubic } }
+        }
+        HoverHandler { onHoveredChanged: dock._dockAreaHover = hovered }
 
         Row {
             id: dockRow

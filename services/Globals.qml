@@ -29,6 +29,12 @@ Singleton {
     property bool audioOpen: false
     property bool batteryOpen: false
 
+    // Dock auto-hide (macOS "Turn Hiding On"): dock slides off-screen and
+    // reveals when the cursor reaches the bottom edge — keeps the dock out of
+    // the way of fullscreen apps / games.
+    property bool dockAutoHide: false
+    function toggleDockAutoHide() { dockAutoHide = !dockAutoHide; }
+
     // Tray context menu (right-click a tray icon).
     property bool trayMenuOpen: false
     property var trayMenuHandle: null
@@ -156,5 +162,9 @@ Singleton {
     IpcHandler {
         target: "battery"
         function toggle() { root.toggleBattery(); }
+    }
+    IpcHandler {
+        target: "dock"
+        function autohide() { root.toggleDockAutoHide(); }
     }
 }
