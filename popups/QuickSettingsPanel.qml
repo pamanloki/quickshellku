@@ -126,6 +126,7 @@ Variants {
             property bool on: false
             property color accent: Theme.base0E
             signal toggled()
+            signal opened()
             height: 62
             radius: 14
             color: on ? accent : Theme.base01
@@ -154,7 +155,11 @@ Variants {
                     font.pixelSize: Theme.fontSize - 4
                 }
             }
-            MouseArea { anchors.fill: parent; onClicked: toggled() }
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onClicked: mouse => mouse.button === Qt.RightButton ? opened() : toggled()
+            }
         }
 
         // horizontal slider inside a card
@@ -272,6 +277,7 @@ Variants {
                         on: Nightlight.active
                         accent: Theme.base09
                         onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
+                        onOpened: Globals.toggleNightlight()
                     }
                     Tile {
                         width: (parent.width - 10) / 2
