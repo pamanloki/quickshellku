@@ -162,7 +162,7 @@ PanelWindow {
             anchors.bottomMargin: 3
             spacing: 3
             Repeater {
-                model: Math.min(cell.count, 4)
+                model: Math.min(cell.count, 3)
                 delegate: Rectangle { width: 4; height: 4; radius: 2; color: Theme.base05 }
             }
         }
@@ -226,7 +226,9 @@ PanelWindow {
                         for (let i = 0; i < list.length; i++)
                             if (dock._norm(list[i].app_id || "?") === modelData.norm)
                                 wins.push({ id: list[i].id, title: (list[i].title && list[i].title.length ? list[i].title : dock.labelFor(list[i].app_id)) });
-                        Globals.openDockMenu(wins, dcell.mapToItem(null, dcell.width / 2, 0).x);
+                        // dock window is centred, so add its on-screen left edge
+                        const cx = (dock.screen.width - dock.width) / 2 + dcell.mapToItem(null, dcell.width / 2, 0).x;
+                        Globals.openDockMenu(wins, cx);
                     }
                 }
             }
