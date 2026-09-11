@@ -44,6 +44,7 @@ ShellRoot {
     AboutPanel {}
     AudioPanel {}
     BatteryPanel {}
+    BatteryAlert {}
     ScreenshotMenu {}
     ScreenCorners {}
 }

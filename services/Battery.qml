@@ -18,6 +18,11 @@ Singleton {
     readonly property bool low: present && !charging && percent <= 20
     readonly property bool critical: present && !charging && percent <= 10
 
+    // Fires once when the battery drops past 20% and again past 10% while
+    // discharging. Resets after charging or rising back above the threshold.
+    signal lowWarning(int level)
+    property int _warnedAt: 0   // 0 | 20 | 10
+
     readonly property string powerSource: charging ? "Power Adapter" : "Battery"
     readonly property string statusText: {
         if (!present) return "No Battery";
@@ -74,6 +79,19 @@ Singleton {
             hrs = root.charging ? (cFull - cNow) / iNow : cNow / iNow;
         }
         root.timeHours = (hrs > 0 && hrs < 48) ? hrs : 0;
+
+        // low-battery warning with hysteresis
+        if (root.charging || root.percent > 22) {
+            root._warnedAt = 0;
+        } else {
+            if (root.percent <= 10 && root._warnedAt !== 10) {
+                root._warnedAt = 10;
+                root.lowWarning(10);
+            } else if (root.percent <= 20 && root._warnedAt === 0) {
+                root._warnedAt = 20;
+                root.lowWarning(20);
+            }
+        }
     }
 
     Process {
