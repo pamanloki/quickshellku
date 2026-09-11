@@ -14,9 +14,11 @@ Singleton {
 
     readonly property string dir: Quickshell.env("HOME") + "/pictures/ScreenShots"
 
+    // Detached, not a Process: wl-copy daemonises to keep serving the clipboard,
+    // and a Process would kill it (and its whole group) when sh exits, wiping
+    // the copy. execDetached fully detaches so the capture + clipboard survive.
     function _run(script) {
-        proc.command = ["sh", "-c", script];
-        proc.running = true;
+        Quickshell.execDetached(["sh", "-c", script]);
     }
 
     // Run one of the actions after a short delay, so a menu that triggered it
@@ -60,8 +62,6 @@ Singleton {
              'if grim "$f"; then wl-copy -t image/png < "$f" 2>/dev/null; ' +
              'notify-send -a Screenshot "󰄄 Screenshot tersimpan" "$(basename "$f")"; else ' + root._fail + '; fi');
     }
-
-    Process { id: proc }
 
     IpcHandler {
         target: "shot"
