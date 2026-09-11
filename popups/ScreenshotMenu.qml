@@ -22,16 +22,9 @@ Variants {
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
         WlrLayershell.namespace: "quickshell:screenshot"
 
-        property var pending: null
-        Timer {
-            id: delay
-            interval: 200
-            onTriggered: if (win.pending) { win.pending(); win.pending = null; }
-        }
-        function pick(fn) {
+        function pick(act) {
             Globals.screenshotOpen = false;
-            win.pending = fn;
-            delay.restart();
+            Screenshot.menuPick(act);
         }
 
         Item {
@@ -126,12 +119,7 @@ Variants {
                         HoverHandler { id: hover }
                         MouseArea {
                             anchors.fill: parent
-                            onClicked: {
-                                if (modelData.act === "rc") win.pick(() => Screenshot.regionClip());
-                                else if (modelData.act === "rf") win.pick(() => Screenshot.regionFile());
-                                else if (modelData.act === "fc") win.pick(() => Screenshot.fullClip());
-                                else win.pick(() => Screenshot.fullFile());
-                            }
+                            onClicked: win.pick(modelData.act)
                         }
                     }
                 }
