@@ -41,7 +41,7 @@ Variants {
             anchors.top: parent.top
             anchors.rightMargin: 8
             anchors.topMargin: Theme.menuBarHeight + 6
-            Rectangle { color: Theme.base00; border.width: 1; border.color: Theme.base02; anchors.fill: parent; radius: 8 }
+            Rectangle { color: Theme.base00; border.width: 1; border.color: Theme.base02; anchors.fill: parent; radius: 16 }
 
             MouseArea { anchors.fill: parent }
 
@@ -82,7 +82,7 @@ Variants {
                     width: parent.width
                     spacing: 8
                     Rectangle {
-                        width: (parent.width - 8) / 2; height: 30; radius: 4
+                        width: (parent.width - 8) / 2; height: 32; radius: 10
                         color: Theme.base02
                         Text {
                             anchors.centerIn: parent
@@ -94,7 +94,7 @@ Variants {
                         MouseArea { anchors.fill: parent; onClicked: Bluetooth.toggleScan() }
                     }
                     Rectangle {
-                        width: (parent.width - 8) / 2; height: 30; radius: 4
+                        width: (parent.width - 8) / 2; height: 32; radius: 10
                         color: Theme.base02
                         Text {
                             anchors.centerIn: parent
@@ -126,7 +126,7 @@ Variants {
                         width: devList.width
                         height: 40
                         color: modelData.connected ? Theme.base02 : Theme.base01
-                        radius: 4
+                        radius: 10
 
                         Row {
                             anchors.fill: parent
