@@ -4,9 +4,10 @@ import Quickshell.Wayland
 import Quickshell.Services.Pipewire
 import "root:/services"
 
-// Quick settings: volume + brightness sliders and WiFi / Bluetooth / Night
-// light tiles. Styled after noctalia (icon badge + rounded slider with a
-// cut-out knob + value; big rounded toggle tiles).
+// Quick Settings, using the iOS 26/27 Control Centre *layout* (a floating card
+// with a 2x2 round connectivity cluster, tall vertical brightness/volume
+// sliders, a now-playing tile with a scrubber, and an output picker) — but with
+// solid theme colours, no translucent "liquid glass" and no blur.
 Variants {
     model: Quickshell.screens
 
@@ -23,11 +24,10 @@ Variants {
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         WlrLayershell.namespace: "quickshell:quicksettings"
 
+        // ---- audio ----
         readonly property var sink: Pipewire.defaultAudioSink
         readonly property int volume: sink && sink.audio ? Math.round(sink.audio.volume * 100) : 0
         readonly property bool muted: sink && sink.audio ? sink.audio.muted : false
-
-        // Audio output devices (real sinks, not per-app streams) for the switcher.
         readonly property var sinks: {
             const ns = (Pipewire.nodes && Pipewire.nodes.values) ? Pipewire.nodes.values : [];
             const out = [];
@@ -42,163 +42,129 @@ Variants {
         function nodeName(n) {
             return n ? (n.description || n.nickname || n.name || "Unknown") : "None";
         }
-
-        PwObjectTracker { objects: win.sink ? [win.sink] : [] }
-        PwObjectTracker { objects: win.sinks }
-
         function setVolume(v) {
             if (!sink || !sink.audio) return;
             sink.audio.muted = false;
             sink.audio.volume = Math.max(0, Math.min(1, v / 100));
         }
 
+        PwObjectTracker { objects: win.sink ? [win.sink] : [] }
+        PwObjectTracker { objects: win.sinks }
+
         onVisibleChanged: if (visible) { audioExpanded = false; Network.refresh(); Bluetooth.refresh(); Nightlight.refresh(); }
 
-        // ---------- slider row: icon badge + track + value ----------
-        component CtlSlider: Item {
-            id: sl
+        // ---- palette (solid theme colours — iOS layout, no glass) ----
+        readonly property color cardBg: Theme.base00
+        readonly property color modBg: Theme.base01
+        readonly property color slotBg: Theme.base02
+        readonly property color hairline: "transparent"
+
+        // ================= components =================
+
+        // Round connectivity toggle (iOS control-centre style).
+        component RoundToggle: Rectangle {
+            id: rt
             property string icon: ""
-            property int value: 0
-            property color accent: Theme.base0D
-            property bool badgeActive: false
-            signal moved(int v)
-            signal badgeClicked()
-            width: parent ? parent.width : 0
-            height: 40
-            property bool dragging: false
-
-            Rectangle {
-                id: badge
-                width: 38; height: 38; radius: 19
-                anchors.verticalCenter: parent.verticalCenter
-                color: sl.badgeActive ? sl.accent : Theme.base02
-                Text {
-                    anchors.centerIn: parent
-                    text: sl.icon
-                    color: sl.badgeActive ? Theme.base00 : sl.accent
-                    font.family: Theme.fontFamilyFallback
-                    font.pixelSize: Theme.fontSize + 5
-                }
-                MouseArea { anchors.fill: parent; onClicked: sl.badgeClicked() }
-            }
-
-            Item {
-                id: track
-                anchors.left: badge.right
-                anchors.leftMargin: 12
-                anchors.right: valLabel.left
-                anchors.rightMargin: 12
-                anchors.verticalCenter: parent.verticalCenter
-                height: 40
-
-                Rectangle {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width; height: 8; radius: 4
-                    color: Theme.base02
-                    Rectangle {
-                        height: parent.height; radius: 4
-                        width: Math.round(parent.width * Math.max(0, Math.min(100, sl.value)) / 100)
-                        color: sl.accent
-                    }
-                }
-                Rectangle {
-                    id: knob
-                    width: knobHover.hovered || sl.dragging ? 22 : 18
-                    height: width; radius: width / 2
-                    color: sl.accent
-                    border.color: Theme.base00
-                    border.width: 3
-                    anchors.verticalCenter: parent.verticalCenter
-                    x: Math.round((parent.width - width) * Math.max(0, Math.min(100, sl.value)) / 100)
-                    Behavior on width { NumberAnimation { duration: 80 } }
-                    HoverHandler { id: knobHover }
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    function pick(mx) {
-                        const v = Math.round(Math.max(0, Math.min(1, mx / track.width)) * 100);
-                        sl.value = v; sl.moved(v);
-                    }
-                    onPressed: mouse => { sl.dragging = true; pick(mouse.x); }
-                    onPositionChanged: mouse => { if (sl.dragging) pick(mouse.x); }
-                    onReleased: sl.dragging = false
-                }
-            }
-
-            Text {
-                id: valLabel
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                width: 46
-                horizontalAlignment: Text.AlignRight
-                text: sl.value + "%"
-                color: Theme.base05
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize
-                font.weight: Theme.fontWeight
-                font.features: ({ "tnum": 1 })
-            }
-        }
-
-        // ---------- toggle tile ----------
-        component Tile: Rectangle {
-            id: tile
-            property string icon: ""
-            property string label: ""
             property color accent: Theme.base0D
             property bool on: false
             signal toggled()
             signal opened()
-            width: (contentCol.width - 2 * 10) / 3
-            height: 88
-            radius: 14
-            color: on ? accent : Theme.base02
-            Behavior on color { ColorAnimation { duration: 120 } }
-
-            Column {
+            implicitWidth: 58; implicitHeight: 58
+            radius: 29
+            color: on ? accent : win.slotBg
+            Behavior on color { ColorAnimation { duration: 140 } }
+            border.width: 1
+            border.color: on ? "transparent" : win.hairline
+            Text {
                 anchors.centerIn: parent
-                spacing: 8
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: tile.icon
-                    color: tile.on ? Theme.base00 : tile.accent
-                    font.family: Theme.fontFamilyFallback
-                    font.pixelSize: Theme.fontSize + 9
-                }
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: tile.label
-                    color: tile.on ? Theme.base00 : Theme.base05
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize - 4
-                    elide: Text.ElideRight
-                    width: tile.width - 12
-                    horizontalAlignment: Text.AlignHCenter
-                }
+                text: rt.icon
+                color: rt.on ? Theme.base00 : Theme.base05
+                font.family: Theme.fontFamilyFallback
+                font.pixelSize: Theme.fontSize + 6
             }
             MouseArea {
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
-                onClicked: mouse => mouse.button === Qt.RightButton ? tile.opened() : tile.toggled()
+                onClicked: mouse => mouse.button === Qt.RightButton ? rt.opened() : rt.toggled()
             }
         }
 
+        // Tall vertical slider (brightness / volume).
+        component VSlider: Item {
+            id: vs
+            property string icon: ""
+            property int value: 0
+            property color accent: Theme.base05
+            property bool badgeMuted: false
+            signal moved(int v)
+            property bool dragging: false
+            property int dragValue: 0
+            readonly property int shown: dragging ? dragValue : value
+
+            Rectangle {
+                anchors.fill: parent
+                radius: 18
+                clip: true
+                color: win.slotBg
+                border.width: 1
+                border.color: win.hairline
+
+                Rectangle {   // fill grows from the bottom
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: Math.round(parent.height * Math.max(0, Math.min(100, vs.shown)) / 100)
+                    color: vs.badgeMuted ? Theme.base08 : vs.accent
+                    Behavior on height { enabled: !vs.dragging; NumberAnimation { duration: 90 } }
+                }
+
+                Text {   // icon pinned near the bottom, iOS-style
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 12
+                    text: vs.icon
+                    color: vs.shown > 14 ? Theme.base00 : Theme.base05
+                    font.family: Theme.fontFamilyFallback
+                    font.pixelSize: Theme.fontSize + 6
+                }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                function pick(my) {
+                    vs.dragValue = Math.round(Math.max(0, Math.min(1, 1 - my / height)) * 100);
+                    vs.moved(vs.dragValue);
+                }
+                onPressed: mouse => { vs.dragging = true; pick(mouse.y); }
+                onPositionChanged: mouse => { if (vs.dragging) pick(mouse.y); }
+                onReleased: vs.dragging = false
+            }
+        }
+
+        // dim scrim + click-away
+        Rectangle { anchors.fill: parent; color: "#000000"; opacity: win.visible ? 0.22 : 0
+            Behavior on opacity { NumberAnimation { duration: Theme.durEffects } } }
         MouseArea { anchors.fill: parent; onClicked: Globals.quickSettingsOpen = false }
 
-        Item {
+        Rectangle {
             id: box
             opacity: win.visible ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.durEffects; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeEffects } }
             transformOrigin: Item.BottomRight
             scale: win.visible ? 1 : 0.9
             Behavior on scale { NumberAnimation { duration: Theme.durSpatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeSpatial } }
-            width: 380
+
+            width: 372
             height: contentCol.implicitHeight + 36
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.rightMargin: 8
-            anchors.bottomMargin: 0
-            IslandBg { anchors.fill: parent; radius: 16 }
+            anchors.rightMargin: 10
+            anchors.bottomMargin: 10
+            radius: 30
+            color: win.cardBg
+            border.width: 1
+            border.color: win.hairline
+
             MouseArea { anchors.fill: parent }
 
             Column {
@@ -207,9 +173,9 @@ Variants {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.margins: 18
-                spacing: 16
+                spacing: 14
 
-                // date + theme button
+                // ---- header: date + wallpaper/theme ----
                 Row {
                     width: parent.width
                     Column {
@@ -220,12 +186,12 @@ Variants {
                             text: Qt.formatDate(Time.now, "dddd")
                             color: Theme.base05
                             font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize + 2
+                            font.pixelSize: Theme.fontSize + 3
                             font.weight: Theme.fontWeight
                         }
                         Text {
                             text: Qt.formatDate(Time.now, "d MMMM yyyy")
-                            color: Theme.base05
+                            color: Theme.base04
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSize - 2
                         }
@@ -235,44 +201,109 @@ Variants {
                         spacing: 8
                         Rectangle {
                             width: 40; height: 40; radius: 20
-                            color: wallH.hovered ? Theme.base02 : Theme.base01
-                            Text {
-                                anchors.centerIn: parent
-                                text: "󰸉"
-                                color: Theme.base0C
-                                font.family: Theme.fontFamilyFallback
-                                font.pixelSize: Theme.fontSize + 4
-                            }
+                            color: wallH.hovered ? win.slotBg : win.modBg
+                            border.width: 1; border.color: win.hairline
+                            Text { anchors.centerIn: parent; text: "󰸉"; color: Theme.base0C
+                                font.family: Theme.fontFamilyFallback; font.pixelSize: Theme.fontSize + 4 }
                             HoverHandler { id: wallH }
                             MouseArea { anchors.fill: parent; onClicked: Globals.toggleWallpaper() }
                         }
                         Rectangle {
                             width: 40; height: 40; radius: 20
-                            color: themeH.hovered ? Theme.base02 : Theme.base01
-                            Text {
-                                anchors.centerIn: parent
-                                text: "󰸌"
-                                color: Theme.base0E
-                                font.family: Theme.fontFamilyFallback
-                                font.pixelSize: Theme.fontSize + 4
-                            }
+                            color: themeH.hovered ? win.slotBg : win.modBg
+                            border.width: 1; border.color: win.hairline
+                            Text { anchors.centerIn: parent; text: "󰸌"; color: Theme.base0E
+                                font.family: Theme.fontFamilyFallback; font.pixelSize: Theme.fontSize + 4 }
                             HoverHandler { id: themeH }
                             MouseArea { anchors.fill: parent; onClicked: Globals.toggleTheme() }
                         }
                     }
                 }
 
-                // music player (only when something is playing/paused)
+                // ---- connectivity cluster  +  vertical sliders ----
+                Row {
+                    width: parent.width
+                    spacing: 14
+                    readonly property real colW: (width - 14) / 2
+                    readonly property real blockH: 168
+
+                    // 2x2 round toggles
+                    Rectangle {
+                        width: parent.colW
+                        height: parent.blockH
+                        radius: 24
+                        color: win.modBg
+                        border.width: 1; border.color: win.hairline
+                        Grid {
+                            anchors.centerIn: parent
+                            columns: 2
+                            rowSpacing: 12
+                            columnSpacing: 12
+                            RoundToggle {
+                                icon: Network.icon
+                                accent: Theme.base0B
+                                on: Network.radioOn
+                                onToggled: Network.setRadio(!Network.radioOn)
+                                onOpened: Globals.toggleWifi()
+                            }
+                            RoundToggle {
+                                icon: Bluetooth.icon
+                                accent: Theme.base0D
+                                on: Bluetooth.powered
+                                onToggled: Bluetooth.setPowered(!Bluetooth.powered)
+                                onOpened: Globals.toggleBluetooth()
+                            }
+                            RoundToggle {
+                                icon: "󰃝"
+                                accent: Theme.base09
+                                on: Nightlight.active
+                                onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
+                                onOpened: Globals.toggleNightlight()
+                            }
+                            RoundToggle {
+                                icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"
+                                accent: Theme.base08
+                                on: Notifications.doNotDisturb
+                                onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
+                                onOpened: Notifications.doNotDisturb = !Notifications.doNotDisturb
+                            }
+                        }
+                    }
+
+                    // brightness + volume vertical sliders
+                    Row {
+                        width: parent.colW
+                        height: parent.blockH
+                        spacing: 14
+                        VSlider {
+                            width: (parent.width - 14) / 2
+                            height: parent.height
+                            icon: Brightness.icon
+                            value: Brightness.percent
+                            accent: Theme.base0E
+                            onMoved: v => Brightness.set(v)
+                        }
+                        VSlider {
+                            width: (parent.width - 14) / 2
+                            height: parent.height
+                            icon: win.muted || win.volume === 0 ? "󰖁" : (win.volume >= 50 ? "󰕾" : "󰖀")
+                            value: win.volume
+                            accent: Theme.base0D
+                            badgeMuted: win.muted
+                            onMoved: v => win.setVolume(v)
+                        }
+                    }
+                }
+
+                // ---- now playing ----
                 Rectangle {
                     width: parent.width
-                    height: 88
-                    radius: 12
-                    color: Theme.base01
+                    height: 92
+                    radius: 22
+                    color: win.modBg
+                    border.width: 1; border.color: win.hairline
                     visible: Player.hasPlayer
 
-                    // Keep the MPRIS position fresh while this panel is open and
-                    // playing (MPRIS doesn't push it). Only runs when visible, so
-                    // there's no background ticking.
                     Timer {
                         interval: 1000
                         running: win.visible && Player.isPlaying
@@ -283,18 +314,17 @@ Variants {
 
                     Column {
                         anchors.fill: parent
-                        anchors.margins: 9
+                        anchors.margins: 10
                         spacing: 8
 
                         Row {
                             width: parent.width
-                            height: 48
+                            height: 46
                             spacing: 10
-
                             Rectangle {
-                                width: 48; height: 48; radius: 8
+                                width: 46; height: 46; radius: 10
                                 anchors.verticalCenter: parent.verticalCenter
-                                color: Theme.base02
+                                color: win.slotBg
                                 clip: true
                                 Image {
                                     anchors.fill: parent
@@ -311,9 +341,8 @@ Variants {
                                     font.pixelSize: Theme.fontSize + 6
                                 }
                             }
-
                             Column {
-                                width: parent.width - 48 - 10 - (3 * 30 + 2 * 4) - 10
+                                width: parent.width - 46 - 10 - (3 * 30 + 2 * 4) - 10
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 2
                                 Text {
@@ -328,14 +357,13 @@ Variants {
                                 Text {
                                     width: parent.width
                                     text: Player.artist
-                                    color: Theme.base05
+                                    color: Theme.base04
                                     font.family: Theme.fontFamily
                                     font.pixelSize: Theme.fontSize - 3
                                     elide: Text.ElideRight
                                     visible: text.length > 0
                                 }
                             }
-
                             Row {
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 4
@@ -348,7 +376,7 @@ Variants {
                                     delegate: Rectangle {
                                         required property var modelData
                                         width: 30; height: 30; radius: 15
-                                        color: mh.hovered ? Theme.base02 : "transparent"
+                                        color: mh.hovered ? win.slotBg : "transparent"
                                         Text {
                                             anchors.centerIn: parent
                                             text: modelData.icon
@@ -370,12 +398,10 @@ Variants {
                             }
                         }
 
-                        // ---- seek bar: position | track | length ----
                         Row {
                             width: parent.width
                             height: 14
                             spacing: 6
-
                             Text {
                                 width: 32; height: parent.height
                                 verticalAlignment: Text.AlignVCenter
@@ -385,7 +411,6 @@ Variants {
                                 font.pixelSize: Theme.fontSize - 5
                                 font.features: ({ "tnum": 1 })
                             }
-
                             Item {
                                 id: seek
                                 width: parent.width - 2 * 32 - 2 * 6
@@ -393,11 +418,10 @@ Variants {
                                 property bool dragging: false
                                 property real dragFrac: 0
                                 readonly property real frac: dragging ? dragFrac : Player.progress
-
                                 Rectangle {
                                     anchors.verticalCenter: parent.verticalCenter
                                     width: parent.width; height: 4; radius: 2
-                                    color: Theme.base02
+                                    color: win.slotBg
                                     Rectangle {
                                         height: parent.height; radius: 2
                                         width: Math.round(parent.width * seek.frac)
@@ -420,7 +444,6 @@ Variants {
                                     onReleased: { Player.seek(seek.dragFrac); seek.dragging = false; }
                                 }
                             }
-
                             Text {
                                 width: 32; height: parent.height
                                 horizontalAlignment: Text.AlignRight
@@ -435,22 +458,6 @@ Variants {
                     }
                 }
 
-                CtlSlider {
-                    icon: win.muted || win.volume === 0 ? "󰖁" : (win.volume >= 50 ? "󰕾" : "󰖀")
-                    value: win.volume
-                    accent: Theme.base0D
-                    badgeActive: win.muted
-                    onMoved: v => win.setVolume(v)
-                    onBadgeClicked: if (win.sink && win.sink.audio) win.sink.audio.muted = !win.sink.audio.muted
-                }
-                CtlSlider {
-                    icon: Brightness.icon
-                    value: Brightness.percent
-                    accent: Theme.base0E
-                    onMoved: v => Brightness.set(v)
-                    onBadgeClicked: {}
-                }
-
                 // ---- audio output switcher (collapsible) ----
                 Column {
                     width: parent.width
@@ -458,9 +465,10 @@ Variants {
 
                     Rectangle {
                         width: parent.width
-                        height: 38
-                        radius: 10
-                        color: outHdr.hovered ? Theme.base02 : Theme.base01
+                        height: 40
+                        radius: 14
+                        color: outHdr.hovered ? win.slotBg : win.modBg
+                        border.width: 1; border.color: win.hairline
                         Row {
                             anchors.left: parent.left
                             anchors.leftMargin: 12
@@ -508,15 +516,15 @@ Variants {
                             delegate: Rectangle {
                                 required property var modelData
                                 width: parent.width
-                                height: 32
-                                radius: 8
+                                height: 34
+                                radius: 12
                                 readonly property bool isDefault: modelData === win.sink
-                                color: isDefault ? Theme.base02 : (devHover.hovered ? Theme.base01 : "transparent")
+                                color: isDefault ? win.slotBg : (devHover.hovered ? win.modBg : "transparent")
                                 Text {
                                     anchors.left: parent.left
-                                    anchors.leftMargin: 34
+                                    anchors.leftMargin: 14
                                     anchors.right: parent.right
-                                    anchors.rightMargin: 30
+                                    anchors.rightMargin: 34
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: win.nodeName(modelData)
                                     color: Theme.base05
@@ -526,7 +534,7 @@ Variants {
                                 }
                                 Text {
                                     anchors.right: parent.right
-                                    anchors.rightMargin: 10
+                                    anchors.rightMargin: 12
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: parent.isDefault ? "󰄬" : ""
                                     color: Theme.base0B
@@ -544,57 +552,6 @@ Variants {
                             }
                         }
                     }
-                }
-
-                Row {
-                    width: parent.width
-                    spacing: 10
-                    Tile {
-                        icon: Network.icon
-                        label: Network.connected ? Network.ssid : "Wi-Fi"
-                        accent: Theme.base0B
-                        on: Network.radioOn
-                        onToggled: Network.setRadio(!Network.radioOn)
-                        onOpened: Globals.toggleWifi()
-                    }
-                    Tile {
-                        icon: Bluetooth.icon
-                        label: Bluetooth.anyConnected ? Bluetooth.connectedName : "Bluetooth"
-                        accent: Theme.base0D
-                        on: Bluetooth.powered
-                        onToggled: Bluetooth.setPowered(!Bluetooth.powered)
-                        onOpened: Globals.toggleBluetooth()
-                    }
-                    Tile {
-                        icon: "󰃝"
-                        label: "Night Light"
-                        accent: Theme.base09
-                        on: Nightlight.active
-                        onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
-                        onOpened: Globals.toggleNightlight()
-                    }
-                }
-
-                Row {
-                    width: parent.width
-                    spacing: 10
-                    Tile {
-                        icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"
-                        label: "Do Not Disturb"
-                        accent: Theme.base08
-                        on: Notifications.doNotDisturb
-                        onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
-                        onOpened: Notifications.doNotDisturb = !Notifications.doNotDisturb
-                    }
-                }
-
-                Text {
-                    width: parent.width
-                    horizontalAlignment: Text.AlignHCenter
-                    text: "click toggles · right-click opens details"
-                    color: Theme.base03
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize - 4
                 }
             }
         }
