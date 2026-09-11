@@ -102,18 +102,20 @@ Variants {
             readonly property int shown: dragging ? dragValue : value
 
             Rectangle {
+                id: vtrack
                 anchors.fill: parent
                 radius: 18
-                clip: true
                 color: win.slotBg
                 border.width: 1
                 border.color: win.hairline
 
-                Rectangle {   // fill grows from the bottom
+                Rectangle {   // fill grows from the bottom, rounded like the track
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    height: Math.round(parent.height * Math.max(0, Math.min(100, vs.shown)) / 100)
+                    radius: vtrack.radius
+                    height: Math.max(vs.shown > 0 ? radius : 0,
+                        Math.round(parent.height * Math.max(0, Math.min(100, vs.shown)) / 100))
                     color: vs.badgeMuted ? Theme.base08 : vs.accent
                     Behavior on height { enabled: !vs.dragging; NumberAnimation { duration: 90 } }
                 }
