@@ -101,7 +101,7 @@ PanelWindow {
         implicitHeight: Theme.dockIconSize + 22   // = dock background height
 
         Rectangle {   // tooltip (floats above the cell, into the headroom)
-            visible: cellMA.containsMouse && cell.tip.length > 0
+            visible: cellMA.containsMouse && cell.tip.length > 0 && !Globals.dockMenuOpen
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.top
             anchors.bottomMargin: 8
@@ -225,7 +225,7 @@ PanelWindow {
                         const wins = [];
                         for (let i = 0; i < list.length; i++)
                             if (dock._norm(list[i].app_id || "?") === modelData.norm)
-                                wins.push({ id: list[i].id, title: (list[i].title && list[i].title.length ? list[i].title : dock.labelFor(list[i].app_id)) });
+                                wins.push({ id: list[i].id, icon: dock.iconFor(list[i].app_id), title: (list[i].title && list[i].title.length ? list[i].title : dock.labelFor(list[i].app_id)) });
                         // dock window is centred, so add its on-screen left edge
                         const cx = (dock.screen.width - dock.width) / 2 + dcell.mapToItem(null, dcell.width / 2, 0).x;
                         Globals.openDockMenu(wins, cx);

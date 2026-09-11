@@ -24,7 +24,7 @@ Variants {
 
         Rectangle {
             id: menuBox
-            width: 260
+            width: 300
             height: menuCol.implicitHeight + 10
             radius: 10
             color: Theme.base01
@@ -56,12 +56,22 @@ Variants {
                     delegate: Rectangle {
                         required property var modelData
                         width: menuCol.width
-                        height: 30
-                        radius: 7
+                        height: 38
+                        radius: 8
                         color: itemMA.containsMouse ? Theme.base02 : "transparent"
+
+                        Image {
+                            id: appIcon
+                            anchors.left: parent.left; anchors.leftMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 22; height: 22
+                            sourceSize.width: 22; sourceSize.height: 22
+                            source: modelData.icon
+                            fillMode: Image.PreserveAspectFit
+                        }
                         Text {
-                            anchors.left: parent.left; anchors.leftMargin: 10
-                            anchors.right: parent.right; anchors.rightMargin: 10
+                            anchors.left: appIcon.right; anchors.leftMargin: 10
+                            anchors.right: killBtn.left; anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
                             text: modelData.title
                             color: Theme.base05
@@ -69,11 +79,37 @@ Variants {
                             font.pixelSize: Theme.fontSize - 2
                             elide: Text.ElideRight
                         }
+
                         MouseArea {
                             id: itemMA
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: { Niri.focusWindow(modelData.id); Globals.dockMenuOpen = false; }
+                        }
+
+                        // kill button (red X)
+                        Rectangle {
+                            id: killBtn
+                            anchors.right: parent.right; anchors.rightMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 22; height: 22; radius: 11
+                            color: killMA.containsMouse ? Qt.lighter(Theme.base08, 1.2) : Theme.base08
+                            Text {
+                                anchors.centerIn: parent
+                                text: "󰅖"
+                                color: Theme.base00
+                                font.family: Theme.fontFamilyFallback
+                                font.pixelSize: Theme.fontSize - 4
+                            }
+                            MouseArea {
+                                id: killMA
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onClicked: {
+                                    Niri.closeWindow(modelData.id);
+                                    Globals.dockMenuOpen = false;
+                                }
+                            }
                         }
                     }
                 }

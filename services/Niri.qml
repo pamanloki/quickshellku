@@ -182,6 +182,11 @@ Singleton {
         actionProc.running = true;
     }
 
+    function closeWindow(id) {
+        actionProc.command = ["niri", "msg", "action", "close-window", "--id", String(id)];
+        actionProc.running = true;
+    }
+
     Process {
         id: actionProc
         running: false
