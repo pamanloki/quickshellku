@@ -72,7 +72,7 @@ Variants {
                     model: [
                         { label: "About This System", act: "about" },
                         { sep: true },
-                        { act: "dockhide" },
+                        { label: "Automatically Hide Dock", act: "dockhide" },
                         { sep: true },
                         { label: "Lock Screen", flag: "--lock" },
                         { label: "Sleep", flag: "--suspend" },
@@ -101,12 +101,19 @@ Variants {
                             anchors.fill: parent
                             radius: 7
                             color: itemMA.containsMouse ? Theme.base0D : "transparent"
-                            Text {
-                                anchors.left: parent.left; anchors.leftMargin: 12
+                            Text {   // checkmark gutter (macOS-style, left of the label)
+                                anchors.left: parent.left; anchors.leftMargin: 9
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: mi.modelData.act === "dockhide"
-                                    ? (Globals.dockAutoHide ? "Turn Dock Hiding Off" : "Turn Dock Hiding On")
-                                    : (mi.modelData.label || "")
+                                text: "󰄬"
+                                visible: mi.modelData.act === "dockhide" && Globals.dockAutoHide
+                                color: itemMA.containsMouse ? Theme.base00 : Theme.base05
+                                font.family: Theme.fontFamilyFallback
+                                font.pixelSize: Theme.fontSize - 1
+                            }
+                            Text {
+                                anchors.left: parent.left; anchors.leftMargin: 28
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: mi.modelData.label || ""
                                 color: itemMA.containsMouse ? Theme.base00 : Theme.base05
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontSize - 2
