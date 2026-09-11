@@ -59,30 +59,32 @@ Variants {
                 spacing: 10
 
                 // header
-                Row {
+                Item {
                     width: parent.width
+                    height: 30
                     Text {
+                        anchors.left: parent.left
+                        anchors.verticalCenter: parent.verticalCenter
                         text: "󰂚  Notifications"
                         color: Theme.base05
                         font.family: Theme.fontFamilyFallback
                         font.pixelSize: Theme.fontSize + 2
                         font.weight: Theme.fontWeight
-                        width: parent.width - 150
-                        anchors.verticalCenter: parent.verticalCenter
                     }
                     Row {
+                        anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: 8
                         // DND toggle
                         Rectangle {
-                            width: 68; height: 28; radius: 8
+                            width: 72; height: 30; radius: 8
                             color: Notifications.doNotDisturb ? Theme.base08 : (dndMA.containsMouse ? Theme.base02 : Theme.base01)
                             Text {
                                 anchors.centerIn: parent
                                 text: Notifications.doNotDisturb ? "󰂛 DND" : "󰂚 DND"
                                 color: Notifications.doNotDisturb ? Theme.base00 : Theme.base05
                                 font.family: Theme.fontFamilyFallback
-                                font.pixelSize: Theme.fontSize - 4
+                                font.pixelSize: Theme.fontSize - 3
                             }
                             MouseArea {
                                 id: dndMA
@@ -93,14 +95,14 @@ Variants {
                         }
                         // clear all
                         Rectangle {
-                            width: 66; height: 28; radius: 8
+                            width: 72; height: 30; radius: 8
                             color: clMA.containsMouse ? Theme.base08 : Theme.base01
                             Text {
                                 anchors.centerIn: parent
-                                text: "󰎟  Clear"
+                                text: "󰩺 Clear"
                                 color: clMA.containsMouse ? Theme.base00 : Theme.base05
                                 font.family: Theme.fontFamilyFallback
-                                font.pixelSize: Theme.fontSize - 4
+                                font.pixelSize: Theme.fontSize - 3
                             }
                             MouseArea {
                                 id: clMA
@@ -184,9 +186,9 @@ Variants {
                             anchors.rightMargin: 6
                             y: 10
                             text: win.ago(card.modelData.time)
-                            color: Theme.base03
+                            color: Theme.base04
                             font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize - 5
+                            font.pixelSize: Theme.fontSize - 4
                         }
                         Rectangle {
                             id: closeB
@@ -197,9 +199,9 @@ Variants {
                             color: xH.hovered ? Theme.base08 : "transparent"
                             Text {
                                 anchors.centerIn: parent; text: "󰅖"
-                                color: xH.hovered ? Theme.base00 : Theme.base03
+                                color: xH.hovered ? Theme.base00 : Theme.base05
                                 font.family: Theme.fontFamilyFallback
-                                font.pixelSize: Theme.fontSize - 3
+                                font.pixelSize: Theme.fontSize - 2
                             }
                             HoverHandler { id: xH }
                             MouseArea { anchors.fill: parent; onClicked: Notifications.removeHistory(card.modelData.id) }

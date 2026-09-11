@@ -23,6 +23,7 @@ Singleton {
     property bool wallpaperOpen: false
     property bool powerOpen: false
     property bool notifsOpen: false
+    property bool screenshotOpen: false
 
     // Tray context menu (right-click a tray icon).
     property bool trayMenuOpen: false
@@ -54,6 +55,7 @@ Singleton {
         powerOpen = false;
         notifsOpen = false;
         trayMenuOpen = false;
+        screenshotOpen = false;
     }
 
     function toggleLauncher() { const v = !launcherOpen; _closeAll(); launcherOpen = v; }
@@ -66,6 +68,7 @@ Singleton {
     function toggleWallpaper(){ const v = !wallpaperOpen; _closeAll(); wallpaperOpen = v; }
     function togglePower()    { const v = !powerOpen;    _closeAll(); powerOpen = v; }
     function toggleNotifs()   { const v = !notifsOpen;   _closeAll(); notifsOpen = v; }
+    function toggleScreenshot(){ const v = !screenshotOpen; _closeAll(); screenshotOpen = v; }
 
     Timer {
         id: osdTimer
@@ -121,5 +124,9 @@ Singleton {
     IpcHandler {
         target: "notifications"
         function toggle() { root.toggleNotifs(); }
+    }
+    IpcHandler {
+        target: "screenshot"
+        function toggle() { root.toggleScreenshot(); }
     }
 }

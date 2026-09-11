@@ -11,7 +11,7 @@ ShellRoot {
     // IpcHandlers, so they're live from startup (not just on first reference).
     readonly property var _services: [
         Globals, Theme, Niri, SystemStats, Brightness, Network, Bluetooth, Nightlight,
-        Notifications, Player, Flavours, Time, Wallpaper, Audio
+        Notifications, Player, Flavours, Time, Wallpaper, Audio, Screenshot
     ]
 
     // One bar per monitor.
@@ -34,4 +34,5 @@ ShellRoot {
     NotificationToasts {}
     NotificationCenter {}
     TrayMenu {}
+    ScreenshotMenu {}
 }
