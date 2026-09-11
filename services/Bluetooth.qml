@@ -5,14 +5,23 @@ import Quickshell.Io
 import QtQuick
 
 // Bluetooth via `bluetoothctl` (bluez), matching your bluetui setup.
-// bluetoothctl output parses cleanly, so the native panel is reliable;
-// the panel also offers "Manage in bluetui" as a fallback.
+//
+// Anti-flicker: refresh() runs every few seconds. It must NOT expose transient
+// states, or the bar pill's value flips width ("on" -> "BLAST") each cycle and
+// the right-anchored row reflows, making the clock jump. So we build the whole
+// device list (enriched with connected/paired) into a pending array and assign
+// `devices` exactly once, and only when a signature of the visible fields
+// actually changed. Same for `powered`.
 Singleton {
     id: root
 
     property bool powered: false
     property var devices: []          // [{mac, name, connected, paired}]
     property bool scanning: false
+
+    property string _sig: ""
+    property var _pending: []
+    property int _enrichIndex: 0
 
     readonly property bool anyConnected: {
         for (const d of devices)
@@ -22,6 +31,15 @@ Singleton {
     }
 
     readonly property string icon: !powered ? "󰂲" : (anyConnected ? "󰂱" : "󰂯")
+
+    // First connected device's name, or "" — used by the bar pill. Stable name
+    // so the pill width doesn't change between refreshes.
+    readonly property string connectedName: {
+        for (const d of devices)
+            if (d.connected)
+                return d.name;
+        return "";
+    }
 
     function refresh() {
         showProc.running = true;
@@ -53,17 +71,25 @@ Singleton {
         actProc.running = true;
     }
 
+    function _applyDevices(list) {
+        let sig = "";
+        for (let i = 0; i < list.length; i++)
+            sig += list[i].mac + ":" + list[i].name + ":" + list[i].connected + ":" + list[i].paired + "|";
+        if (sig === root._sig)
+            return;               // nothing visible changed -> don't churn bindings
+        root._sig = sig;
+        root.devices = list;
+    }
+
     Process {
         id: showProc
         command: ["sh", "-c", "bluetoothctl show"]
         stdout: StdioCollector {
-            onStreamFinished: {
-                root.powered = /Powered:\s+yes/i.test(text);
-            }
+            onStreamFinished: root.powered = /Powered:\s+yes/i.test(text)
         }
     }
 
-    // List devices, then enrich each with connected/paired via `info`.
+    // List devices, then enrich each into _pending; assign once when done.
     Process {
         id: devProc
         command: ["sh", "-c", "bluetoothctl devices"]
@@ -76,18 +102,22 @@ Singleton {
                     if (m)
                         out.push({ mac: m[1], name: m[2], connected: false, paired: false });
                 }
-                root.devices = out;
+                root._pending = out;
                 root._enrichIndex = 0;
-                root._enrichNext();
+                if (out.length === 0)
+                    root._applyDevices([]);
+                else
+                    root._enrichNext();
             }
         }
     }
 
-    property int _enrichIndex: 0
     function _enrichNext() {
-        if (_enrichIndex >= devices.length)
+        if (_enrichIndex >= _pending.length) {
+            _applyDevices(_pending.slice());
             return;
-        infoProc.command = ["sh", "-c", "bluetoothctl info " + devices[_enrichIndex].mac];
+        }
+        infoProc.command = ["sh", "-c", "bluetoothctl info " + _pending[_enrichIndex].mac];
         infoProc.running = true;
     }
 
@@ -95,12 +125,10 @@ Singleton {
         id: infoProc
         stdout: StdioCollector {
             onStreamFinished: {
-                const list = root.devices.slice();
-                const d = list[root._enrichIndex];
+                const d = root._pending[root._enrichIndex];
                 if (d) {
                     d.connected = /Connected:\s+yes/i.test(text);
                     d.paired = /Paired:\s+yes/i.test(text);
-                    root.devices = list;
                 }
                 root._enrichIndex++;
                 root._enrichNext();

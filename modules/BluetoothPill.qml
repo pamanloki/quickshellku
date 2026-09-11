@@ -7,14 +7,8 @@ import "root:/services"
 StatPill {
     id: root
     icon: Bluetooth.icon
-    value: {
-        if (!Bluetooth.powered)
-            return "off";
-        for (const d of Bluetooth.devices)
-            if (d.connected)
-                return d.name;
-        return "on";
-    }
+    value: !Bluetooth.powered ? "off"
+        : (Bluetooth.connectedName.length > 0 ? Bluetooth.connectedName : "on")
     accent: !Bluetooth.powered ? Theme.base08
         : (Bluetooth.anyConnected ? Theme.base0B : Theme.base05)
     iconBg: Theme.base03
