@@ -90,7 +90,7 @@ Variants {
             MouseArea { anchors.fill: parent; onClicked: parent.picked() }
         }
 
-        Item {
+        Rectangle {
             id: box
             transform: Translate {
                 id: slide
