@@ -173,6 +173,15 @@ PanelWindow {
             onClicked: Globals.toggleAudio()
         }
         Item2 {
+            visible: Battery.present
+            icon: Battery.icon
+            iconColor: Battery.critical ? Theme.base08
+                : Battery.low ? Theme.base0A
+                : Battery.charging ? Theme.base0B : Theme.base05
+            label: Battery.percent + "%"
+            onClicked: Globals.toggleQuickSettings()
+        }
+        Item2 {
             icon: "󰕮"
             onClicked: Globals.toggleQuickSettings()
         }

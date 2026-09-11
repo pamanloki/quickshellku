@@ -11,7 +11,8 @@ ShellRoot {
     // IpcHandlers, so they're live from startup (not just on first reference).
     readonly property var _services: [
         Globals, Theme, Niri, SystemStats, Brightness, Network, Bluetooth, Nightlight,
-        Notifications, Player, Flavours, Time, Wallpaper, Audio, Screenshot, Updates, SysInfo
+        Notifications, Player, Flavours, Time, Wallpaper, Audio, Screenshot, Updates, SysInfo,
+        Battery
     ]
 
     // macOS-style top menu bar + bottom dock, per monitor.
