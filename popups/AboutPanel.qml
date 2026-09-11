@@ -132,45 +132,6 @@ Variants {
                     }
                 }
 
-                // More Info… button (macOS-style)
-                Item { width: parent.width; height: 6 }
-                Rectangle {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: reportRow.implicitWidth + 28
-                    height: 30
-                    radius: 9
-                    color: reportMA.containsMouse ? Theme.base0D : Theme.base02
-                    Row {
-                        id: reportRow
-                        anchors.centerIn: parent
-                        spacing: 7
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: "󰋼"
-                            color: reportMA.containsMouse ? Theme.base00 : Theme.base05
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: Theme.fontSize
-                        }
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: "System Report…"
-                            color: reportMA.containsMouse ? Theme.base00 : Theme.base05
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize - 2
-                            font.weight: Theme.fontWeight
-                        }
-                    }
-                    MouseArea {
-                        id: reportMA
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onClicked: {
-                            Quickshell.execDetached(["footx", "-e", "-f", "btop"]);
-                            Globals.aboutOpen = false;
-                        }
-                    }
-                }
-
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: "quickshellku"

@@ -142,31 +142,6 @@ Variants {
                     tint: SystemStats.diskPercent >= 90 ? Theme.base08
                         : SystemStats.diskPercent >= 75 ? Theme.base0A : Theme.base0E
                 }
-
-                // open full monitor
-                Rectangle {
-                    width: parent.width
-                    height: 32
-                    radius: 10
-                    color: monMA.containsMouse ? Theme.base0D : Theme.base02
-                    Text {
-                        anchors.centerIn: parent
-                        text: "Open System Monitor"
-                        color: monMA.containsMouse ? Theme.base00 : Theme.base05
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSize - 2
-                        font.weight: Theme.fontWeight
-                    }
-                    MouseArea {
-                        id: monMA
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onClicked: {
-                            Quickshell.execDetached(["footx", "-e", "-f", "btop"]);
-                            Globals.systemOpen = false;
-                        }
-                    }
-                }
             }
         }
     }
