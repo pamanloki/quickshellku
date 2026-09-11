@@ -24,23 +24,32 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.namespace: "quickshell:dock"
 
-    // pinned first, then any other running apps; dedup by app_id
+    function _norm(s) { return (s || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+
+    // pinned first (matched to running windows so e.g. "brave" == "Brave-browser"
+    // and never doubles up), then any other running apps.
     readonly property var items: {
         const list = Niri.windowList || [];
-        const runId = ({});
+        const runByNorm = ({});
         const order = [];
         for (let i = 0; i < list.length; i++) {
             const a = list[i].app_id || "?";
-            if (!(a in runId)) { runId[a] = list[i].id; order.push(a); }
+            const n = dock._norm(a);
+            if (!(n in runByNorm)) { runByNorm[n] = { app_id: a, id: list[i].id }; order.push(n); }
         }
         const out = [];
-        const seen = ({});
-        for (const a of dock.pinned) {
-            out.push({ app_id: a, id: (a in runId) ? runId[a] : -1, running: (a in runId) });
-            seen[a] = true;
+        const used = ({});
+        for (const p of dock.pinned) {
+            const pn = dock._norm(p);
+            let match = null;
+            for (const n in runByNorm) {
+                if (n === pn || n.indexOf(pn) === 0 || pn.indexOf(n) === 0) { match = n; break; }
+            }
+            if (match) { out.push({ app_id: runByNorm[match].app_id, id: runByNorm[match].id, running: true }); used[match] = true; }
+            else { out.push({ app_id: p, id: -1, running: false }); }
         }
-        for (const a of order)
-            if (!seen[a]) out.push({ app_id: a, id: runId[a], running: true });
+        for (const n of order)
+            if (!used[n]) out.push({ app_id: runByNorm[n].app_id, id: runByNorm[n].id, running: true });
         return out;
     }
 
