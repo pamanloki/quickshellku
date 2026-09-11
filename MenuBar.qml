@@ -95,6 +95,15 @@ PanelWindow {
         anchors.verticalCenter: parent.verticalCenter
         spacing: 1
 
+        // weather (wttr.in); hidden until a reading is available
+        Item2 {
+            visible: Weather.ok
+            icon: Weather.icon
+            iconColor: Theme.base0C
+            label: Weather.temp
+            onClicked: Weather.refresh()
+        }
+
         // system stats (cpu + temp), click opens btop
         Item2 {
             icon: "󰻠"

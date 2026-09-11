@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Services.Pipewire
 import "root:/services"
 
 // macOS-style Now Playing popover: album art, title/artist, a scrubber with
@@ -20,6 +21,17 @@ Variants {
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         WlrLayershell.namespace: "quickshell:music"
+
+        // ---- audio (for the volume slider) ----
+        readonly property var sink: Pipewire.defaultAudioSink
+        readonly property int volume: sink && sink.audio ? Math.round(sink.audio.volume * 100) : 0
+        readonly property bool muted: sink && sink.audio ? sink.audio.muted : false
+        function setVolume(v) {
+            if (!sink || !sink.audio) return;
+            sink.audio.muted = false;
+            sink.audio.volume = Math.max(0, Math.min(1, v / 100));
+        }
+        PwObjectTracker { objects: win.sink ? [win.sink] : [] }
 
         // keep the scrubber live while open
         Timer {
@@ -195,6 +207,46 @@ Variants {
                         text: "󰒭"; color: Theme.base05
                         font.family: Theme.fontFamilyFallback; font.pixelSize: Theme.fontSize + 8
                         MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: Player.next() }
+                    }
+                }
+
+                // ---- volume ----
+                Row {
+                    width: parent.width
+                    spacing: 10
+                    visible: Player.hasPlayer
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: win.muted || win.volume === 0 ? "󰖁" : (win.volume >= 50 ? "󰕾" : "󰖀")
+                        color: Theme.base05
+                        font.family: Theme.fontFamilyFallback
+                        font.pixelSize: Theme.fontSize + 2
+                        width: 22
+                    }
+                    Item {
+                        width: parent.width - 32
+                        height: 22
+                        anchors.verticalCenter: parent.verticalCenter
+                        Rectangle {
+                            id: vtrack
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width
+                            height: 5
+                            radius: 2.5
+                            color: Theme.base02
+                            Rectangle {
+                                anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
+                                radius: 2.5
+                                width: parent.width * Math.max(0, Math.min(100, win.volume)) / 100
+                                color: win.muted ? Theme.base08 : Theme.base0D
+                            }
+                        }
+                        MouseArea {
+                            anchors.fill: parent
+                            function pick(mx) { win.setVolume(Math.round(Math.max(0, Math.min(1, mx / width)) * 100)); }
+                            onPressed: mouse => pick(mouse.x)
+                            onPositionChanged: mouse => { if (pressed) pick(mouse.x); }
+                        }
                     }
                 }
             }
