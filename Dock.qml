@@ -301,18 +301,6 @@ PanelWindow {
                 }
             }
 
-            Rectangle {   // separator before Trash
-                width: 1; height: Theme.dockIconSize * 0.7
-                anchors.verticalCenter: parent.verticalCenter
-                color: Theme.base03
-            }
-
-            DockCell {
-                source: Quickshell.iconPath("user-trash", "user-trash")
-                tip: "Trash"
-                onActivated: Quickshell.execDetached(["sh", "-c",
-                    "pcmanfm trash:/// || xdg-open trash:/// || gio open trash:///"])
-            }
         }
     }
 }
