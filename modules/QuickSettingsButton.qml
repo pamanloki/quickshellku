@@ -45,14 +45,14 @@ Item {
                 text: root.volIcon()
                 color: root.muted ? Theme.base08 : Theme.base0D
                 font.family: Theme.fontFamilyFallback
-                font.pixelSize: Theme.fontSize + 3
+                font.pixelSize: Theme.fontSize + 2
             }
             Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: Network.icon
                 color: Network.connected ? Theme.base0A : Theme.base08
                 font.family: Theme.fontFamilyFallback
-                font.pixelSize: Theme.fontSize + 3
+                font.pixelSize: Theme.fontSize
             }
             Text {
                 anchors.verticalCenter: parent.verticalCenter
@@ -60,7 +60,7 @@ Item {
                 color: !Bluetooth.powered ? Theme.base08
                     : (Bluetooth.anyConnected ? Theme.base0B : Theme.base05)
                 font.family: Theme.fontFamilyFallback
-                font.pixelSize: Theme.fontSize + 3
+                font.pixelSize: Theme.fontSize
             }
         }
     }

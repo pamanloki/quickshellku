@@ -47,6 +47,9 @@ Variants {
 
         Rectangle {
             id: box
+            opacity: win.visible ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+            transform: Translate { y: win.visible ? 0 : 14; Behavior on y { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } } }
             width: 340
             height: 300
             anchors.right: parent.right

@@ -47,6 +47,10 @@ Variants {
             anchors.centerIn: parent
             width: grid.width + 40
             height: grid.height + 40
+            opacity: win.visible ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+            scale: win.visible ? 1 : 0.94
+            Behavior on scale { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
             color: Theme.base00
             border.color: Theme.base02
             border.width: 2
