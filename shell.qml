@@ -10,7 +10,8 @@ ShellRoot {
     // Force-instantiate singletons that run background services / own the
     // IpcHandlers, so they're live from startup (not just on first reference).
     readonly property var _services: [
-        Globals, Theme, Niri, SystemStats, Brightness, Network, Bluetooth, Nightlight, Notifications
+        Globals, Theme, Niri, SystemStats, Brightness, Network, Bluetooth, Nightlight,
+        Notifications, Player, Flavours, Time
     ]
 
     // One bar per monitor.
@@ -25,6 +26,8 @@ ShellRoot {
     BluetoothPanel {}
     NightlightPanel {}
     QuickSettingsPanel {}
+    CalendarPanel {}
+    ThemePanel {}
     PowerMenu {}
     Osd {}
     NotificationToasts {}

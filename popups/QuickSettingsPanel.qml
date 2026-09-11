@@ -191,6 +191,136 @@ Variants {
                 anchors.margins: 18
                 spacing: 16
 
+                // date + theme button
+                Row {
+                    width: parent.width
+                    Column {
+                        width: parent.width - 44
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 1
+                        Text {
+                            text: Qt.formatDate(Time.now, "dddd")
+                            color: Theme.base05
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize + 2
+                            font.weight: Theme.fontWeight
+                        }
+                        Text {
+                            text: Qt.formatDate(Time.now, "d MMMM yyyy")
+                            color: Theme.base03
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize - 2
+                        }
+                    }
+                    Rectangle {
+                        width: 40; height: 40; radius: 20
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: themeH.hovered ? Theme.base02 : Theme.base01
+                        Text {
+                            anchors.centerIn: parent
+                            text: "󰸌"
+                            color: Theme.base0E
+                            font.family: Theme.fontFamilyFallback
+                            font.pixelSize: Theme.fontSize + 4
+                        }
+                        HoverHandler { id: themeH }
+                        MouseArea { anchors.fill: parent; onClicked: Globals.toggleTheme() }
+                    }
+                }
+
+                // music player (only when something is playing/paused)
+                Rectangle {
+                    width: parent.width
+                    height: 66
+                    radius: 12
+                    color: Theme.base01
+                    visible: Player.hasPlayer
+
+                    Row {
+                        anchors.fill: parent
+                        anchors.margins: 9
+                        spacing: 10
+
+                        Rectangle {
+                            width: 48; height: 48; radius: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            color: Theme.base02
+                            clip: true
+                            Image {
+                                anchors.fill: parent
+                                source: Player.artUrl
+                                fillMode: Image.PreserveAspectCrop
+                                visible: Player.artUrl.length > 0
+                            }
+                            Text {
+                                anchors.centerIn: parent
+                                visible: Player.artUrl.length === 0
+                                text: "󰝚"
+                                color: Theme.base05
+                                font.family: Theme.fontFamilyFallback
+                                font.pixelSize: Theme.fontSize + 6
+                            }
+                        }
+
+                        Column {
+                            width: parent.width - 48 - 10 - (3 * 30 + 2 * 4) - 10
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 2
+                            Text {
+                                width: parent.width
+                                text: Player.title || "Nothing playing"
+                                color: Theme.base05
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 1
+                                font.weight: Theme.fontWeight
+                                elide: Text.ElideRight
+                            }
+                            Text {
+                                width: parent.width
+                                text: Player.artist
+                                color: Theme.base03
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 3
+                                elide: Text.ElideRight
+                                visible: text.length > 0
+                            }
+                        }
+
+                        Row {
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 4
+                            Repeater {
+                                model: [
+                                    { icon: "󰒮", act: "prev" },
+                                    { icon: Player.isPlaying ? "󰏤" : "󰐊", act: "toggle" },
+                                    { icon: "󰒭", act: "next" }
+                                ]
+                                delegate: Rectangle {
+                                    required property var modelData
+                                    width: 30; height: 30; radius: 15
+                                    color: mh.hovered ? Theme.base02 : "transparent"
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: modelData.icon
+                                        color: Theme.base05
+                                        font.family: Theme.fontFamilyFallback
+                                        font.pixelSize: Theme.fontSize + (modelData.act === "toggle" ? 3 : 1)
+                                    }
+                                    HoverHandler { id: mh }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        onClicked: {
+                                            if (modelData.act === "prev") Player.previous();
+                                            else if (modelData.act === "next") Player.next();
+                                            else Player.playPause();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 CtlSlider {
                     icon: win.muted || win.volume === 0 ? "󰖁" : (win.volume >= 50 ? "󰕾" : "󰖀")
                     value: win.volume

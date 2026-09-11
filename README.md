@@ -19,6 +19,9 @@ Flavours), reusing the same tools I already run:
 | Power | native grid → delegates to your `power-fuzzel` script |
 | Notifications | native daemon + toast popups (org.freedesktop.Notifications) |
 | OSD | unified volume + brightness on-screen display |
+| Media | MPRIS mini player in Quick Settings |
+| Calendar | month calendar (right-click the clock) |
+| Theme | Flavours picker (Base16/Base24) + light/dark toggle |
 | Tray | StatusNotifierItem (native) |
 
 ## Dependencies
@@ -97,7 +100,9 @@ You can also click the bar:
   Night light tiles — click a tile toggles it, right-click opens its detailed
   panel (network list / bluetooth devices / nightlight)
 - **Power button** (right, red) → power menu
-- **Clock** → toggle time / full date
+- **Clock** → left-click toggles time / full date · right-click → calendar
+- **Quick Settings** also shows the date, a music player (MPRIS), and a theme
+  button that opens the Flavours scheme picker (Base16 / Base24)
 
 ## Theming
 

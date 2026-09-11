@@ -59,6 +59,12 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: root.showDate = !root.showDate
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: mouse => {
+            if (mouse.button === Qt.RightButton)
+                Globals.toggleCalendar();
+            else
+                root.showDate = !root.showDate;
+        }
     }
 }
