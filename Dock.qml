@@ -79,11 +79,11 @@ PanelWindow {
             let m = null;
             for (const n in groups)
                 if (n === pn || n.indexOf(pn) === 0 || pn.indexOf(n) === 0) { m = n; break; }
-            if (m) { out.push({ app_id: groups[m].app_id, norm: m, running: true, count: groups[m].count }); used[m] = true; }
-            else { out.push({ app_id: p, norm: pn, running: false, count: 0 }); }
+            if (m) { out.push({ app_id: groups[m].app_id, norm: m, running: true, count: groups[m].count, pinned: true, pin: p }); used[m] = true; }
+            else { out.push({ app_id: p, norm: pn, running: false, count: 0, pinned: true, pin: p }); }
         }
         for (const n of order)
-            if (!used[n]) out.push({ app_id: groups[n].app_id, norm: n, running: true, count: groups[n].count });
+            if (!used[n]) out.push({ app_id: groups[n].app_id, norm: n, running: true, count: groups[n].count, pinned: false, pin: "" });
         return out;
     }
 
@@ -138,6 +138,7 @@ PanelWindow {
         signal reordered(real px)         // px = pointer x within dockRow at drop
         implicitWidth: Theme.dockIconSize + 10
         implicitHeight: Theme.dockIconSize + 22   // = dock background height
+        z: dragging ? 10 : 0              // lift above sibling cells while dragging
 
         // macOS launch bounce
         property real bounceY: 0
@@ -188,7 +189,6 @@ PanelWindow {
             anchors.bottomMargin: 9
             transformOrigin: Item.Bottom
             scale: cell.dragging ? 1.15 : cell._mag
-            z: cell.dragging ? 10 : 0
             Behavior on scale { enabled: !dock.dockHovering; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
             transform: [
                 Translate { y: cell.bounceY },
@@ -236,12 +236,14 @@ PanelWindow {
             hoverEnabled: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             property real pressX: 0
+            property bool dragArmed: false
+            property bool suppressClick: false
             onPressed: mouse => {
-                if (mouse.button === Qt.LeftButton && cell.canDrag)
-                    pressX = cell.mapToItem(dockRow, mouse.x, 0).x;
+                dragArmed = (mouse.button === Qt.LeftButton && cell.canDrag);
+                if (dragArmed) pressX = cell.mapToItem(dockRow, mouse.x, 0).x;
             }
             onPositionChanged: mouse => {
-                if (!pressed || !cell.canDrag) return;
+                if (!dragArmed) return;
                 const dx = cell.mapToItem(dockRow, mouse.x, 0).x - pressX;
                 if (Math.abs(dx) > 6) cell.dragging = true;
                 if (cell.dragging) cell.dragDX = dx;
@@ -251,10 +253,12 @@ PanelWindow {
                     cell.reordered(cell.mapToItem(dockRow, mouse.x, 0).x);
                     cell.dragDX = 0;
                     cell.dragging = false;
+                    suppressClick = true;    // don't fire the click that follows a drag
                 }
+                dragArmed = false;
             }
             onClicked: mouse => {
-                if (cell.dragging) { cell.dragging = false; return; }
+                if (suppressClick) { suppressClick = false; return; }
                 if (mouse.button === Qt.RightButton) cell.menuRequested();
                 else cell.activated();
             }
@@ -313,12 +317,12 @@ PanelWindow {
                     tip: dock.labelFor(modelData.app_id)
                     running: modelData.running
                     count: modelData.count
-                    canDrag: DockConfig.isPinned(modelData.app_id)
+                    canDrag: modelData.pinned === true
                     onReordered: px => {
                         const cw = Theme.dockIconSize + 10;
                         const step = cw + 4;
                         const startX = cw + 9;   // launcher + spacing + separator + spacing
-                        DockConfig.moveTo(modelData.app_id, Math.round((px - startX - cw / 2) / step));
+                        DockConfig.moveTo(modelData.pin, Math.round((px - startX - cw / 2) / step));
                     }
                     onActivated: {
                         if (modelData.running) dock.activateApp(modelData.norm);
