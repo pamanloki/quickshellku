@@ -42,6 +42,7 @@ ShellRoot {
     DockMenu {}
     AppleMenu {}
     AboutPanel {}
+    SystemPanel {}
     AudioPanel {}
     BatteryPanel {}
     BatteryAlert {}

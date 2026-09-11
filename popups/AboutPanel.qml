@@ -120,9 +120,54 @@ Variants {
                         Row2 { k: "Kernel";     v: SysInfo.kernel }
                         Row2 { k: "Desktop";    v: SysInfo.desktop }
                         Row2 { k: "Processor";  v: SysInfo.cpu }
-                        Row2 { k: "Memory";     v: SystemStats.memTotalGiB > 0 ? SystemStats.memTotalGiB.toFixed(1) + " GiB" : "" }
+                        Row2 {
+                            k: "Memory"
+                            v: SystemStats.memTotalGiB > 0
+                                ? (SystemStats.memUsedGiB.toFixed(1) + " / " + SystemStats.memTotalGiB.toFixed(1) + " GiB")
+                                : ""
+                        }
+                        Row2 { k: "Disk";       v: SystemStats.diskFree !== "--" ? SystemStats.diskFree + " free" : "" }
                         Row2 { k: "Shell";      v: SysInfo.shell }
                         Row2 { k: "Uptime";     v: SysInfo.uptime }
+                    }
+                }
+
+                // More Info… button (macOS-style)
+                Item { width: parent.width; height: 6 }
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: reportRow.implicitWidth + 28
+                    height: 30
+                    radius: 9
+                    color: reportMA.containsMouse ? Theme.base0D : Theme.base02
+                    Row {
+                        id: reportRow
+                        anchors.centerIn: parent
+                        spacing: 7
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "󰋼"
+                            color: reportMA.containsMouse ? Theme.base00 : Theme.base05
+                            font.family: Theme.fontFamilyFallback
+                            font.pixelSize: Theme.fontSize
+                        }
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "System Report…"
+                            color: reportMA.containsMouse ? Theme.base00 : Theme.base05
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize - 2
+                            font.weight: Theme.fontWeight
+                        }
+                    }
+                    MouseArea {
+                        id: reportMA
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onClicked: {
+                            Quickshell.execDetached(["footx", "-e", "-f", "btop"]);
+                            Globals.aboutOpen = false;
+                        }
                     }
                 }
 

@@ -100,7 +100,7 @@ PanelWindow {
             icon: "󰻠"
             iconColor: Theme.base0C
             label: SystemStats.cpuPercent + "%"
-            onClicked: Quickshell.execDetached(["footx", "-e", "-f", "btop"])
+            onClicked: Globals.toggleSystem()
         }
         Item2 {
             visible: SystemStats.tempKnown
@@ -108,7 +108,7 @@ PanelWindow {
             iconColor: SystemStats.tempClass === "critical" ? Theme.base08
                 : SystemStats.tempClass === "warm" ? Theme.base0A : Theme.base0B
             label: SystemStats.tempC + "°"
-            onClicked: Quickshell.execDetached(["footx", "-e", "-f", "btop"])
+            onClicked: Globals.toggleSystem()
         }
 
         // XBPS updates (only when there are any)

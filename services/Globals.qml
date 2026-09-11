@@ -28,6 +28,7 @@ Singleton {
     property bool aboutOpen: false
     property bool audioOpen: false
     property bool batteryOpen: false
+    property bool systemOpen: false
 
     // Dock auto-hide (macOS "Turn Hiding On"): dock slides off-screen and
     // reveals when the cursor reaches the bottom edge — keeps the dock out of
@@ -87,6 +88,7 @@ Singleton {
         aboutOpen = false;
         audioOpen = false;
         batteryOpen = false;
+        systemOpen = false;
         panelX = -1;
     }
 
@@ -105,6 +107,7 @@ Singleton {
     function showAbout()       { _closeAll(); aboutOpen = true; }
     function toggleAudio()     { const v = !audioOpen;     _closeAll(); audioOpen = v; }
     function toggleBattery()   { const v = !batteryOpen;   _closeAll(); batteryOpen = v; }
+    function toggleSystem()    { const v = !systemOpen;    _closeAll(); systemOpen = v; }
 
     Timer {
         id: osdTimer
@@ -172,5 +175,9 @@ Singleton {
     IpcHandler {
         target: "dock"
         function autohide() { root.toggleDockAutoHide(); }
+    }
+    IpcHandler {
+        target: "system"
+        function toggle() { root.toggleSystem(); }
     }
 }

@@ -21,6 +21,11 @@ Singleton {
     property int tempC: 0
     property bool tempKnown: false
 
+    property string diskUsed: "--"
+    property string diskTotal: "--"
+    property int diskPercent: 0
+    readonly property real memPercent: memTotalGiB > 0 ? Math.round(memUsedGiB / memTotalGiB * 100) : 0
+
     readonly property string tempClass: !tempKnown ? "unknown"
         : (tempC >= 70 ? "critical" : (tempC >= 55 ? "warm" : "cool"))
 
@@ -79,9 +84,14 @@ Singleton {
             root.tempKnown = false;
         }
 
-        // 3: df avail on /
-        if (s[3] && s[3].trim().length > 0)
-            root.diskFree = s[3].trim();
+        // 3: df on / → "avail used size pcent" (e.g. "40G 55G 100G 58%")
+        if (s[3] && s[3].trim().length > 0) {
+            const parts = s[3].trim().split(/\s+/);
+            root.diskFree = parts[0] || "--";
+            root.diskUsed = parts[1] || "--";
+            root.diskTotal = parts[2] || "--";
+            root.diskPercent = parts[3] ? (parseInt(parts[3]) || 0) : 0;
+        }
     }
 
     Process {
@@ -90,7 +100,7 @@ Singleton {
             "head -1 /proc/stat; printf '@@@'; " +
             "cat /proc/meminfo; printf '@@@'; " +
             "sensors 2>/dev/null | grep -m1 'Package id 0'; printf '@@@'; " +
-            "df -h --output=avail / | tail -1 | tr -d ' '"]
+            "df -h --output=avail,used,size,pcent / | tail -1"]
         stdout: StdioCollector {
             onStreamFinished: root._parse(text)
         }
