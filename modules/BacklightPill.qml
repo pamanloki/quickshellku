@@ -8,6 +8,7 @@ StatPill {
     id: root
     icon: Brightness.icon
     value: Brightness.percent + "%"
+    valueMax: "100%"
     accent: Theme.base0E
 
     onClicked: Quickshell.execDetached(["nightlight-fuzzel"])

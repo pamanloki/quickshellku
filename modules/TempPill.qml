@@ -8,6 +8,7 @@ StatPill {
     icon: SystemStats.tempClass === "critical" ? "󰸁"
         : (SystemStats.tempClass === "warm" ? "󱃂" : "󰔏")
     value: SystemStats.tempC + "°C"
+    valueMax: "100°C"
     accent: SystemStats.tempClass === "critical" ? Theme.base08
         : (SystemStats.tempClass === "warm" ? Theme.base0A : Theme.base0B)
 

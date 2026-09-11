@@ -50,20 +50,20 @@ PanelWindow {
             icon: "󰘚"
             value: SystemStats.cpuPercent + "%"
             accent: Theme.base08
-            minValueWidth: 44
+            valueMax: "100%"
         }
         StatPill {
             icon: "󰍛"
             value: SystemStats.memUsedGiB.toFixed(1) + "GiB"
             accent: Theme.base0C
-            minValueWidth: 66
+            valueMax: "99.9GiB"
             onClicked: Quickshell.execDetached(["footx", "-e", "-f", "btop"])
         }
         StatPill {
             icon: "󰋊"
             value: SystemStats.diskFree
             accent: Theme.base0A
-            minValueWidth: 52
+            valueMax: "999G"
         }
         TempPill {}
         BacklightPill {}

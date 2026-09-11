@@ -36,6 +36,7 @@ Item {
         id: pill
         icon: root.icon()
         value: root.muted ? "Mute" : (root.volume + "%")
+        valueMax: "100%"
         accent: Theme.base0D
         onClicked: Quickshell.execDetached(["pavucontrol"])
         onScrollUp: root.setVolume((root.volume + 5) / 100)
