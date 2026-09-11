@@ -197,7 +197,7 @@ Variants {
             scale: win.visible ? 1 : 0.96
             Behavior on scale { NumberAnimation { duration: Theme.durSpatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeSpatial } }
             transform: Translate { y: win.visible ? 0 : 18; Behavior on y { NumberAnimation { duration: Theme.durSpatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeSpatial } } }
-            width: 560
+            width: 640
             height: 540
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
@@ -216,8 +216,8 @@ Variants {
                 // ---- search field ----
                 Rectangle {
                     width: parent.width
-                    height: 46
-                    radius: 10
+                    height: 56
+                    radius: 14
                     color: Theme.base01
                     border.color: search.activeFocus ? Theme.base0D : "transparent"
                     border.width: 2
@@ -225,23 +225,23 @@ Variants {
                     Text {
                         id: searchIcon
                         anchors.left: parent.left
-                        anchors.leftMargin: 14
+                        anchors.leftMargin: 16
                         anchors.verticalCenter: parent.verticalCenter
-                        text: win.clipMode ? "󰅍" : win.commandMode ? "󰅱" : ""
+                        text: win.clipMode ? "󰅍" : win.commandMode ? "󰅱" : ""
                         color: win.clipMode ? Theme.base0C : win.commandMode ? Theme.base09 : Theme.base0D
                         font.family: Theme.fontFamilyFallback
-                        font.pixelSize: Theme.fontSize + 2
+                        font.pixelSize: Theme.fontSize + 6
                     }
                     TextInput {
                         id: search
                         anchors.left: searchIcon.right
-                        anchors.leftMargin: 12
+                        anchors.leftMargin: 14
                         anchors.right: countText.left
                         anchors.rightMargin: 8
                         anchors.verticalCenter: parent.verticalCenter
                         color: Theme.base05
                         font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSize + 1
+                        font.pixelSize: Theme.fontSize + 5
                         clip: true
                         onTextChanged: win.refresh()
 
@@ -279,7 +279,7 @@ Variants {
                 ListView {
                     id: list
                     width: parent.width
-                    height: parent.height - 46 - 12 - 22 - 12
+                    height: parent.height - 56 - 12 - 22 - 12
                     clip: true
                     visible: !win.clipMode
                     model: win.commandMode ? 0 : win.results
@@ -382,7 +382,7 @@ Variants {
                 ListView {
                     id: clipList
                     width: parent.width
-                    height: parent.height - 46 - 12 - 22 - 12
+                    height: parent.height - 56 - 12 - 22 - 12
                     clip: true
                     visible: win.clipMode
                     model: win.clipResults
