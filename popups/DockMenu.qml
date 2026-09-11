@@ -111,11 +111,41 @@ Variants {
                                 onClicked: {
                                     Niri.closeWindow(modelData.id);
                                     // drop just this row; keep the panel open
-                                    const rem = Globals.dockMenuWindows.filter(w => w.id !== modelData.id);
-                                    Globals.dockMenuWindows = rem;
-                                    if (rem.length === 0) Globals.dockMenuOpen = false;
+                                    Globals.dockMenuWindows = Globals.dockMenuWindows.filter(w => w.id !== modelData.id);
                                 }
                             }
+                        }
+                    }
+                }
+
+                Rectangle {   // separator above the pin toggle
+                    visible: Globals.dockMenuWindows.length > 0
+                    width: menuCol.width - 16
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    height: 1
+                    color: Theme.base03
+                }
+                Rectangle {   // Keep in Dock / Remove from Dock
+                    width: menuCol.width
+                    height: 34
+                    radius: 8
+                    color: pinMA.containsMouse ? Theme.base02 : "transparent"
+                    Text {
+                        anchors.left: parent.left; anchors.leftMargin: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: DockConfig.isPinned(Globals.dockMenuAppId) ? "Remove from Dock" : "Keep in Dock"
+                        color: Theme.base05
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize - 2
+                    }
+                    MouseArea {
+                        id: pinMA
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onClicked: {
+                            if (DockConfig.isPinned(Globals.dockMenuAppId)) DockConfig.unpin(Globals.dockMenuAppId);
+                            else DockConfig.pin(Globals.dockMenuAppId);
+                            Globals.dockMenuOpen = false;
                         }
                     }
                 }

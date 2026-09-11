@@ -12,7 +12,7 @@ ShellRoot {
     readonly property var _services: [
         Globals, Theme, Niri, SystemStats, Brightness, Network, Bluetooth, Nightlight,
         Notifications, Player, Flavours, Time, Wallpaper, Audio, Screenshot, Updates, SysInfo,
-        Battery
+        Battery, DockConfig
     ]
 
     // macOS-style top menu bar + bottom dock, per monitor.

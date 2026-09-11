@@ -47,14 +47,16 @@ Singleton {
         trayMenuOpen = true;
     }
 
-    // Dock window menu (right-click a dock icon → pick a window).
+    // Dock window menu (right-click a dock icon → pick a window / pin toggle).
     property bool dockMenuOpen: false
     property var dockMenuWindows: []
     property real dockMenuX: 0
-    function openDockMenu(wins, x) {
+    property string dockMenuAppId: ""    // app whose menu is open (for pin/unpin)
+    function openDockMenu(wins, x, appId) {
         _closeAll();
         dockMenuWindows = wins;
         dockMenuX = x;
+        dockMenuAppId = appId || "";
         dockMenuOpen = true;
     }
 

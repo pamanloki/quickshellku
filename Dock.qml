@@ -11,8 +11,8 @@ PanelWindow {
     required property var modelData
     screen: modelData
 
-    // Pinned app ids (edit to taste; matches .desktop / window app_id).
-    property var pinned: ["brave", "foot"]
+    // Pinned app ids (persisted; "Keep in Dock" / "Remove from Dock").
+    readonly property var pinned: DockConfig.pinned
 
     // parabolic magnify state (cursor x within the dock row)
     property real hoverX: -1
@@ -288,15 +288,15 @@ PanelWindow {
                         else { dock.launch(modelData.app_id); dcell.bounce(); }
                     }
                     onMenuRequested: {
-                        if (!modelData.running) return;
                         const list = Niri.windowList || [];
                         const wins = [];
-                        for (let i = 0; i < list.length; i++)
-                            if (dock._norm(list[i].app_id || "?") === modelData.norm)
-                                wins.push({ id: list[i].id, icon: dock.iconFor(list[i].app_id), title: (list[i].title && list[i].title.length ? list[i].title : dock.labelFor(list[i].app_id)) });
+                        if (modelData.running)
+                            for (let i = 0; i < list.length; i++)
+                                if (dock._norm(list[i].app_id || "?") === modelData.norm)
+                                    wins.push({ id: list[i].id, icon: dock.iconFor(list[i].app_id), title: (list[i].title && list[i].title.length ? list[i].title : dock.labelFor(list[i].app_id)) });
                         // dock window is centred, so add its on-screen left edge
                         const cx = (dock.screen.width - dock.width) / 2 + dcell.mapToItem(null, dcell.width / 2, 0).x;
-                        Globals.openDockMenu(wins, cx);
+                        Globals.openDockMenu(wins, cx, modelData.app_id);
                     }
                 }
             }
