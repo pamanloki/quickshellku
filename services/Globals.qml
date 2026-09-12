@@ -37,16 +37,34 @@ Singleton {
     property var switcherList: []      // [{norm, app_id, id}]
     property int switcherIndex: 0
     function _switcherNorm(s) { return (s || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+
+    // most-recently-used app order (norms, most recent first)
+    property var _appMru: []
+    Connections {
+        target: Niri
+        function onFocusedAppIdChanged() {
+            const n = root._switcherNorm(Niri.focusedAppId || "");
+            if (!n) return;
+            const a = root._appMru.filter(x => x !== n);
+            a.unshift(n);
+            root._appMru = a;
+        }
+    }
+
     function _buildSwitcher() {
         const list = Niri.windowList || [];
-        const seen = ({});
-        const out = [];
+        const byNorm = ({});
         for (let i = 0; i < list.length; i++) {
             const n = _switcherNorm(list[i].app_id || "?");
-            if (seen[n]) continue;
-            seen[n] = true;
-            out.push({ norm: n, app_id: list[i].app_id || "?", id: list[i].id });
+            if (!byNorm[n]) byNorm[n] = { norm: n, app_id: list[i].app_id || "?", id: list[i].id };
         }
+        const out = [];
+        const used = ({});
+        // MRU first (running apps only), then any remaining running apps
+        for (const n of root._appMru)
+            if (byNorm[n] && !used[n]) { out.push(byNorm[n]); used[n] = true; }
+        for (const n in byNorm)
+            if (!used[n]) out.push(byNorm[n]);
         return out;
     }
     function switcherStep(dir) {

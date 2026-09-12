@@ -14,6 +14,26 @@ Singleton {
 
     readonly property string dir: Quickshell.env("HOME") + "/pictures/ScreenShots"
 
+    // last saved screenshot path — a floating thumbnail watches this (macOS-style)
+    property string lastShot: ""
+    function _stamp() { return Qt.formatDateTime(new Date(), "yyyy-MM-dd_HH-mm-ss"); }
+    Process {
+        id: shotProc
+        property string file: ""
+        onExited: (code, status) => {
+            if (code === 0 && shotProc.file.length > 0) {
+                root.lastShot = "";                       // force change even if same path
+                root.lastShot = shotProc.file;
+                Quickshell.execDetached(["sh", "-c",
+                    'wl-copy -t image/png < "$1" 2>/dev/null; ' +
+                    'notify-send -a Screenshot "󰄄 Screenshot tersimpan" "$(basename "$1")"',
+                    "sh", shotProc.file]);
+            } else if (code !== 0 && code !== 3) {
+                Quickshell.execDetached(["sh", "-c", root._fail]);
+            }
+        }
+    }
+
     // Detached, not a Process: wl-copy daemonises to keep serving the clipboard,
     // and a Process would kill it (and its whole group) when sh exits, wiping
     // the copy. execDetached fully detaches so the capture + clipboard survive.
@@ -47,10 +67,11 @@ Singleton {
              'notify-send -a Screenshot "󰄄 Region disalin" "→ clipboard"; else ' + root._fail + '; fi; rm -f "$t"');
     }
     function regionFile() {
-        _run('d="$HOME/pictures/ScreenShots"; mkdir -p "$d"; f="$d/shot-$(date +%F_%H-%M-%S).png"; ' +
-             'g=$(slurp) || exit 0; ' +
-             'if grim -g "$g" "$f"; then wl-copy -t image/png < "$f" 2>/dev/null; ' +
-             'notify-send -a Screenshot "󰄄 Screenshot tersimpan" "$(basename "$f")"; else ' + root._fail + '; fi');
+        const f = root.dir + "/shot-" + _stamp() + ".png";
+        shotProc.file = f;
+        shotProc.command = ["sh", "-c",
+            'mkdir -p "$(dirname "$1")"; g=$(slurp) || exit 3; exec grim -g "$g" "$1"', "sh", f];
+        shotProc.running = true;
     }
     function fullClip() {
         _run('t=$(mktemp --suffix=.png); ' +
@@ -58,9 +79,11 @@ Singleton {
              'notify-send -a Screenshot "󰄄 Layar penuh disalin" "→ clipboard"; else ' + root._fail + '; fi; rm -f "$t"');
     }
     function fullFile() {
-        _run('d="$HOME/pictures/ScreenShots"; mkdir -p "$d"; f="$d/shot-$(date +%F_%H-%M-%S).png"; ' +
-             'if grim "$f"; then wl-copy -t image/png < "$f" 2>/dev/null; ' +
-             'notify-send -a Screenshot "󰄄 Screenshot tersimpan" "$(basename "$f")"; else ' + root._fail + '; fi');
+        const f = root.dir + "/shot-" + _stamp() + ".png";
+        shotProc.file = f;
+        shotProc.command = ["sh", "-c",
+            'mkdir -p "$(dirname "$1")"; exec grim "$1"', "sh", f];
+        shotProc.running = true;
     }
 
     IpcHandler {

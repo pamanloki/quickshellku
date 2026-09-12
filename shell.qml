@@ -49,5 +49,6 @@ ShellRoot {
     BatteryPanel {}
     BatteryAlert {}
     ScreenshotMenu {}
+    ScreenshotThumbnail {}
     ScreenCorners {}
 }
