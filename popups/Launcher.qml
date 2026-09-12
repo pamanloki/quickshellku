@@ -4,11 +4,9 @@ import Quickshell.Io
 import Quickshell.Wayland
 import "root:/services"
 
-// App launcher, polished with ideas from noctalia:
-//   * fuzzy scoring (prefix / word-start / substring / subsequence)
-//   * "most used" ordering via a small persisted usage count
-//   * hover-to-select that ignores stray hover right after keyboard nav
-//   * command mode: type ">cmd" and press Enter to run it
+// macOS Launchpad-style app launcher: a full-screen grid of large app icons
+// with a search pill on top. Keeps fuzzy scoring + "most used" ordering, and
+// the command mode (">cmd") / clipboard mode (";") from before.
 Variants {
     model: Quickshell.screens
 
@@ -103,29 +101,20 @@ Variants {
             else if (gen.indexOf(q) >= 0) s = 220;
             else if (com.indexOf(q) >= 0) s = 140;
             else return -1;
-            s += Math.min(300, (win.usage[e.id] || 0) * 25); // frequency boost
-            s -= name.length * 0.1;                            // prefer shorter
+            s += Math.min(300, (win.usage[e.id] || 0) * 25);
+            s -= name.length * 0.1;
             return s;
         }
 
         function refresh() {
-            if (win.commandMode) {
-                win.results = [];
-                win.selectedIndex = 0;
-                return;
-            }
-            if (win.clipMode) {
-                clipListProc.running = true;   // parsed + filtered in its collector
-                return;
-            }
+            if (win.commandMode) { win.results = []; win.selectedIndex = 0; return; }
+            if (win.clipMode) { clipListProc.running = true; return; }
             const q = search.text.toLowerCase().trim();
             const apps = DesktopEntries.applications;
             const all = apps && apps.values !== undefined ? apps.values : apps;
             let out = [];
             if (q.length === 0) {
-                for (const e of all)
-                    if (!e.noDisplay)
-                        out.push(e);
+                for (const e of all) if (!e.noDisplay) out.push(e);
                 out.sort((a, b) => {
                     const ua = win.usage[a.id] || 0, ub = win.usage[b.id] || 0;
                     if (ua !== ub) return ub - ua;
@@ -148,8 +137,7 @@ Variants {
         function activate() {
             if (win.commandMode) {
                 const cmd = search.text.slice(1).trim();
-                if (cmd.length > 0)
-                    Quickshell.execDetached(["sh", "-c", cmd]);
+                if (cmd.length > 0) Quickshell.execDetached(["sh", "-c", cmd]);
                 Globals.launcherOpen = false;
                 return;
             }
@@ -160,11 +148,7 @@ Variants {
                 return;
             }
             const e = win.results[win.selectedIndex];
-            if (e) {
-                win.bumpUsage(e.id);
-                e.execute();
-                Globals.launcherOpen = false;
-            }
+            if (e) { win.bumpUsage(e.id); e.execute(); Globals.launcherOpen = false; }
         }
 
         function move(delta) {
@@ -172,8 +156,8 @@ Variants {
             if (n === 0) return;
             win.ignoreHover = true;
             win.selectedIndex = Math.max(0, Math.min(n - 1, win.selectedIndex + delta));
-            const lv = win.clipMode ? clipList : list;
-            lv.positionViewAtIndex(win.selectedIndex, ListView.Contain);
+            if (win.clipMode) clipList.positionViewAtIndex(win.selectedIndex, ListView.Contain);
+            else grid.positionViewAtIndex(win.selectedIndex, GridView.Contain);
         }
 
         onVisibleChanged: {
@@ -186,262 +170,214 @@ Variants {
             }
         }
 
-        // dim + click-away
+        // dim + click-away (full screen, Launchpad-style)
         MouseArea { anchors.fill: parent; onClicked: Globals.launcherOpen = false }
-        Rectangle { anchors.fill: parent; color: "#000000"; opacity: 0.38 }
-
         Rectangle {
+            anchors.fill: parent
+            color: "#000000"
+            opacity: win.visible ? 0.5 : 0
+            Behavior on opacity { NumberAnimation { duration: Theme.durEffects } }
+        }
+
+        Item {
             id: box
+            anchors.fill: parent
             opacity: win.visible ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: Theme.durEffects; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeEffects } }
+            Behavior on opacity { NumberAnimation { duration: Theme.durEffects; easing.type: Easing.OutCubic } }
             scale: win.visible ? 1 : 0.96
             Behavior on scale { NumberAnimation { duration: Theme.durSpatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeSpatial } }
-            transform: Translate { y: win.visible ? 0 : 18; Behavior on y { NumberAnimation { duration: Theme.durSpatial; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.easeSpatial } } }
-            width: 640
-            height: 540
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: -110
-            color: Theme.base00
-            border.color: Theme.base02
-            border.width: 2
-            radius: 14
-            MouseArea { anchors.fill: parent }
 
-            Column {
-                anchors.fill: parent
-                anchors.margins: 14
-                spacing: 12
+            // ---- search pill (top centre) ----
+            Rectangle {
+                id: searchPill
+                anchors.top: parent.top
+                anchors.topMargin: Math.round(parent.height * 0.10)
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 420
+                height: 44
+                radius: 22
+                color: Theme.base01
+                border.color: search.activeFocus ? Theme.base0D : Theme.base02
+                border.width: 1
 
-                // ---- search field ----
-                Rectangle {
-                    width: parent.width
-                    height: 56
-                    radius: 14
-                    color: Theme.base01
-                    border.color: search.activeFocus ? Theme.base0D : "transparent"
-                    border.width: 2
+                Text {
+                    id: searchIcon
+                    anchors.left: parent.left; anchors.leftMargin: 16
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: win.clipMode ? "󰅍" : win.commandMode ? "󰅱" : ""
+                    color: win.clipMode ? Theme.base0C : win.commandMode ? Theme.base09 : Theme.base04
+                    font.family: Theme.fontFamilyFallback
+                    font.pixelSize: Theme.fontSize + 2
+                }
+                TextInput {
+                    id: search
+                    anchors.left: searchIcon.right; anchors.leftMargin: 12
+                    anchors.right: parent.right; anchors.rightMargin: 16
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: Theme.base05
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize + 1
+                    clip: true
+                    onTextChanged: win.refresh()
 
                     Text {
-                        id: searchIcon
-                        anchors.left: parent.left
-                        anchors.leftMargin: 16
                         anchors.verticalCenter: parent.verticalCenter
-                        text: win.clipMode ? "󰅍" : win.commandMode ? "󰅱" : ""
-                        color: win.clipMode ? Theme.base0C : win.commandMode ? Theme.base09 : Theme.base0D
-                        font.family: Theme.fontFamilyFallback
-                        font.pixelSize: Theme.fontSize + 6
-                    }
-                    TextInput {
-                        id: search
-                        anchors.left: searchIcon.right
-                        anchors.leftMargin: 14
-                        anchors.right: countText.left
-                        anchors.rightMargin: 8
-                        anchors.verticalCenter: parent.verticalCenter
-                        color: Theme.base05
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSize + 5
-                        clip: true
-                        onTextChanged: win.refresh()
-
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: "Search apps…   ( >  run command  ·  ;  clipboard )"
-                            color: Theme.base03
-                            font: search.font
-                            visible: search.text.length === 0
-                        }
-
-                        Keys.onEscapePressed: Globals.launcherOpen = false
-                        Keys.onReturnPressed: win.activate()
-                        Keys.onEnterPressed: win.activate()
-                        Keys.onDownPressed: win.move(1)
-                        Keys.onUpPressed: win.move(-1)
-                        Keys.onPressed: event => {
-                            if (event.key === Qt.Key_Tab) { win.move(1); event.accepted = true; }
-                            else if (event.key === Qt.Key_Backtab) { win.move(-1); event.accepted = true; }
-                        }
-                    }
-                    Text {
-                        id: countText
-                        anchors.right: parent.right
-                        anchors.rightMargin: 14
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: win.clipMode ? (win.clipResults.length + "") : win.commandMode ? "run" : win.results.length + ""
+                        text: "Search"
                         color: Theme.base03
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSize - 2
+                        font: search.font
+                        visible: search.text.length === 0
+                    }
+
+                    Keys.onEscapePressed: Globals.launcherOpen = false
+                    Keys.onReturnPressed: win.activate()
+                    Keys.onEnterPressed: win.activate()
+                    Keys.onDownPressed: win.move(win.clipMode ? 1 : grid.columns)
+                    Keys.onUpPressed: win.move(win.clipMode ? -1 : -grid.columns)
+                    Keys.onPressed: event => {
+                        if (event.key === Qt.Key_Tab) { win.move(1); event.accepted = true; }
+                        else if (event.key === Qt.Key_Backtab) { win.move(-1); event.accepted = true; }
+                        else if (event.key === Qt.Key_Right && !win.clipMode) { win.move(1); event.accepted = true; }
+                        else if (event.key === Qt.Key_Left && !win.clipMode) { win.move(-1); event.accepted = true; }
                     }
                 }
+            }
 
-                // ---- results ----
-                ListView {
-                    id: list
-                    width: parent.width
-                    height: parent.height - 56 - 12 - 22 - 12
-                    clip: true
-                    visible: !win.clipMode
-                    model: win.commandMode ? 0 : win.results
-                    boundsBehavior: Flickable.StopAtBounds
-                    spacing: 2
-                    cacheBuffer: 400
+            // ---- command-mode hint ----
+            Text {
+                anchors.top: searchPill.bottom; anchors.topMargin: 40
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: win.commandMode
+                text: search.text.length > 1 ? ("Press ↵ to run:  " + search.text.slice(1).trim()) : "Type a shell command…"
+                color: Theme.base04
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize + 1
+            }
 
-                    // command-mode hint
-                    Text {
-                        anchors.centerIn: parent
-                        visible: win.commandMode
-                        text: search.text.length > 1
-                            ? ("Press ↵ to run:  " + search.text.slice(1).trim())
-                            : "Type a shell command…"
-                        color: Theme.base04
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSize
-                        width: parent.width - 20
-                        horizontalAlignment: Text.AlignHCenter
-                        wrapMode: Text.WordWrap
-                    }
-                    // empty state
-                    Text {
-                        anchors.centerIn: parent
-                        visible: !win.commandMode && win.results.length === 0
-                        text: "No matches"
-                        color: Theme.base03
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSize
-                    }
+            // ---- app grid (Launchpad) ----
+            GridView {
+                id: grid
+                visible: !win.clipMode && !win.commandMode
+                anchors.top: searchPill.bottom; anchors.topMargin: 28
+                anchors.bottom: parent.bottom; anchors.bottomMargin: 40
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: Math.min(parent.width - 120, columns * cellWidth)
+                clip: true
+                cellWidth: 132
+                cellHeight: 124
+                readonly property int columns: Math.max(1, Math.floor((parent.width - 120) / cellWidth))
+                model: win.results
+                boundsBehavior: Flickable.StopAtBounds
+                cacheBuffer: 600
 
-                    delegate: Rectangle {
-                        id: row
-                        required property var modelData
-                        required property int index
-                        width: list.width
-                        height: 52
-                        radius: 8
-                        readonly property bool selected: index === win.selectedIndex
-                        color: selected ? Theme.base02 : "transparent"
-                        Behavior on color { ColorAnimation { duration: 90 } }
-
-                        Row {
-                            anchors.fill: parent
-                            anchors.leftMargin: 10
-                            anchors.rightMargin: 10
-                            spacing: 12
-
-                            Rectangle {
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: 40; height: 40; radius: 8
-                                color: row.selected ? Theme.base01 : "transparent"
-                                Image {
-                                    anchors.centerIn: parent
-                                    width: 30; height: 30
-                                    sourceSize.width: 30; sourceSize.height: 30
-                                    source: Quickshell.iconPath(row.modelData.icon, "application-x-executable")
-                                    fillMode: Image.PreserveAspectFit
-                                }
-                            }
-                            Column {
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: row.width - 90
-                                spacing: 1
-                                Text {
-                                    text: row.modelData.name || ""
-                                    color: Theme.base05
-                                    font.family: Theme.fontFamily
-                                    font.pixelSize: Theme.fontSize
-                                    font.weight: Theme.fontWeight
-                                    elide: Text.ElideRight
-                                    width: parent.width
-                                }
-                                Text {
-                                    text: row.modelData.genericName || row.modelData.comment || ""
-                                    color: Theme.base04
-                                    font.family: Theme.fontFamily
-                                    font.pixelSize: Theme.fontSize - 3
-                                    visible: text.length > 0
-                                    elide: Text.ElideRight
-                                    width: parent.width
-                                }
-                            }
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onPositionChanged: {
-                                win.ignoreHover = false;
-                                win.selectedIndex = row.index;
-                            }
-                            onEntered: if (!win.ignoreHover) win.selectedIndex = row.index
-                            onClicked: { win.selectedIndex = row.index; win.activate(); }
-                        }
-                    }
+                Text {
+                    anchors.centerIn: parent
+                    visible: win.results.length === 0
+                    text: "No matches"
+                    color: Theme.base04
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize + 1
                 }
 
-                // ---- clipboard results ----
-                ListView {
-                    id: clipList
-                    width: parent.width
-                    height: parent.height - 56 - 12 - 22 - 12
-                    clip: true
-                    visible: win.clipMode
-                    model: win.clipResults
-                    boundsBehavior: Flickable.StopAtBounds
-                    spacing: 2
-                    cacheBuffer: 400
+                delegate: Item {
+                    id: cell
+                    required property var modelData
+                    required property int index
+                    width: grid.cellWidth
+                    height: grid.cellHeight
+                    readonly property bool selected: index === win.selectedIndex
 
-                    Text {
+                    Rectangle {
                         anchors.centerIn: parent
-                        visible: win.clipMode && win.clipResults.length === 0
-                        text: "Clipboard empty\n(needs cliphist + wl-clipboard)"
-                        color: Theme.base03
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSize
-                        horizontalAlignment: Text.AlignHCenter
-                    }
-
-                    delegate: Rectangle {
-                        id: crow
-                        required property var modelData
-                        required property int index
-                        width: clipList.width
-                        height: 44
-                        radius: 8
-                        readonly property bool selected: index === win.selectedIndex
-                        color: selected ? Theme.base02 : "transparent"
+                        width: parent.width - 12
+                        height: parent.height - 8
+                        radius: 18
+                        color: cell.selected ? Theme.base02 : "transparent"
                         Behavior on color { ColorAnimation { duration: 90 } }
-
+                    }
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 8
+                        Image {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: 60; height: 60
+                            sourceSize.width: 60; sourceSize.height: 60
+                            source: Quickshell.iconPath(cell.modelData.icon, "application-x-executable")
+                            fillMode: Image.PreserveAspectFit
+                        }
                         Text {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 14
-                            anchors.right: parent.right
-                            anchors.rightMargin: 14
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: crow.modelData.preview
+                            width: grid.cellWidth - 16
+                            horizontalAlignment: Text.AlignHCenter
+                            text: cell.modelData.name || ""
                             color: Theme.base05
                             font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize - 1
+                            font.pixelSize: Theme.fontSize - 3
                             elide: Text.ElideRight
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onPositionChanged: { win.ignoreHover = false; win.selectedIndex = crow.index; }
-                            onEntered: if (!win.ignoreHover) win.selectedIndex = crow.index
-                            onClicked: { win.selectedIndex = crow.index; win.activate(); }
+                            maximumLineCount: 2
+                            wrapMode: Text.WordWrap
                         }
                     }
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onPositionChanged: { win.ignoreHover = false; win.selectedIndex = cell.index; }
+                        onEntered: if (!win.ignoreHover) win.selectedIndex = cell.index
+                        onClicked: { win.selectedIndex = cell.index; win.activate(); }
+                    }
                 }
+            }
 
-                // ---- footer hints ----
+            // ---- clipboard results (list) ----
+            ListView {
+                id: clipList
+                visible: win.clipMode
+                anchors.top: searchPill.bottom; anchors.topMargin: 20
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 560
+                height: Math.min(parent.height - searchPill.height - 160, contentHeight)
+                clip: true
+                model: win.clipResults
+                boundsBehavior: Flickable.StopAtBounds
+                spacing: 2
+                cacheBuffer: 400
+
                 Text {
-                    width: parent.width
-                    horizontalAlignment: Text.AlignHCenter
-                    text: "↑↓ navigate    ↵ open    esc close"
+                    anchors.centerIn: parent
+                    visible: win.clipMode && win.clipResults.length === 0
+                    text: "Clipboard empty\n(needs cliphist + wl-clipboard)"
                     color: Theme.base03
                     font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize - 4
+                    font.pixelSize: Theme.fontSize
+                    horizontalAlignment: Text.AlignHCenter
+                }
+
+                delegate: Rectangle {
+                    id: crow
+                    required property var modelData
+                    required property int index
+                    width: clipList.width
+                    height: 44
+                    radius: 10
+                    readonly property bool selected: index === win.selectedIndex
+                    color: selected ? Theme.base02 : Theme.base01
+                    Behavior on color { ColorAnimation { duration: 90 } }
+
+                    Text {
+                        anchors.left: parent.left; anchors.leftMargin: 14
+                        anchors.right: parent.right; anchors.rightMargin: 14
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: crow.modelData.preview
+                        color: Theme.base05
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize - 1
+                        elide: Text.ElideRight
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onPositionChanged: { win.ignoreHover = false; win.selectedIndex = crow.index; }
+                        onEntered: if (!win.ignoreHover) win.selectedIndex = crow.index
+                        onClicked: { win.selectedIndex = crow.index; win.activate(); }
+                    }
                 }
             }
         }
