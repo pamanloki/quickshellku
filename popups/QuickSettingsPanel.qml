@@ -120,8 +120,8 @@ Variants {
             }
         }
 
-        // square-ish toggle tile (Focus / Night Light / Theme). The label wraps
-        // so it stays readable on the narrow (half-width) tiles.
+        // toggle tile (Focus / Do Not Disturb / Theme) — macOS lays the icon and
+        // the label out on one line (icon left, text right, vertically centred).
         component Tile: Rectangle {
             property string icon: ""
             property string label: ""
@@ -134,26 +134,27 @@ Variants {
             radius: 14
             color: on ? accent : Theme.base01
             Behavior on color { ColorAnimation { duration: 120 } }
+            Text {
+                id: tIcon
+                anchors.left: parent.left; anchors.leftMargin: 14
+                anchors.verticalCenter: parent.verticalCenter
+                text: icon
+                color: on ? Theme.base00 : Theme.base05
+                font.family: Theme.fontFamilyFallback
+                font.pixelSize: Theme.fontSize + 6
+            }
             Column {
-                anchors.left: parent.left; anchors.leftMargin: 12
+                anchors.left: tIcon.right; anchors.leftMargin: 12
                 anchors.right: parent.right; anchors.rightMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 2
-                Text {
-                    text: icon
-                    color: on ? Theme.base00 : Theme.base05
-                    font.family: Theme.fontFamilyFallback
-                    font.pixelSize: Theme.fontSize + 4
-                }
+                spacing: 1
                 Text {
                     text: label
                     color: on ? Theme.base00 : Theme.base05
                     font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize - 3
+                    font.pixelSize: Theme.fontSize - 1
                     font.weight: Theme.fontWeight
                     width: parent.width
-                    wrapMode: Text.WordWrap
-                    maximumLineCount: 2
                     elide: Text.ElideRight
                 }
                 Text {
@@ -161,6 +162,8 @@ Variants {
                     color: on ? Theme.base00 : Theme.base04
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize - 4
+                    width: parent.width
+                    elide: Text.ElideRight
                     visible: state.length > 0
                 }
             }
@@ -318,9 +321,11 @@ Variants {
                 // ---- Display ----
                 Card {
                     width: parent.width
-                    height: 74
+                    height: dispCol.implicitHeight + 24
                     Column {
-                        anchors.fill: parent
+                        id: dispCol
+                        anchors.left: parent.left; anchors.right: parent.right
+                        anchors.top: parent.top
                         anchors.margins: 12
                         spacing: 6
                         Text {
