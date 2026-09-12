@@ -175,7 +175,7 @@ Variants {
         Rectangle {
             anchors.fill: parent
             color: "#000000"
-            opacity: win.visible ? 0.5 : 0
+            opacity: win.visible ? 0.78 : 0
             Behavior on opacity { NumberAnimation { duration: Theme.durEffects } }
         }
 
