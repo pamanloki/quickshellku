@@ -243,9 +243,10 @@ Singleton {
     Instantiator {
         model: root.onNiri ? null : ToplevelManager.toplevels
         delegate: QtObject {
+            id: tlWatch
             required property var modelData
-            Connections {
-                target: modelData
+            property Connections _c: Connections {
+                target: tlWatch.modelData
                 function onAppIdChanged() { root._wlrRebuild(); }
             }
             Component.onCompleted: root._wlrRebuild()
