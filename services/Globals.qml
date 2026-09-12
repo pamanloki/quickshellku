@@ -54,7 +54,7 @@ Singleton {
             const l = _buildSwitcher();
             if (l.length === 0) return;
             switcherList = l;
-            switcherIndex = l.length > 1 ? (dir > 0 ? 1 : l.length - 1) : 0;
+            switcherIndex = dir > 0 ? 0 : (l.length - 1);   // start at the leftmost
             switcherOpen = true;
         } else {
             const n = switcherList.length;
