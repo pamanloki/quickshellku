@@ -62,37 +62,54 @@ Variants {
                 anchors.margins: 14
                 spacing: 10
 
-                // header + light/dark toggle
+                // header + Wallpaper button + light/dark toggle
                 Row {
                     width: parent.width
+                    spacing: 8
                     Text {
                         text: "Theme"
                         color: Theme.base05
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontSize + 2
                         font.weight: Theme.fontWeight
-                        width: parent.width - 96
+                        width: parent.width - 116 - 30 - 16
                         anchors.verticalCenter: parent.verticalCenter
+                        elide: Text.ElideRight
                     }
+                    // Wallpaper (moved here from Control Centre) — opens the picker
                     Rectangle {
-                        width: 96; height: 30; radius: 8
-                        color: togH.hovered ? Theme.base02 : Theme.base01
+                        width: 116; height: 30; radius: 8
+                        color: wpH.hovered ? Theme.base02 : Theme.base01
                         anchors.verticalCenter: parent.verticalCenter
                         Row {
                             anchors.centerIn: parent
                             spacing: 6
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: "󰔎"; color: Theme.base05
+                                text: "󰸉"; color: Theme.base05
                                 font.family: Theme.fontFamilyFallback
                                 font.pixelSize: Theme.fontSize - 3
                             }
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: "Toggle"; color: Theme.base05
+                                text: "Wallpaper"; color: Theme.base05
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontSize - 3
                             }
+                        }
+                        HoverHandler { id: wpH }
+                        MouseArea { anchors.fill: parent; onClicked: Globals.toggleWallpaper() }
+                    }
+                    // light/dark toggle
+                    Rectangle {
+                        width: 30; height: 30; radius: 8
+                        color: togH.hovered ? Theme.base02 : Theme.base01
+                        anchors.verticalCenter: parent.verticalCenter
+                        Text {
+                            anchors.centerIn: parent
+                            text: "󰔎"; color: Theme.base05
+                            font.family: Theme.fontFamilyFallback
+                            font.pixelSize: Theme.fontSize - 1
                         }
                         HoverHandler { id: togH }
                         MouseArea { anchors.fill: parent; onClicked: Flavours.toggle() }

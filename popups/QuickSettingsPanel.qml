@@ -118,7 +118,8 @@ Variants {
             }
         }
 
-        // square-ish toggle tile (Focus / Night Light)
+        // square-ish toggle tile (Focus / Night Light / Theme). The label wraps
+        // so it stays readable on the narrow (half-width) tiles.
         component Tile: Rectangle {
             property string icon: ""
             property string label: ""
@@ -133,8 +134,9 @@ Variants {
             Behavior on color { ColorAnimation { duration: 120 } }
             Column {
                 anchors.left: parent.left; anchors.leftMargin: 12
+                anchors.right: parent.right; anchors.rightMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 3
+                spacing: 2
                 Text {
                     text: icon
                     color: on ? Theme.base00 : Theme.base05
@@ -147,12 +149,17 @@ Variants {
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize - 3
                     font.weight: Theme.fontWeight
+                    width: parent.width
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 2
+                    elide: Text.ElideRight
                 }
                 Text {
                     text: state
                     color: on ? Theme.base00 : Theme.base04
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize - 4
+                    visible: state.length > 0
                 }
             }
             MouseArea {
@@ -237,73 +244,73 @@ Variants {
                     bottomPadding: 2
                 }
 
-                // ---- connectivity ----
-                Card {
+                // ---- top block: connectivity card (left) + tiles (right) ----
+                Row {
+                    id: topBlock
                     width: parent.width
-                    height: conn.implicitHeight + 8
+                    spacing: 10
+                    // right cluster is one wide tile + a row of two → its height
+                    // drives the left card so the two columns line up like macOS.
+                    readonly property real colH: 62 + 10 + 62
+
+                    // left: connectivity (Wi-Fi + Bluetooth)
+                    Card {
+                        width: (parent.width - 10) * 0.55
+                        height: topBlock.colH
+                        Column {
+                            anchors.left: parent.left; anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            ConnRow {
+                                width: parent.width
+                                icon: "󰤨"; label: "Wi-Fi"
+                                on: Network.radioOn
+                                accent: Theme.base0D
+                                sub: Network.connected ? Network.ssid : (Network.radioOn ? "On" : "Off")
+                                onToggled: Network.setRadio(!Network.radioOn)
+                                onOpened: Globals.toggleWifi()
+                            }
+                            ConnRow {
+                                width: parent.width
+                                icon: "󰂯"; label: "Bluetooth"
+                                on: Bluetooth.powered
+                                accent: Theme.base0D
+                                sub: Bluetooth.powered ? (Bluetooth.connectedName || "On") : "Off"
+                                onToggled: Bluetooth.setPowered(!Bluetooth.powered)
+                                onOpened: Globals.toggleBluetooth()
+                            }
+                        }
+                    }
+
+                    // right: Do Not Disturb (wide) + Night Light + Theme
                     Column {
-                        id: conn
-                        anchors.left: parent.left; anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        ConnRow {
+                        width: (parent.width - 10) * 0.45
+                        spacing: 10
+                        Tile {
                             width: parent.width
-                            icon: "󰤨"; label: "Wi-Fi"
-                            on: Network.radioOn
-                            accent: Theme.base0D
-                            sub: Network.connected ? Network.ssid : (Network.radioOn ? "On" : "Off")
-                            onToggled: Network.setRadio(!Network.radioOn)
-                            onOpened: Globals.toggleWifi()
+                            icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"; label: "Do Not Disturb"
+                            state: Notifications.doNotDisturb ? "On" : "Off"
+                            on: Notifications.doNotDisturb
+                            accent: Theme.base0E
+                            onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
                         }
-                        ConnRow {
+                        Row {
                             width: parent.width
-                            icon: "󰂯"; label: "Bluetooth"
-                            on: Bluetooth.powered
-                            accent: Theme.base0D
-                            sub: Bluetooth.powered ? (Bluetooth.connectedName || "On") : "Off"
-                            onToggled: Bluetooth.setPowered(!Bluetooth.powered)
-                            onOpened: Globals.toggleBluetooth()
+                            spacing: 10
+                            Tile {
+                                width: (parent.width - 10) / 2
+                                icon: "󰛨"; label: "Night Light"
+                                on: Nightlight.active
+                                accent: Theme.base09
+                                onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
+                                onOpened: Globals.toggleNightlight()
+                            }
+                            Tile {
+                                width: (parent.width - 10) / 2
+                                icon: "󰸌"; label: "Theme"
+                                accent: Theme.base0C
+                                onToggled: Globals.toggleTheme()
+                            }
                         }
-                    }
-                }
-
-                // ---- Night Light + Do Not Disturb tiles ----
-                Row {
-                    width: parent.width
-                    spacing: 10
-                    Tile {
-                        width: (parent.width - 10) / 2
-                        icon: "󰛨"; label: "Night Light"
-                        state: Nightlight.active ? "On" : "Off"
-                        on: Nightlight.active
-                        accent: Theme.base09
-                        onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
-                        onOpened: Globals.toggleNightlight()
-                    }
-                    Tile {
-                        width: (parent.width - 10) / 2
-                        icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"; label: "Do Not Disturb"
-                        state: Notifications.doNotDisturb ? "On" : "Off"
-                        on: Notifications.doNotDisturb
-                        accent: Theme.base0E
-                        onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
-                    }
-                }
-
-                // ---- Wallpaper + Theme ----
-                Row {
-                    width: parent.width
-                    spacing: 10
-                    Tile {
-                        width: (parent.width - 10) / 2
-                        icon: "󰸉"; label: "Wallpaper"; state: "Choose"
-                        accent: Theme.base0C
-                        onToggled: Globals.toggleWallpaper()
-                    }
-                    Tile {
-                        width: (parent.width - 10) / 2
-                        icon: "󰸌"; label: "Theme"; state: "Flavours"
-                        accent: Theme.base0E
-                        onToggled: Globals.toggleTheme()
                     }
                 }
 
@@ -410,6 +417,84 @@ Variants {
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+
+                // ---- Now Playing (merged from the old Music panel) ----
+                Card {
+                    width: parent.width
+                    height: 72
+                    visible: Player.hasPlayer
+
+                    Rectangle {
+                        id: npArt
+                        width: 48; height: 48; radius: 8
+                        anchors.left: parent.left; anchors.leftMargin: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: Theme.base02
+                        clip: true
+                        Image {
+                            anchors.fill: parent
+                            source: Player.artUrl
+                            fillMode: Image.PreserveAspectCrop
+                            visible: Player.artUrl.length > 0
+                        }
+                        Text {
+                            anchors.centerIn: parent
+                            text: "󰎈"
+                            color: Theme.base05
+                            font.family: Theme.fontFamilyFallback
+                            font.pixelSize: 22
+                            visible: Player.artUrl.length === 0
+                        }
+                    }
+
+                    Row {
+                        id: npCtrls
+                        anchors.right: parent.right; anchors.rightMargin: 14
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 20
+                        Text {
+                            text: Player.isPlaying ? "󰏤" : "󰐊"
+                            color: Theme.base05
+                            font.family: Theme.fontFamilyFallback
+                            font.pixelSize: Theme.fontSize + 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: Player.playPause() }
+                        }
+                        Text {
+                            text: "󰒭"
+                            color: Theme.base05
+                            font.family: Theme.fontFamilyFallback
+                            font.pixelSize: Theme.fontSize + 6
+                            anchors.verticalCenter: parent.verticalCenter
+                            MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: Player.next() }
+                        }
+                    }
+
+                    Column {
+                        anchors.left: npArt.right; anchors.leftMargin: 12
+                        anchors.right: npCtrls.left; anchors.rightMargin: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 2
+                        Text {
+                            text: Player.title || "Unknown"
+                            color: Theme.base05
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize - 1
+                            font.weight: Theme.fontWeight
+                            elide: Text.ElideRight
+                            width: parent.width
+                        }
+                        Text {
+                            text: Player.artist
+                            color: Theme.base04
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize - 3
+                            elide: Text.ElideRight
+                            width: parent.width
+                            visible: text.length > 0
                         }
                     }
                 }
