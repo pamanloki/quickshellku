@@ -72,9 +72,11 @@ Variants {
                             source: modelData.icon
                             fillMode: Image.PreserveAspectFit
                         }
+                        readonly property bool canMinMax: Niri.isMinimizable(modelData.id)
+
                         Text {
                             anchors.left: appIcon.right; anchors.leftMargin: 10
-                            anchors.right: killBtn.left; anchors.rightMargin: 8
+                            anchors.right: btnRow.left; anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
                             text: modelData.title
                             color: Theme.base05
@@ -90,28 +92,72 @@ Variants {
                             onClicked: { Niri.focusWindow(modelData.id); Globals.dockMenuOpen = false; }
                         }
 
-                        // kill button (red X)
-                        Rectangle {
-                            id: killBtn
+                        // window action buttons (minimize / maximize / close)
+                        Row {
+                            id: btnRow
                             anchors.right: parent.right; anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
-                            width: 22; height: 22; radius: 11
-                            color: killMA.containsMouse ? Qt.lighter(Theme.base08, 1.2) : Theme.base08
-                            Text {
-                                anchors.centerIn: parent
-                                text: "󰅖"
-                                color: Theme.base00
-                                font.family: Theme.fontFamilyFallback
-                                font.pixelSize: Theme.fontSize - 4
+                            spacing: 6
+
+                            // minimize
+                            Rectangle {
+                                width: 22; height: 22; radius: 11
+                                visible: parent.parent.canMinMax
+                                color: minMA.containsMouse ? Theme.base03 : Theme.base02
+                                Text {
+                                    anchors.centerIn: parent; text: "󰖰"
+                                    color: Theme.base05
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize - 4
+                                }
+                                MouseArea {
+                                    id: minMA
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    onClicked: { Niri.setMinimized(modelData.id, true); Globals.dockMenuOpen = false; }
+                                }
                             }
-                            MouseArea {
-                                id: killMA
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onClicked: {
-                                    Niri.closeWindow(modelData.id);
-                                    // drop just this row; keep the panel open
-                                    Globals.dockMenuWindows = Globals.dockMenuWindows.filter(w => w.id !== modelData.id);
+
+                            // maximize (toggle)
+                            Rectangle {
+                                width: 22; height: 22; radius: 11
+                                visible: parent.parent.canMinMax
+                                color: maxMA.containsMouse ? Theme.base03 : Theme.base02
+                                Text {
+                                    anchors.centerIn: parent; text: "󰖯"
+                                    color: Theme.base05
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize - 4
+                                }
+                                MouseArea {
+                                    id: maxMA
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    onClicked: { Niri.toggleMaximize(modelData.id); Globals.dockMenuOpen = false; }
+                                }
+                            }
+
+                            // close (red X)
+                            Rectangle {
+                                id: killBtn
+                                width: 22; height: 22; radius: 11
+                                color: killMA.containsMouse ? Qt.lighter(Theme.base08, 1.2) : Theme.base08
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "󰅖"
+                                    color: Theme.base00
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize - 4
+                                }
+                                MouseArea {
+                                    id: killMA
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    onClicked: {
+                                        Niri.closeWindow(modelData.id);
+                                        // drop just this row; keep the panel open
+                                        Globals.dockMenuWindows = Globals.dockMenuWindows.filter(w => w.id !== modelData.id);
+                                    }
                                 }
                             }
                         }

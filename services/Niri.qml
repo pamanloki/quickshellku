@@ -223,6 +223,21 @@ Singleton {
         actionProc.running = true;
     }
 
+    // Minimize / maximize (wlr backend only — labwc etc.). No-op on niri, which
+    // has no minimize concept.
+    function setMinimized(id, v) {
+        if (root.onNiri || !id) return;
+        if (typeof id.setMinimized === "function") id.setMinimized(v);
+        else if (id.minimized !== undefined) id.minimized = v;
+    }
+    function toggleMaximize(id) {
+        if (root.onNiri || !id) return;
+        const cur = id.maximized === true;
+        if (typeof id.setMaximized === "function") id.setMaximized(!cur);
+        else if (id.maximized !== undefined) id.maximized = !cur;
+    }
+    function isMinimizable(id) { return !root.onNiri && !!id && id.minimized !== undefined; }
+
     // ---- wlr backend wiring (inactive under niri) ----
     Binding {
         target: root; property: "focusedWindowId"; when: !root.onNiri

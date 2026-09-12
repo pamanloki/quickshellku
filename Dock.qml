@@ -95,12 +95,18 @@ PanelWindow {
             if (dock._norm(list[i].app_id || "?") === norm) ids.push(list[i].id);
         return ids;
     }
-    // click a running app: focus its next window (cycle through them)
+    // click a running app: if its focused window is active, minimize it
+    // (macOS-style toggle, wlr only); otherwise focus/raise the next window.
     function activateApp(norm) {
         const ids = windowsOf(norm);
         if (ids.length === 0) return;
-        const idx = ids.indexOf(Niri.focusedWindowId);
-        Niri.focusWindow(ids[(idx + 1) % ids.length]);
+        const fid = Niri.focusedWindowId;
+        const idx = ids.indexOf(fid);
+        if (idx >= 0 && Niri.isMinimizable(fid)) {
+            Niri.setMinimized(fid, true);   // active window belongs to us → minimize
+            return;
+        }
+        Niri.focusWindow(ids[(idx + 1) % ids.length]);   // focus/raise (unminimizes)
     }
 
     function iconFor(appId) {
