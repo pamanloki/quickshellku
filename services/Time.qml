@@ -5,36 +5,39 @@ import QtQuick
 
 // Single shared clock tick (mirrors noctalia's Commons/Time).
 // A plain Timer + Date is more predictable than SystemClock across Quickshell
-// versions. `now` updates once a second, re-synced to the second boundary.
+// versions. The only consumers (menu-bar "HH:mm" clock, calendar's day) need
+// minute granularity, so we tick once a minute — aligned to the minute
+// boundary so the clock flips exactly on the change — instead of once a second.
+// That is 60x fewer QML wakeups, keeping the event loop idle (better for
+// battery / heat). Switch to a per-second re-align only if a seconds clock is
+// ever added.
 Singleton {
     id: root
 
     property var now: new Date()
-    property real _lastTs: Date.now()
+
+    function _msToNextMinute(d) {
+        return 60000 - (d.getSeconds() * 1000 + d.getMilliseconds());
+    }
 
     Timer {
         id: tick
-        interval: 1000
+        interval: 60000
         repeat: true
         running: true
         triggeredOnStart: false
         onTriggered: {
             const d = new Date();
             root.now = d;
-            // keep aligned to the start of each second
-            const ms = d.getMilliseconds();
-            if (ms > 100) {
-                tick.interval = 1000 - ms + 10;
-                tick.restart();
-            } else {
-                tick.interval = 1000;
-            }
+            // keep aligned to the start of each minute
+            const ms = root._msToNextMinute(d);
+            tick.interval = ms > 500 ? ms : 60000;
+            tick.restart();
         }
     }
 
     Component.onCompleted: {
-        const ms = (new Date()).getMilliseconds();
-        tick.interval = 1000 - ms + 10;
+        tick.interval = root._msToNextMinute(new Date()) + 10;
         tick.restart();
     }
 }
