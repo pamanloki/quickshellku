@@ -213,7 +213,7 @@ Variants {
                 y: Globals.quickSettingsOpen ? 0 : -box.height
                 Behavior on y { NumberAnimation { duration: Theme.durSlide; easing.type: Easing.OutCubic } }
             }
-            width: 340
+            width: 384
             height: col.implicitHeight + 28
             x: Globals.panelX < 0
                 ? (parent.width - width - 8)
