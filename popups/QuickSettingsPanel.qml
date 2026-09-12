@@ -244,15 +244,16 @@ Variants {
                     bottomPadding: 2
                 }
 
-                // ---- connectivity card + Do Not Disturb (Focus) ----
+                // ---- connectivity card (Wi-Fi/BT/Night Light) + DND/Theme ----
                 Row {
                     id: topRow
                     width: parent.width
                     spacing: 10
                     readonly property real cellW: (width - spacing) / 2
-                    readonly property real rowH: 92     // = two 46px connectivity rows
+                    readonly property real rowH: 138        // = three 46px connectivity rows
+                    readonly property real tileH: (rowH - 10) / 2
 
-                    // left: connectivity (Wi-Fi + Bluetooth)
+                    // left: connectivity (Wi-Fi + Bluetooth + Night Light)
                     Card {
                         width: topRow.cellW
                         height: topRow.rowH
@@ -277,39 +278,38 @@ Variants {
                                 onToggled: Bluetooth.setPowered(!Bluetooth.powered)
                                 onOpened: Globals.toggleBluetooth()
                             }
+                            ConnRow {
+                                width: parent.width
+                                icon: "󰛨"; label: "Night Light"
+                                on: Nightlight.active
+                                accent: Theme.base09
+                                sub: Nightlight.active ? "On" : "Off"
+                                onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
+                                onOpened: Globals.toggleNightlight()
+                            }
                         }
                     }
 
-                    // right: Do Not Disturb (Focus)
-                    Tile {
+                    // right: Do Not Disturb (Focus) + Theme, stacked
+                    Column {
                         width: topRow.cellW
-                        height: topRow.rowH
-                        icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"; label: "Do Not Disturb"
-                        state: Notifications.doNotDisturb ? "On" : "Off"
-                        on: Notifications.doNotDisturb
-                        accent: Theme.base0E
-                        onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
-                    }
-                }
-
-                // ---- Night Light + Theme ----
-                Row {
-                    width: parent.width
-                    spacing: 10
-                    Tile {
-                        width: (parent.width - 10) / 2
-                        icon: "󰛨"; label: "Night Light"
-                        state: Nightlight.active ? "On" : "Off"
-                        on: Nightlight.active
-                        accent: Theme.base09
-                        onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
-                        onOpened: Globals.toggleNightlight()
-                    }
-                    Tile {
-                        width: (parent.width - 10) / 2
-                        icon: "󰸌"; label: "Theme"; state: "Flavours"
-                        accent: Theme.base0C
-                        onToggled: Globals.toggleTheme()
+                        spacing: 10
+                        Tile {
+                            width: parent.width
+                            height: topRow.tileH
+                            icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"; label: "Do Not Disturb"
+                            state: Notifications.doNotDisturb ? "On" : "Off"
+                            on: Notifications.doNotDisturb
+                            accent: Theme.base0E
+                            onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
+                        }
+                        Tile {
+                            width: parent.width
+                            height: topRow.tileH
+                            icon: "󰸌"; label: "Theme"; state: "Flavours"
+                            accent: Theme.base0C
+                            onToggled: Globals.toggleTheme()
+                        }
                     }
                 }
 
