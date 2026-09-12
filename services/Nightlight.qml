@@ -78,8 +78,11 @@ Singleton {
         }
     }
 
+    // Our own actions refresh via actProc.onExited/settle, and the config file is
+    // watched, so this background pgrep only catches out-of-band toggles — 20s is
+    // ample (was 5s, i.e. 4× fewer spawns).
     Timer {
-        interval: 5000
+        interval: 20000
         running: true
         repeat: true
         triggeredOnStart: true

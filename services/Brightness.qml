@@ -62,8 +62,11 @@ Singleton {
     }
 
     // Light poll so external changes (e.g. keyboard keys via light) stay in sync.
+    // Our own set/raise/lower already refresh via setProc.onExited, so this only
+    // needs to catch out-of-band changes — 15s is plenty and spawns `light -G`
+    // far less often (was 3s, i.e. 5× fewer process wakeups).
     Timer {
-        interval: 3000
+        interval: 15000
         running: true
         repeat: true
         onTriggered: root.refresh()

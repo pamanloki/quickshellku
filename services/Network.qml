@@ -179,8 +179,11 @@ Singleton {
         }
     }
 
+    // Wi-Fi state changes slowly; user actions refresh immediately via each
+    // Process.onExited, so 10s (was 5s) halves the rfkill + iwctl background
+    // spawns with no practical loss of freshness on the bar.
     Timer {
-        interval: 5000
+        interval: 10000
         running: true
         repeat: true
         triggeredOnStart: true

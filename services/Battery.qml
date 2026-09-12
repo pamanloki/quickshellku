@@ -134,8 +134,10 @@ Singleton {
         }
     }
 
+    // Battery level changes slowly; 15s (was 5s) cuts this shell-heavy poll
+    // (~11 cat subshells per run) to a third with no visible lag on the bar.
     Timer {
-        interval: 5000
+        interval: 15000
         running: true
         repeat: true
         triggeredOnStart: true

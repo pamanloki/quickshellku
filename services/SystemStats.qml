@@ -94,23 +94,30 @@ Singleton {
         }
     }
 
+    // Disk usage barely moves, so we only append the (comparatively expensive)
+    // `df` every 10th tick; on the other ticks _parse keeps the previous value.
+    property int _tick: 0
+
     Process {
         id: proc
         command: ["sh", "-c",
             "head -1 /proc/stat; printf '@@@'; " +
             "cat /proc/meminfo; printf '@@@'; " +
             "sensors 2>/dev/null | grep -m1 'Package id 0'; printf '@@@'; " +
-            "df -h --output=avail,used,size,pcent / | tail -1"]
+            ((root._tick % 10 === 0)
+                ? "df -h --output=avail,used,size,pcent / | tail -1" : "")]
         stdout: StdioCollector {
             onStreamFinished: root._parse(text)
         }
     }
 
+    // 3s keeps CPU%/temp/mem lively in the bar without hammering the CPU the way
+    // a 2s `sensors` spawn did (~33% fewer wakeups, and far fewer `df` calls).
     Timer {
-        interval: 2000
+        interval: 3000
         running: true
         repeat: true
         triggeredOnStart: true
-        onTriggered: proc.running = true
+        onTriggered: { root._tick++; proc.running = true; }
     }
 }

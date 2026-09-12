@@ -163,8 +163,11 @@ Singleton {
     Process { id: scanOffProc; command: ["sh", "-c", "bluetoothctl scan off"] }
     Process { id: actProc; onExited: root.refresh() }
 
+    // User actions (connect/disconnect/power/scan) refresh immediately via each
+    // Process.onExited, so this background poll only reconciles external changes
+    // — 30s cuts the 4-`bluetoothctl`-per-cycle spawns to a third (was 10s).
     Timer {
-        interval: 10000
+        interval: 30000
         running: true
         repeat: true
         triggeredOnStart: true
