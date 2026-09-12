@@ -244,19 +244,18 @@ Variants {
                     bottomPadding: 2
                 }
 
-                // ---- top block: connectivity card (left) + tiles (right) ----
+                // ---- connectivity card + Do Not Disturb (Focus) ----
                 Row {
-                    id: topBlock
+                    id: topRow
                     width: parent.width
                     spacing: 10
-                    // right cluster is one wide tile + a row of two → its height
-                    // drives the left card so the two columns line up like macOS.
-                    readonly property real colH: 62 + 10 + 62
+                    readonly property real cellW: (width - spacing) / 2
+                    readonly property real rowH: 92     // = two 46px connectivity rows
 
                     // left: connectivity (Wi-Fi + Bluetooth)
                     Card {
-                        width: (parent.width - 10) * 0.55
-                        height: topBlock.colH
+                        width: topRow.cellW
+                        height: topRow.rowH
                         Column {
                             anchors.left: parent.left; anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
@@ -281,36 +280,36 @@ Variants {
                         }
                     }
 
-                    // right: Do Not Disturb (wide) + Night Light + Theme
-                    Column {
-                        width: (parent.width - 10) * 0.45
-                        spacing: 10
-                        Tile {
-                            width: parent.width
-                            icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"; label: "Do Not Disturb"
-                            state: Notifications.doNotDisturb ? "On" : "Off"
-                            on: Notifications.doNotDisturb
-                            accent: Theme.base0E
-                            onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
-                        }
-                        Row {
-                            width: parent.width
-                            spacing: 10
-                            Tile {
-                                width: (parent.width - 10) / 2
-                                icon: "󰛨"; label: "Night Light"
-                                on: Nightlight.active
-                                accent: Theme.base09
-                                onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
-                                onOpened: Globals.toggleNightlight()
-                            }
-                            Tile {
-                                width: (parent.width - 10) / 2
-                                icon: "󰸌"; label: "Theme"
-                                accent: Theme.base0C
-                                onToggled: Globals.toggleTheme()
-                            }
-                        }
+                    // right: Do Not Disturb (Focus)
+                    Tile {
+                        width: topRow.cellW
+                        height: topRow.rowH
+                        icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"; label: "Do Not Disturb"
+                        state: Notifications.doNotDisturb ? "On" : "Off"
+                        on: Notifications.doNotDisturb
+                        accent: Theme.base0E
+                        onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
+                    }
+                }
+
+                // ---- Night Light + Theme ----
+                Row {
+                    width: parent.width
+                    spacing: 10
+                    Tile {
+                        width: (parent.width - 10) / 2
+                        icon: "󰛨"; label: "Night Light"
+                        state: Nightlight.active ? "On" : "Off"
+                        on: Nightlight.active
+                        accent: Theme.base09
+                        onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
+                        onOpened: Globals.toggleNightlight()
+                    }
+                    Tile {
+                        width: (parent.width - 10) / 2
+                        icon: "󰸌"; label: "Theme"; state: "Flavours"
+                        accent: Theme.base0C
+                        onToggled: Globals.toggleTheme()
                     }
                 }
 
