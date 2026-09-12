@@ -31,6 +31,45 @@ Singleton {
     property bool systemOpen: false
     property bool musicOpen: false
 
+    // macOS-style app switcher (⌘-Tab): a row of app icons; cycle with Tab,
+    // confirm on release. Driven by:  qs ipc call switcher next | prev
+    property bool switcherOpen: false
+    property var switcherList: []      // [{norm, app_id, id}]
+    property int switcherIndex: 0
+    function _switcherNorm(s) { return (s || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+    function _buildSwitcher() {
+        const list = Niri.windowList || [];
+        const seen = ({});
+        const out = [];
+        for (let i = 0; i < list.length; i++) {
+            const n = _switcherNorm(list[i].app_id || "?");
+            if (seen[n]) continue;
+            seen[n] = true;
+            out.push({ norm: n, app_id: list[i].app_id || "?", id: list[i].id });
+        }
+        return out;
+    }
+    function switcherStep(dir) {
+        if (!switcherOpen) {
+            const l = _buildSwitcher();
+            if (l.length === 0) return;
+            switcherList = l;
+            switcherIndex = l.length > 1 ? (dir > 0 ? 1 : l.length - 1) : 0;
+            switcherOpen = true;
+        } else {
+            const n = switcherList.length;
+            if (n === 0) return;
+            switcherIndex = ((switcherIndex + dir) % n + n) % n;
+        }
+    }
+    function switcherConfirm() {
+        if (!switcherOpen) return;
+        const e = switcherList[switcherIndex];
+        switcherOpen = false;
+        if (e) Niri.focusWindow(e.id);
+    }
+    function switcherCancel() { switcherOpen = false; }
+
     // Dock auto-hide (macOS "Turn Hiding On"): dock slides off-screen and
     // reveals when the cursor reaches the bottom edge — keeps the dock out of
     // the way of fullscreen apps / games.
@@ -188,5 +227,12 @@ Singleton {
     IpcHandler {
         target: "music"
         function toggle() { root.toggleMusic(); }
+    }
+    IpcHandler {
+        target: "switcher"
+        function next() { root.switcherStep(1); }
+        function prev() { root.switcherStep(-1); }
+        function confirm() { root.switcherConfirm(); }
+        function cancel() { root.switcherCancel(); }
     }
 }

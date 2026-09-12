@@ -41,6 +41,7 @@ ShellRoot {
     TrayMenu {}
     DockMenu {}
     AppleMenu {}
+    Switcher {}
     AboutPanel {}
     SystemPanel {}
     MusicPanel {}
