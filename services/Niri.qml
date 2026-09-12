@@ -2,11 +2,16 @@ pragma Singleton
 
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 import QtQuick
 
-// Talks to niri over its JSON IPC.
-//   * an event-stream Process keeps workspaces / windows / focus live
-//   * action() fires one-shot `niri msg action ...` commands
+// Window/workspace service with two backends behind ONE API (windowList,
+// focusedWindowId, focusedAppId, focusWindow(id), closeWindow(id)):
+//   * niri  — its JSON IPC event-stream (workspaces + windows + focus)
+//   * wlroots (labwc, etc.) — the wlr-foreign-toplevel protocol via
+//     ToplevelManager, so the dock keeps working off niri too.
+// The backend is picked at startup from $NIRI_SOCKET. For the wlr backend a
+// window "id" is the Toplevel object itself (opaque to callers).
 //
 // Anti-flicker: the workspaces and windowList arrays feed Repeaters, and
 // re-assigning a JS array rebuilds every delegate. niri re-sends full state
@@ -17,15 +22,44 @@ import QtQuick
 Singleton {
     id: root
 
+    // true when running under niri (JSON IPC available), false → wlr backend.
+    readonly property bool onNiri: {
+        const s = Quickshell.env("NIRI_SOCKET");
+        return !!s && ("" + s).length > 0;
+    }
+
     property var workspaces: []
     property var windowList: []
     property var windows: ({})
-    property int focusedWindowId: -1
+    property var focusedWindowId: -1     // int (niri) or Toplevel object (wlr)
     property string focusedTitle: ""
     property string focusedAppId: ""
 
     property string _wsSig: ""
     property string _wlSig: ""
+
+    // ---- wlr backend (labwc / wlroots) ----
+    property var _idMap: new Map()   // Toplevel -> stable numeric id (for the signature)
+    property int _idSeq: 0
+    property string _wlrSig: ""
+    function _idOf(tl) {
+        if (!root._idMap.has(tl)) root._idMap.set(tl, ++root._idSeq);
+        return root._idMap.get(tl);
+    }
+    function _wlrRebuild() {
+        if (root.onNiri) return;
+        const tl = ToplevelManager.toplevels;
+        const vals = (tl && tl.values) ? tl.values : [];
+        const out = [];
+        let sig = "";
+        for (let i = 0; i < vals.length; i++) {
+            const t = vals[i];
+            if (!t) continue;
+            out.push({ id: t, app_id: t.appId || "", title: t.title || "" });
+            sig += root._idOf(t) + ":" + (t.appId || "") + "|";
+        }
+        if (sig !== root._wlrSig) { root._wlrSig = sig; root.windowList = out; }
+    }
 
     function _applyWorkspaces(list) {
         let sig = "";
@@ -178,13 +212,45 @@ Singleton {
     }
 
     function focusWindow(id) {
+        if (!root.onNiri) { if (id && id.activate) id.activate(); return; }
         actionProc.command = ["niri", "msg", "action", "focus-window", "--id", String(id)];
         actionProc.running = true;
     }
 
     function closeWindow(id) {
+        if (!root.onNiri) { if (id && id.close) id.close(); return; }
         actionProc.command = ["niri", "msg", "action", "close-window", "--id", String(id)];
         actionProc.running = true;
+    }
+
+    // ---- wlr backend wiring (inactive under niri) ----
+    Binding {
+        target: root; property: "focusedWindowId"; when: !root.onNiri
+        value: ToplevelManager.activeToplevel ? ToplevelManager.activeToplevel : -1
+        restoreMode: Binding.RestoreNone
+    }
+    Binding {
+        target: root; property: "focusedAppId"; when: !root.onNiri
+        value: ToplevelManager.activeToplevel ? (ToplevelManager.activeToplevel.appId || "") : ""
+        restoreMode: Binding.RestoreNone
+    }
+    Binding {
+        target: root; property: "focusedTitle"; when: !root.onNiri
+        value: ToplevelManager.activeToplevel ? (ToplevelManager.activeToplevel.title || "") : ""
+        restoreMode: Binding.RestoreNone
+    }
+    // Rebuild the window list on open/close and per-window app_id changes.
+    Instantiator {
+        model: root.onNiri ? null : ToplevelManager.toplevels
+        delegate: QtObject {
+            required property var modelData
+            Connections {
+                target: modelData
+                function onAppIdChanged() { root._wlrRebuild(); }
+            }
+            Component.onCompleted: root._wlrRebuild()
+            Component.onDestruction: Qt.callLater(root._wlrRebuild)
+        }
     }
 
     Process {
@@ -199,7 +265,7 @@ Singleton {
     Process {
         id: stream
         command: ["niri", "msg", "--json", "event-stream"]
-        running: true
+        running: root.onNiri
         stdout: SplitParser {
             onRead: line => {
                 if (!line)
@@ -212,6 +278,7 @@ Singleton {
             }
         }
         onExited: (code, status) => {
+            if (!root.onNiri) return;
             console.log("[Niri] event-stream exited code=" + code + " — restarting");
             restartTimer.start();
         }
@@ -220,6 +287,6 @@ Singleton {
     Timer {
         id: restartTimer
         interval: 1000
-        onTriggered: stream.running = true
+        onTriggered: if (root.onNiri) stream.running = true
     }
 }
