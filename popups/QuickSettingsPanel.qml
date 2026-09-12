@@ -37,6 +37,7 @@ Variants {
             return out;
         }
         property bool audioExpanded: false
+        property bool npExpanded: false      // Now Playing: compact ↔ expanded
         function nodeName(n) { return n ? (n.description || n.nickname || n.name || "Unknown") : "None"; }
         function setVolume(v) {
             if (!sink || !sink.audio) return;
@@ -49,6 +50,7 @@ Variants {
 
         onVisibleChanged: if (visible) {
             audioExpanded = false;
+            npExpanded = false;
             Network.refresh(); Bluetooth.refresh(); Nightlight.refresh();
             Player.refreshPosition();
         }
@@ -420,80 +422,169 @@ Variants {
                     }
                 }
 
-                // ---- Now Playing (merged from the old Music panel) ----
+                // ---- Now Playing (macOS: click to expand ↔ collapse) ----
                 Card {
+                    id: npCard
                     width: parent.width
-                    height: 72
                     visible: Player.hasPlayer
+                    clip: true
+                    height: npCol.implicitHeight + 24
+                    Behavior on height { NumberAnimation { duration: Theme.durSlide; easing.type: Easing.OutCubic } }
 
-                    Rectangle {
-                        id: npArt
-                        width: 48; height: 48; radius: 8
-                        anchors.left: parent.left; anchors.leftMargin: 12
-                        anchors.verticalCenter: parent.verticalCenter
-                        color: Theme.base02
-                        clip: true
-                        Image {
-                            anchors.fill: parent
-                            source: Player.artUrl
-                            fillMode: Image.PreserveAspectCrop
-                            visible: Player.artUrl.length > 0
-                        }
-                        Text {
-                            anchors.centerIn: parent
-                            text: "󰎈"
-                            color: Theme.base05
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: 22
-                            visible: Player.artUrl.length === 0
-                        }
+                    // keep the scrubber live only while the expanded view is shown
+                    Timer {
+                        running: Globals.quickSettingsOpen && Player.hasPlayer && win.npExpanded
+                        interval: 1000
+                        repeat: true
+                        triggeredOnStart: true
+                        onTriggered: Player.refreshPosition()
                     }
 
-                    Row {
-                        id: npCtrls
-                        anchors.right: parent.right; anchors.rightMargin: 14
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 20
-                        Text {
-                            text: Player.isPlaying ? "󰏤" : "󰐊"
-                            color: Theme.base05
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: Theme.fontSize + 12
-                            anchors.verticalCenter: parent.verticalCenter
-                            MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: Player.playPause() }
-                        }
-                        Text {
-                            text: "󰒭"
-                            color: Theme.base05
-                            font.family: Theme.fontFamilyFallback
-                            font.pixelSize: Theme.fontSize + 6
-                            anchors.verticalCenter: parent.verticalCenter
-                            MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: Player.next() }
-                        }
-                    }
+                    // click anywhere (except a control) toggles expand
+                    MouseArea { anchors.fill: parent; onClicked: win.npExpanded = !win.npExpanded }
 
                     Column {
-                        anchors.left: npArt.right; anchors.leftMargin: 12
-                        anchors.right: npCtrls.left; anchors.rightMargin: 12
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 2
-                        Text {
-                            text: Player.title || "Unknown"
-                            color: Theme.base05
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize - 1
-                            font.weight: Theme.fontWeight
-                            elide: Text.ElideRight
+                        id: npCol
+                        anchors.left: parent.left; anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.margins: 12
+                        spacing: 12
+
+                        // header: art + title/artist + transport
+                        Item {
                             width: parent.width
+                            height: win.npExpanded ? 84 : 48
+                            Behavior on height { NumberAnimation { duration: Theme.durSlide; easing.type: Easing.OutCubic } }
+
+                            Rectangle {
+                                id: npArt
+                                width: parent.height; height: parent.height; radius: 10
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                color: Theme.base02
+                                clip: true
+                                Image {
+                                    anchors.fill: parent
+                                    source: Player.artUrl
+                                    fillMode: Image.PreserveAspectCrop
+                                    visible: Player.artUrl.length > 0
+                                }
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "󰎈"
+                                    color: Theme.base05
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: win.npExpanded ? 34 : 22
+                                    visible: Player.artUrl.length === 0
+                                }
+                            }
+
+                            Row {
+                                id: npCtrls
+                                anchors.right: parent.right; anchors.rightMargin: 2
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 18
+                                Text {
+                                    text: "󰒮"
+                                    visible: win.npExpanded
+                                    color: Theme.base05
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize + 6
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: Player.previous() }
+                                }
+                                Text {
+                                    text: Player.isPlaying ? "󰏤" : "󰐊"
+                                    color: Theme.base05
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize + 12
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: Player.playPause() }
+                                }
+                                Text {
+                                    text: "󰒭"
+                                    color: Theme.base05
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize + 6
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: Player.next() }
+                                }
+                            }
+
+                            Column {
+                                anchors.left: npArt.right; anchors.leftMargin: 12
+                                anchors.right: npCtrls.left; anchors.rightMargin: 12
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 2
+                                Text {
+                                    text: Player.title || "Unknown"
+                                    color: Theme.base05
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSize - 1
+                                    font.weight: Theme.fontWeight
+                                    elide: Text.ElideRight
+                                    width: parent.width
+                                    maximumLineCount: win.npExpanded ? 2 : 1
+                                    wrapMode: Text.WordWrap
+                                }
+                                Text {
+                                    text: Player.artist
+                                    color: Theme.base04
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSize - 3
+                                    elide: Text.ElideRight
+                                    width: parent.width
+                                    visible: text.length > 0
+                                }
+                            }
                         }
-                        Text {
-                            text: Player.artist
-                            color: Theme.base04
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize - 3
-                            elide: Text.ElideRight
+
+                        // scrubber (expanded only)
+                        Column {
                             width: parent.width
-                            visible: text.length > 0
+                            spacing: 4
+                            visible: win.npExpanded
+                            Item {
+                                width: parent.width
+                                height: 14
+                                Rectangle {
+                                    id: strack
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: parent.width
+                                    height: 5
+                                    radius: 2.5
+                                    color: Theme.base02
+                                    Rectangle {
+                                        anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
+                                        radius: 2.5
+                                        width: parent.width * Player.progress
+                                        color: Theme.base0D
+                                    }
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    enabled: Player.canSeek
+                                    onClicked: mouse => Player.seek(Math.max(0, Math.min(1, mouse.x / width)))
+                                }
+                            }
+                            Row {
+                                width: parent.width
+                                Text {
+                                    text: Player.fmtTime(Player.position)
+                                    color: Theme.base04
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSize - 4
+                                    width: parent.width / 2
+                                }
+                                Text {
+                                    text: Player.fmtTime(Player.length)
+                                    color: Theme.base04
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSize - 4
+                                    width: parent.width / 2
+                                    horizontalAlignment: Text.AlignRight
+                                }
+                            }
                         }
                     }
                 }

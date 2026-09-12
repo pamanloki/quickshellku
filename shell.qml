@@ -44,6 +44,7 @@ ShellRoot {
     Switcher {}
     AboutPanel {}
     SystemPanel {}
+    MusicPanel {}
     AudioPanel {}
     BatteryPanel {}
     BatteryAlert {}

@@ -163,13 +163,13 @@ PanelWindow {
             }
         }
 
-        // Now Playing (shows while media is available; opens Control Centre,
-        // which now hosts the Now Playing card)
+        // Now Playing (shows while media is available; opens its own player
+        // popover — separate from the Now Playing card in Control Centre)
         Item2 {
             visible: Player.hasPlayer
             icon: Player.isPlaying ? "󰎆" : "󰎊"
             iconColor: Player.isPlaying ? Theme.base0D : Theme.base05
-            onClicked: Globals.toggleQuickSettings()
+            onClicked: Globals.toggleMusic()
         }
         Item2 {
             icon: ""   // nf-fa-search (Spotlight)
