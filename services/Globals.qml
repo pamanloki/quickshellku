@@ -54,7 +54,11 @@ Singleton {
             const l = _buildSwitcher();
             if (l.length === 0) return;
             switcherList = l;
-            switcherIndex = dir > 0 ? 0 : (l.length - 1);   // start at the leftmost
+            // start on the currently-focused app
+            const f = _switcherNorm(Niri.focusedAppId || "");
+            let idx = 0;
+            for (let i = 0; i < l.length; i++) if (l[i].norm === f) { idx = i; break; }
+            switcherIndex = idx;
             switcherOpen = true;
         } else {
             const n = switcherList.length;
