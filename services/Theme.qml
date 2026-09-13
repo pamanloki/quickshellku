@@ -29,6 +29,10 @@ Singleton {
     property color base0E: "#ba8baf" // magenta
     property color base0F: "#a16946" // brown
 
+    // Single UI accent — locked to the Flavours blue (base0D). Change here to
+    // re-tint every accented control at once.
+    readonly property color accent: base0D
+
     // ---- Fonts ----
     // Text uses SF Pro Display (clean weights; fontconfig forces it to Medium).
     // SF Pro has no icon glyphs, so icons/glyphs come from SFMono Nerd Font.

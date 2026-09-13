@@ -71,7 +71,7 @@ Variants {
             property string label: ""
             property string sub: ""
             property bool on: false
-            property color accent: Theme.base0D
+            property color accent: Theme.accent
             signal toggled()
             signal opened()
             width: parent ? parent.width : 0
@@ -136,7 +136,7 @@ Variants {
             property string label: ""
             property string state: ""
             property bool on: false
-            property color accent: Theme.base0D
+            property color accent: Theme.accent
             signal toggled()
             signal opened()
             height: 62
@@ -188,7 +188,7 @@ Variants {
         component HSlider: Item {
             property string icon: ""
             property real value: 0        // 0..100
-            property color accent: Theme.base0D
+            property color accent: Theme.accent
             signal moved(real v)
             height: 44
             Rectangle {
@@ -279,7 +279,7 @@ Variants {
                                 width: parent.width
                                 icon: "󰤨"; label: "Wi-Fi"
                                 on: Network.radioOn
-                                accent: Theme.base0D
+                                accent: Theme.accent
                                 sub: Network.connected ? Network.ssid : (Network.radioOn ? "On" : "Off")
                                 onToggled: Network.setRadio(!Network.radioOn)
                                 onOpened: Globals.toggleWifi()
@@ -288,7 +288,7 @@ Variants {
                                 width: parent.width
                                 icon: "󰂯"; label: "Bluetooth"
                                 on: Bluetooth.powered
-                                accent: Theme.base0D
+                                accent: Theme.accent
                                 sub: Bluetooth.powered ? (Bluetooth.connectedName || "On") : "Off"
                                 onToggled: Bluetooth.setPowered(!Bluetooth.powered)
                                 onOpened: Globals.toggleBluetooth()
@@ -297,7 +297,7 @@ Variants {
                                 width: parent.width
                                 icon: "󰛨"; label: "Night Light"
                                 on: Nightlight.active
-                                accent: Theme.base0D
+                                accent: Theme.accent
                                 sub: Nightlight.active ? "On" : "Off"
                                 onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
                                 onOpened: Globals.toggleNightlight()
@@ -347,7 +347,7 @@ Variants {
                             width: parent.width
                             icon: "󰃟"
                             value: Brightness.percent
-                            accent: Theme.base0D
+                            accent: Theme.accent
                             onMoved: v => Brightness.set(v)
                         }
                     }
@@ -387,7 +387,7 @@ Variants {
                             width: parent.width
                             icon: win.muted || win.volume === 0 ? "󰖁" : (win.volume >= 50 ? "󰕾" : "󰖀")
                             value: win.volume
-                            accent: Theme.base0D
+                            accent: Theme.accent
                             onMoved: v => win.setVolume(v)
                         }
                         // output device switcher
@@ -419,7 +419,7 @@ Variants {
                                         anchors.right: parent.right; anchors.rightMargin: 10
                                         anchors.verticalCenter: parent.verticalCenter
                                         text: parent.current ? "󰄬" : ""
-                                        color: Theme.base0D
+                                        color: Theme.accent
                                         font.family: Theme.fontFamilyFallback
                                         font.pixelSize: Theme.fontSize - 2
                                     }
@@ -571,7 +571,7 @@ Variants {
                                         anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
                                         radius: 2.5
                                         width: parent.width * Player.progress
-                                        color: Theme.base0D
+                                        color: Theme.accent
                                     }
                                 }
                                 MouseArea {
