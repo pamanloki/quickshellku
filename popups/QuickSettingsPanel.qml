@@ -76,6 +76,15 @@ Variants {
             signal opened()
             width: parent ? parent.width : 0
             height: 46
+            HoverHandler { id: connHover }
+            Rectangle {
+                anchors.fill: parent
+                anchors.margins: 3
+                radius: 10
+                z: -1
+                color: connHover.hovered ? Theme.base02 : "transparent"
+                Behavior on color { ColorAnimation { duration: 120 } }
+            }
             Rectangle {
                 id: ci
                 width: 34; height: 34; radius: 17
@@ -127,13 +136,14 @@ Variants {
             property string label: ""
             property string state: ""
             property bool on: false
-            property color accent: Theme.base0E
+            property color accent: Theme.base0D
             signal toggled()
             signal opened()
             height: 62
             radius: 14
-            color: on ? accent : Theme.base01
+            color: on ? accent : (tileHover.hovered ? Theme.base02 : Theme.base01)
             Behavior on color { ColorAnimation { duration: 120 } }
+            HoverHandler { id: tileHover }
             Text {
                 id: tIcon
                 anchors.left: parent.left; anchors.leftMargin: 14
@@ -287,7 +297,7 @@ Variants {
                                 width: parent.width
                                 icon: "󰛨"; label: "Night Light"
                                 on: Nightlight.active
-                                accent: Theme.base09
+                                accent: Theme.base0D
                                 sub: Nightlight.active ? "On" : "Off"
                                 onToggled: Nightlight.active ? Nightlight.disable() : Nightlight.enable()
                                 onOpened: Globals.toggleNightlight()
@@ -305,14 +315,12 @@ Variants {
                             icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"; label: "Do Not Disturb"
                             state: Notifications.doNotDisturb ? "On" : "Off"
                             on: Notifications.doNotDisturb
-                            accent: Theme.base0E
                             onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
                         }
                         Tile {
                             width: parent.width
                             height: topRow.tileH
                             icon: "󰸌"; label: "Theme"; state: "Flavours"
-                            accent: Theme.base0C
                             onToggled: Globals.toggleTheme()
                         }
                     }
@@ -379,7 +387,7 @@ Variants {
                             width: parent.width
                             icon: win.muted || win.volume === 0 ? "󰖁" : (win.volume >= 50 ? "󰕾" : "󰖀")
                             value: win.volume
-                            accent: win.muted ? Theme.base08 : Theme.base0D
+                            accent: Theme.base0D
                             onMoved: v => win.setVolume(v)
                         }
                         // output device switcher
@@ -411,7 +419,7 @@ Variants {
                                         anchors.right: parent.right; anchors.rightMargin: 10
                                         anchors.verticalCenter: parent.verticalCenter
                                         text: parent.current ? "󰄬" : ""
-                                        color: Theme.base0B
+                                        color: Theme.base0D
                                         font.family: Theme.fontFamilyFallback
                                         font.pixelSize: Theme.fontSize - 2
                                     }

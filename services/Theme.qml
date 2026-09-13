@@ -38,7 +38,7 @@ Singleton {
     property string fontFamilyFallback: "SFMono Nerd Font" // icons/glyphs
     readonly property var fontList: [fontFamily, fontFamilyFallback]
     property int fontSize: 17
-    property int fontWeight: Font.DemiBold   // SF Pro Display Semibold
+    property int fontWeight: Font.Bold   // SF Pro Display Bold
 
     // ---- Bar geometry (bump barHeight/fontSize if it looks tiny on HiDPI) ----
     property int barHeight: 40
