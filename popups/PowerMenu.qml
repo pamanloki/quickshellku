@@ -66,11 +66,11 @@ Variants {
                 Repeater {
                     model: [
                         { icon: "󰌾", label: "Lock",      flag: "--lock",      accent: Theme.base0D },
-                        { icon: "󰤄", label: "Suspend",   flag: "--suspend",   accent: Theme.base0C },
-                        { icon: "󰋊", label: "Hibernate", flag: "--hibernate", accent: Theme.base0A },
-                        { icon: "󰗽", label: "Logout",    flag: "--logout",    accent: Theme.base0E },
-                        { icon: "󰜉", label: "Reboot",    flag: "--reboot",    accent: Theme.base09 },
-                        { icon: "󰐥", label: "Shutdown",  flag: "--shutdown",  accent: Theme.base08 }
+                        { icon: "󰤄", label: "Suspend",   flag: "--suspend",   accent: Theme.accent },
+                        { icon: "󰋊", label: "Hibernate", flag: "--hibernate", accent: Theme.accent },
+                        { icon: "󰗽", label: "Logout",    flag: "--logout",    accent: Theme.accent },
+                        { icon: "󰜉", label: "Reboot",    flag: "--reboot",    accent: Theme.accent },
+                        { icon: "󰐥", label: "Shutdown",  flag: "--shutdown",  accent: Theme.accent }
                     ]
                     delegate: Rectangle {
                         required property var modelData

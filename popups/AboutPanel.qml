@@ -82,7 +82,7 @@ Variants {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: ""    // nf-linux-void
-                    color: Theme.base0B
+                    color: Theme.accent
                     font.family: Theme.fontFamilyFallback
                     font.pixelSize: 64
                     bottomPadding: 4

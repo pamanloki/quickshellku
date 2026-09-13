@@ -181,7 +181,7 @@ Variants {
                             anchors.right: parent.right; anchors.rightMargin: 12
                             anchors.verticalCenter: parent.verticalCenter
                             text: parent.isCurrent ? "󰄬" : ""
-                            color: Theme.base0B
+                            color: Theme.accent
                             font.family: Theme.fontFamilyFallback
                             font.pixelSize: Theme.fontSize
                         }

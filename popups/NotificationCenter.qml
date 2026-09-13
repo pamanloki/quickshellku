@@ -90,7 +90,7 @@ Variants {
                         // DND toggle
                         Rectangle {
                             width: 72; height: 30; radius: 8
-                            color: Notifications.doNotDisturb ? Theme.base08 : (dndMA.containsMouse ? Theme.base02 : Theme.base01)
+                            color: Notifications.doNotDisturb ? Theme.accent : (dndMA.containsMouse ? Theme.base02 : Theme.base01)
                             Row {
                                 anchors.centerIn: parent
                                 spacing: 5

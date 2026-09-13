@@ -82,7 +82,7 @@ Variants {
                         Text {
                             anchors.centerIn: parent
                             text: "󰑐"
-                            color: Network.scanning ? Theme.base0B : Theme.base05
+                            color: Network.scanning ? Theme.accent : Theme.base05
                             font.family: Theme.fontFamilyFallback
                             font.pixelSize: Theme.fontSize
                         }
@@ -90,7 +90,7 @@ Variants {
                     }
                     Rectangle {   // radio toggle
                         width: 52; height: 26; radius: 13
-                        color: Network.radioOn ? Theme.base0B : Theme.base03
+                        color: Network.radioOn ? Theme.accent : Theme.base03
                         anchors.verticalCenter: parent.verticalCenter
                         Rectangle {
                             width: 20; height: 20; radius: 10; color: Theme.base00
@@ -110,7 +110,7 @@ Variants {
                     text: Network.connected
                         ? ("Connected: " + Network.ssid + "  (" + Network.signalStrength + "%)")
                         : "Not connected"
-                    color: Network.connected ? Theme.base0B : Theme.base03
+                    color: Network.connected ? Theme.accent : Theme.base03
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize - 2
                     elide: Text.ElideRight
@@ -170,7 +170,7 @@ Variants {
                                 }
                                 Text {
                                     text: modelData.connected ? "󰄬" : ""
-                                    color: Theme.base0B
+                                    color: Theme.accent
                                     font.family: Theme.fontFamilyFallback
                                     font.pixelSize: Theme.fontSize - 1
                                     anchors.verticalCenter: parent.verticalCenter
@@ -205,7 +205,7 @@ Variants {
                                     }
                                 }
                                 Rectangle {
-                                    width: 70; height: 28; radius: 10; color: Theme.base0B
+                                    width: 70; height: 28; radius: 10; color: Theme.accent
                                     Text {
                                         anchors.centerIn: parent; text: "Connect"
                                         color: Theme.base00

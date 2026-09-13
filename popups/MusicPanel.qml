@@ -239,7 +239,7 @@ Variants {
                                 anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
                                 radius: 2.5
                                 width: parent.width * Math.max(0, Math.min(100, win.volume)) / 100
-                                color: win.muted ? Theme.base08 : Theme.base0D
+                                color: win.muted ? Theme.accent : Theme.base0D
                             }
                         }
                         MouseArea {

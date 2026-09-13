@@ -205,7 +205,7 @@ Variants {
                     anchors.left: parent.left; anchors.leftMargin: 16
                     anchors.verticalCenter: parent.verticalCenter
                     text: win.clipMode ? "󰅍" : win.commandMode ? "󰅱" : ""
-                    color: win.clipMode ? Theme.base0C : win.commandMode ? Theme.base09 : Theme.base04
+                    color: win.clipMode ? Theme.accent : win.commandMode ? Theme.accent : Theme.base04
                     font.family: Theme.fontFamilyFallback
                     font.pixelSize: Theme.fontSize + 2
                 }

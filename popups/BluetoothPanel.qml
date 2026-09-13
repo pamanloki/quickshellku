@@ -74,7 +74,7 @@ Variants {
                         Text {
                             anchors.centerIn: parent
                             text: "󰑐"
-                            color: Bluetooth.scanning ? Theme.base0B : Theme.base05
+                            color: Bluetooth.scanning ? Theme.accent : Theme.base05
                             font.family: Theme.fontFamilyFallback
                             font.pixelSize: Theme.fontSize
                         }
@@ -82,7 +82,7 @@ Variants {
                     }
                     Rectangle {   // power toggle
                         width: 52; height: 26; radius: 13
-                        color: Bluetooth.powered ? Theme.base0B : Theme.base03
+                        color: Bluetooth.powered ? Theme.accent : Theme.base03
                         anchors.verticalCenter: parent.verticalCenter
                         Rectangle {
                             width: 20; height: 20; radius: 10; color: Theme.base00
@@ -121,7 +121,7 @@ Variants {
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: modelData.connected ? "󰂱" : (modelData.paired ? "󰂯" : "󰂰")
-                                color: modelData.connected ? Theme.base0B : Theme.base05
+                                color: modelData.connected ? Theme.accent : Theme.base05
                                 font.family: Theme.fontFamilyFallback
                                 font.pixelSize: Theme.fontSize
                             }
@@ -137,7 +137,7 @@ Variants {
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: modelData.connected ? "󰄬" : ""
-                                color: Theme.base0B
+                                color: Theme.accent
                                 font.family: Theme.fontFamilyFallback
                                 font.pixelSize: Theme.fontSize - 1
                                 visible: modelData.connected

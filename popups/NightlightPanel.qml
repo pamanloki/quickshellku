@@ -84,7 +84,7 @@ Variants {
                     }
                     Rectangle {
                         width: 52; height: 26; radius: 13
-                        color: Nightlight.active ? Theme.base0B : Theme.base03
+                        color: Nightlight.active ? Theme.accent : Theme.base03
                         anchors.verticalCenter: parent.verticalCenter
                         Rectangle {
                             width: 20; height: 20; radius: 10; color: Theme.base00
@@ -104,7 +104,7 @@ Variants {
                     text: Nightlight.active
                         ? ("On — night " + win.previewTemp + "K")
                         : ("Off — neutral " + Nightlight.dayTemp + "K")
-                    color: Nightlight.active ? Theme.base0B : Theme.base03
+                    color: Nightlight.active ? Theme.accent : Theme.base03
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize - 2
                 }
@@ -124,7 +124,7 @@ Variants {
                         }
                         Text {
                             text: win.previewTemp + "K"
-                            color: Theme.base0E
+                            color: Theme.accent
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSize - 2
                             font.weight: Theme.fontWeight
@@ -150,12 +150,12 @@ Variants {
                                 width: Math.round(parent.width * slider.ratio)
                                 height: parent.height
                                 radius: 3
-                                color: Theme.base0E
+                                color: Theme.accent
                             }
                         }
                         Rectangle { // handle
                             width: 16; height: 16; radius: 8
-                            color: Theme.base0E
+                            color: Theme.accent
                             border.color: Theme.base00
                             border.width: 2
                             anchors.verticalCenter: parent.verticalCenter

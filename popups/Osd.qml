@@ -73,7 +73,7 @@ Variants {
                 anchors.top: parent.top
                 anchors.topMargin: 34
                 text: win.osdIcon
-                color: win.isMuted ? Theme.base08 : Theme.base05
+                color: win.isMuted ? Theme.accent : Theme.base05
                 font.family: Theme.fontFamilyFallback
                 font.pixelSize: 84
             }
@@ -92,7 +92,7 @@ Variants {
                         height: 12
                         radius: 2
                         color: index < win.filled
-                            ? (win.isVol ? Theme.base0D : Theme.base0E)
+                            ? (win.isVol ? Theme.accent : Theme.accent)
                             : Theme.base02
                         Behavior on color { ColorAnimation { duration: 80 } }
                     }
