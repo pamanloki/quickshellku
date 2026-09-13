@@ -29,11 +29,14 @@ Singleton {
     property color base0E: "#ba8baf" // magenta
     property color base0F: "#a16946" // brown
 
-    // ---- Fonts (from your Waybar style.css) ----
-    property string fontFamily: "SF Pro Text"           // macOS UI / body text
-    property string fontFamilyDisplay: "SF Pro Display" // macOS large / title text
-    property string fontFamilyMono: "SF Mono"           // monospace
-    property string fontFamilyFallback: "JetBrainsMono Nerd Font Propo" // icons/glyphs
+    // ---- Fonts ----
+    // Everything uses SFMono Nerd Font (its Medium is clean, and it carries the
+    // Nerd Font icon glyphs too). fontconfig forces this family to Medium, so
+    // shell text renders Medium without setting a weight everywhere.
+    property string fontFamily: "SFMono Nerd Font"           // UI / body text
+    property string fontFamilyDisplay: "SFMono Nerd Font"    // large / title text
+    property string fontFamilyMono: "SFMono Nerd Font"       // monospace
+    property string fontFamilyFallback: "SFMono Nerd Font"   // icons/glyphs
     readonly property var fontList: [fontFamily, fontFamilyFallback]
     property int fontSize: 17
     property int fontWeight: Font.DemiBold   // macOS Semibold — emphasis/titles
