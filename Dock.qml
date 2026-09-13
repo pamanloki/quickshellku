@@ -87,6 +87,10 @@ PanelWindow {
         return out;
     }
 
+    // split for the macOS-style divider between pinned and running-only apps
+    readonly property var pinnedItems: (items || []).filter(it => it.pinned)
+    readonly property var runningItems: (items || []).filter(it => !it.pinned)
+
     // window ids of a given app (normalized), in order
     function windowsOf(norm) {
         const list = Niri.windowList || [];
@@ -224,16 +228,14 @@ PanelWindow {
             }
         }
 
-        Row {
+        // single running indicator dot (macOS Big Sur+)
+        Rectangle {
             visible: cell.running
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 3
-            spacing: 3
-            Repeater {
-                model: Math.min(cell.count, 3)
-                delegate: Rectangle { width: 4; height: 4; radius: 2; color: Theme.base05 }
-            }
+            width: 4; height: 4; radius: 2
+            color: Theme.base05
         }
 
         MouseArea {
@@ -268,6 +270,36 @@ PanelWindow {
                 if (mouse.button === Qt.RightButton) cell.menuRequested();
                 else cell.activated();
             }
+        }
+    }
+
+    // dock app icon (shared by the pinned and running rows)
+    component AppCell: DockCell {
+        required property var modelData
+        source: dock.iconFor(modelData.app_id)
+        tip: dock.labelFor(modelData.app_id)
+        running: modelData.running
+        count: modelData.count
+        canDrag: modelData.pinned === true
+        onReordered: px => {
+            const cw = Theme.dockIconSize + 10;
+            const step = cw + 4;
+            const startX = cw + 9;   // launcher + spacing + separator + spacing
+            DockConfig.moveTo(modelData.pin, Math.round((px - startX - cw / 2) / step));
+        }
+        onActivated: {
+            if (modelData.running) dock.activateApp(modelData.norm);
+            else { dock.launch(modelData.app_id); bounce(); }
+        }
+        onMenuRequested: {
+            const list = Niri.windowList || [];
+            const wins = [];
+            if (modelData.running)
+                for (let i = 0; i < list.length; i++)
+                    if (dock._norm(list[i].app_id || "?") === modelData.norm)
+                        wins.push({ id: list[i].id, icon: dock.iconFor(list[i].app_id), title: (list[i].title && list[i].title.length ? list[i].title : dock.labelFor(list[i].app_id)) });
+            const cx = (dock.screen.width - dock.width) / 2 + mapToItem(null, width / 2, 0).x;
+            Globals.openDockMenu(wins, cx, modelData.app_id);
         }
     }
 
@@ -307,46 +339,23 @@ PanelWindow {
                 onActivated: Globals.toggleLauncher()
             }
 
-            Rectangle {
+            Rectangle {   // launcher | apps
                 width: 1; height: Theme.dockIconSize * 0.7
                 anchors.verticalCenter: parent.verticalCenter
                 color: Theme.base03
                 visible: dock.items.length > 0
             }
 
-            Repeater {
-                model: dock.items
-                delegate: DockCell {
-                    id: dcell
-                    required property var modelData
-                    source: dock.iconFor(modelData.app_id)
-                    tip: dock.labelFor(modelData.app_id)
-                    running: modelData.running
-                    count: modelData.count
-                    canDrag: modelData.pinned === true
-                    onReordered: px => {
-                        const cw = Theme.dockIconSize + 10;
-                        const step = cw + 4;
-                        const startX = cw + 9;   // launcher + spacing + separator + spacing
-                        DockConfig.moveTo(modelData.pin, Math.round((px - startX - cw / 2) / step));
-                    }
-                    onActivated: {
-                        if (modelData.running) dock.activateApp(modelData.norm);
-                        else { dock.launch(modelData.app_id); dcell.bounce(); }
-                    }
-                    onMenuRequested: {
-                        const list = Niri.windowList || [];
-                        const wins = [];
-                        if (modelData.running)
-                            for (let i = 0; i < list.length; i++)
-                                if (dock._norm(list[i].app_id || "?") === modelData.norm)
-                                    wins.push({ id: list[i].id, icon: dock.iconFor(list[i].app_id), title: (list[i].title && list[i].title.length ? list[i].title : dock.labelFor(list[i].app_id)) });
-                        // dock window is centred, so add its on-screen left edge
-                        const cx = (dock.screen.width - dock.width) / 2 + dcell.mapToItem(null, dcell.width / 2, 0).x;
-                        Globals.openDockMenu(wins, cx, modelData.app_id);
-                    }
-                }
+            Repeater { model: dock.pinnedItems; delegate: AppCell {} }
+
+            Rectangle {   // pinned | running-only
+                width: 1; height: Theme.dockIconSize * 0.7
+                anchors.verticalCenter: parent.verticalCenter
+                color: Theme.base03
+                visible: dock.pinnedItems.length > 0 && dock.runningItems.length > 0
             }
+
+            Repeater { model: dock.runningItems; delegate: AppCell {} }
 
         }
     }
