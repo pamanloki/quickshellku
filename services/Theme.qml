@@ -30,13 +30,12 @@ Singleton {
     property color base0F: "#a16946" // brown
 
     // ---- Fonts ----
-    // Everything uses SFMono Nerd Font (its Medium is clean, and it carries the
-    // Nerd Font icon glyphs too). fontconfig forces this family to Medium, so
-    // shell text renders Medium without setting a weight everywhere.
-    property string fontFamily: "SFMono Nerd Font"           // UI / body text
-    property string fontFamilyDisplay: "SFMono Nerd Font"    // large / title text
-    property string fontFamilyMono: "SFMono Nerd Font"       // monospace
-    property string fontFamilyFallback: "SFMono Nerd Font"   // icons/glyphs
+    // Text uses SF Pro Display (clean weights; fontconfig forces it to Medium).
+    // SF Pro has no icon glyphs, so icons/glyphs come from SFMono Nerd Font.
+    property string fontFamily: "SF Pro Display"           // UI / body text
+    property string fontFamilyDisplay: "SF Pro Display"    // large / title text
+    property string fontFamilyMono: "SFMono Nerd Font"     // monospace
+    property string fontFamilyFallback: "SFMono Nerd Font" // icons/glyphs
     readonly property var fontList: [fontFamily, fontFamilyFallback]
     property int fontSize: 17
     property int fontWeight: Font.DemiBold   // macOS Semibold — emphasis/titles
