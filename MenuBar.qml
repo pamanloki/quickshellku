@@ -173,7 +173,7 @@ PanelWindow {
         }
         Item2 {
             icon: ""   // nf-fa-search (Spotlight)
-            onClicked: Globals.toggleLauncher()
+            onClicked: Globals.toggleSpotlight()
         }
         Item2 {
             icon: Network.icon

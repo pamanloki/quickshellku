@@ -303,6 +303,25 @@ PanelWindow {
         }
     }
 
+    // cheap soft shadow: a few stacked translucent rounded rects behind the dock
+    Repeater {
+        model: 3
+        Rectangle {
+            required property int index
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            width: dockBg.width + (index + 1) * 6
+            height: dockBg.height + (index + 1) * 4
+            radius: 22 + (index + 1) * 3
+            color: Qt.rgba(0, 0, 0, 0.14 - index * 0.04)
+            visible: dock.shown
+            transform: Translate {
+                y: dock.shown ? 0 : (dockBg.height + dock.margins.bottom + 8)
+                Behavior on y { NumberAnimation { duration: Theme.durSlide; easing.type: Easing.OutCubic } }
+            }
+        }
+    }
+
     Rectangle {
         id: dockBg
         height: Theme.dockIconSize + 22

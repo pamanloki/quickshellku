@@ -27,6 +27,7 @@ ShellRoot {
 
     // Popups / overlays (each handles its own per-screen instancing + visibility).
     Launcher {}
+    Spotlight {}
     WifiPanel {}
     BluetoothPanel {}
     NightlightPanel {}

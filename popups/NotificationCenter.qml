@@ -59,6 +59,42 @@ Variants {
                 anchors.margins: 14
                 spacing: 10
 
+                // widget: clock + date (macOS-style)
+                Rectangle {
+                    width: parent.width
+                    height: 78
+                    radius: 14
+                    color: Theme.base01
+                    Column {
+                        anchors.left: parent.left; anchors.leftMargin: 16
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 1
+                        Text {
+                            text: Qt.formatDateTime(Time.now, "dddd")
+                            color: Theme.accent
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize - 1
+                            font.weight: Theme.fontWeight
+                        }
+                        Text {
+                            text: Qt.formatDateTime(Time.now, "d MMMM")
+                            color: Theme.base05
+                            font.family: Theme.fontFamilyDisplay
+                            font.pixelSize: Theme.fontSize + 12
+                            font.weight: Font.Bold
+                        }
+                    }
+                    Text {
+                        anchors.right: parent.right; anchors.rightMargin: 16
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Qt.formatDateTime(Time.now, "HH:mm")
+                        color: Theme.base05
+                        font.family: Theme.fontFamilyDisplay
+                        font.pixelSize: Theme.fontSize + 18
+                        font.weight: Font.Bold
+                    }
+                }
+
                 // header
                 Item {
                     width: parent.width
@@ -176,7 +212,7 @@ Variants {
                 ListView {
                     id: list
                     width: parent.width
-                    height: parent.height - 38 - 10
+                    height: parent.height - 38 - 10 - 88   // minus the clock/date widget
                     clip: true
                     spacing: 8
                     visible: Notifications.history.length > 0

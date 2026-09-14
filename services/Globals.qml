@@ -30,6 +30,7 @@ Singleton {
     property bool batteryOpen: false
     property bool systemOpen: false
     property bool musicOpen: false
+    property bool spotlightOpen: false
 
     // macOS-style app switcher (⌘-Tab): a row of app icons; cycle with Tab,
     // confirm on release. Driven by:  qs ipc call switcher next | prev
@@ -154,6 +155,7 @@ Singleton {
         batteryOpen = false;
         systemOpen = false;
         musicOpen = false;
+        spotlightOpen = false;
         panelX = -1;
     }
 
@@ -174,6 +176,7 @@ Singleton {
     function toggleBattery()   { const v = !batteryOpen;   _closeAll(); batteryOpen = v; }
     function toggleSystem()    { const v = !systemOpen;    _closeAll(); systemOpen = v; }
     function toggleMusic()     { const v = !musicOpen;     _closeAll(); musicOpen = v; }
+    function toggleSpotlight() { const v = !spotlightOpen; _closeAll(); spotlightOpen = v; }
 
     Timer {
         id: osdTimer
@@ -249,6 +252,10 @@ Singleton {
     IpcHandler {
         target: "music"
         function toggle() { root.toggleMusic(); }
+    }
+    IpcHandler {
+        target: "spotlight"
+        function toggle() { root.toggleSpotlight(); }
     }
     IpcHandler {
         target: "switcher"
