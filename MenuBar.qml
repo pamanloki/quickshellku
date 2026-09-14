@@ -75,7 +75,7 @@ PanelWindow {
         // left: Apple menu
         Item2 {
             icon: ""    // nf-linux-void
-            iconColor: Theme.base0B
+            iconColor: Theme.base05
             onClicked: Globals.toggleAppleMenu()
         }
         Item2 {
@@ -98,7 +98,7 @@ PanelWindow {
         // system stats (cpu + temp), click opens btop
         Item2 {
             icon: "󰻠"
-            iconColor: Theme.base0C
+            iconColor: Theme.base05
             label: SystemStats.cpuPercent + "%"
             onClicked: Globals.toggleSystem()
         }
@@ -115,7 +115,7 @@ PanelWindow {
         Item2 {
             visible: Updates.count > 0
             icon: "󰚰"
-            iconColor: Theme.base0A
+            iconColor: Theme.accent
             label: Updates.count + ""
             onClicked: Updates.runUpdate()
         }
@@ -208,7 +208,7 @@ PanelWindow {
         }
         Item2 {
             icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"
-            iconColor: Notifications.unread > 0 ? Theme.base0A : Theme.base05
+            iconColor: Notifications.unread > 0 ? Theme.accent : Theme.base05
             onClicked: Globals.toggleNotifs()
         }
     }
