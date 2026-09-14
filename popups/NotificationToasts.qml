@@ -37,8 +37,12 @@ Variants {
                 delegate: Rectangle {
                     id: card
                     required property var modelData
+                    required property int index
                     width: col.width
-                    implicitHeight: content.y + content.implicitHeight + 12
+                    // macOS caps on-screen toasts; overflow waits in the centre
+                    visible: index < 4
+                    implicitHeight: index < 4 ? (content.y + content.implicitHeight + 12) : 0
+                    clip: true
                     radius: 16
                     color: Theme.base01
                     border.width: 1
