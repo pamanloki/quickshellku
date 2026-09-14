@@ -305,24 +305,32 @@ Variants {
                         }
                     }
 
-                    // right: Do Not Disturb (Focus) + Theme, stacked
-                    Column {
+                    // right: Do Not Disturb (Focus) — tall tile matching the card
+                    Tile {
                         width: topRow.cellW
-                        spacing: 10
-                        Tile {
-                            width: parent.width
-                            height: topRow.tileH
-                            icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"; label: "Do Not Disturb"
-                            state: Notifications.doNotDisturb ? "On" : "Off"
-                            on: Notifications.doNotDisturb
-                            onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
-                        }
-                        Tile {
-                            width: parent.width
-                            height: topRow.tileH
-                            icon: "󰸌"; label: "Theme"; state: "Flavours"
-                            onToggled: Globals.toggleTheme()
-                        }
+                        height: topRow.rowH
+                        icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"; label: "Do Not Disturb"
+                        state: Notifications.doNotDisturb ? "On" : "Off"
+                        on: Notifications.doNotDisturb
+                        onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
+                    }
+                }
+
+                // ---- Theme + Caffeine ----
+                Row {
+                    width: parent.width
+                    spacing: 10
+                    Tile {
+                        width: (parent.width - 10) / 2
+                        icon: "󰸌"; label: "Theme"; state: "Flavours"
+                        onToggled: Globals.toggleTheme()
+                    }
+                    Tile {
+                        width: (parent.width - 10) / 2
+                        icon: Caffeine.active ? "󰛊" : "󰛊"; label: "Caffeine"
+                        state: Caffeine.active ? "On" : "Off"
+                        on: Caffeine.active
+                        onToggled: Caffeine.toggle()
                     }
                 }
 
@@ -363,32 +371,38 @@ Variants {
                         anchors.top: parent.top
                         anchors.margins: 12
                         spacing: 6
+                        Text {
+                            text: "Sound"
+                            color: Theme.base05
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSize - 3
+                            font.weight: Theme.fontWeight
+                        }
+                        // slider + macOS-style round output-device button
                         Row {
                             width: parent.width
-                            Text {
-                                text: "Sound"
-                                color: Theme.base05
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize - 3
-                                font.weight: Theme.fontWeight
-                                width: parent.width - 24
-                                anchors.verticalCenter: parent.verticalCenter
+                            spacing: 8
+                            HSlider {
+                                width: parent.width - 48
+                                icon: win.muted || win.volume === 0 ? "󰖁" : (win.volume >= 50 ? "󰕾" : "󰖀")
+                                value: win.volume
+                                accent: Theme.accent
+                                onMoved: v => win.setVolume(v)
                             }
-                            Text {
-                                text: win.audioExpanded ? "󰅃" : "󰅀"
-                                color: Theme.base04
-                                font.family: Theme.fontFamilyFallback
-                                font.pixelSize: Theme.fontSize
+                            Rectangle {
+                                width: 40; height: 40; radius: 20
                                 anchors.verticalCenter: parent.verticalCenter
-                                MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: win.audioExpanded = !win.audioExpanded }
+                                color: win.audioExpanded ? Theme.accent : (devBtn.containsMouse ? Theme.base02 : Theme.base01)
+                                Behavior on color { ColorAnimation { duration: 120 } }
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "󰋋"
+                                    color: win.audioExpanded ? Theme.base00 : Theme.base05
+                                    font.family: Theme.fontFamilyFallback
+                                    font.pixelSize: Theme.fontSize + 2
+                                }
+                                MouseArea { id: devBtn; anchors.fill: parent; hoverEnabled: true; onClicked: win.audioExpanded = !win.audioExpanded }
                             }
-                        }
-                        HSlider {
-                            width: parent.width
-                            icon: win.muted || win.volume === 0 ? "󰖁" : (win.volume >= 50 ? "󰕾" : "󰖀")
-                            value: win.volume
-                            accent: Theme.accent
-                            onMoved: v => win.setVolume(v)
                         }
                         // output device switcher
                         Column {

@@ -34,6 +34,31 @@ Variants {
             return Math.floor(h / 24) + "d";
         }
 
+        // macOS-style stacking: group notifications by app; keep the latest as
+        // the representative and count the rest.
+        readonly property var grouped: {
+            const h = Notifications.history || [];
+            const out = [];
+            const idx = ({});
+            for (let i = 0; i < h.length; i++) {
+                const e = h[i];
+                const k = e.appName || "?";
+                if (k in idx) {
+                    const g = out[idx[k]];
+                    g.count++;
+                    g.ids.push(e.id);
+                } else {
+                    idx[k] = out.length;
+                    out.push({
+                        appName: e.appName, appIcon: e.appIcon, image: e.image,
+                        summary: e.summary, body: e.body, urgency: e.urgency,
+                        time: e.time, id: e.id, count: 1, ids: [e.id]
+                    });
+                }
+            }
+            return out;
+        }
+
         MouseArea { anchors.fill: parent; onClicked: Globals.notifsOpen = false }
 
         Item {
@@ -215,8 +240,8 @@ Variants {
                     height: parent.height - 38 - 10 - 88   // minus the clock/date widget
                     clip: true
                     spacing: 8
-                    visible: Notifications.history.length > 0
-                    model: Notifications.history
+                    visible: win.grouped.length > 0
+                    model: win.grouped
                     boundsBehavior: Flickable.StopAtBounds
 
                     delegate: Rectangle {
@@ -229,6 +254,21 @@ Variants {
                         border.width: 1
                         border.color: card.modelData.urgency === NotificationUrgency.Critical
                             ? Theme.base08 : Theme.base02
+
+                        // stacked-cards hint when more than one from the same app
+                        Rectangle {
+                            visible: card.modelData.count > 1
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.top: parent.bottom
+                            anchors.topMargin: -radius
+                            width: parent.width - 12
+                            height: 16
+                            radius: 14
+                            color: Theme.base01
+                            border.width: 1
+                            border.color: Theme.base02
+                            z: -1
+                        }
 
                         HoverHandler { id: cardH }
 
@@ -269,7 +309,32 @@ Variants {
                                 font.pixelSize: Theme.fontSize - 2
                             }
                             HoverHandler { id: xH }
-                            MouseArea { anchors.fill: parent; onClicked: Notifications.removeHistory(card.modelData.id) }
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: {
+                                    for (const id of card.modelData.ids) Notifications.removeHistory(id);
+                                }
+                            }
+                        }
+
+                        // count badge (macOS-style stack count)
+                        Rectangle {
+                            visible: card.modelData.count > 1
+                            anchors.right: ic.right; anchors.rightMargin: -4
+                            anchors.top: ic.top; anchors.topMargin: -4
+                            width: Math.max(16, cnt.implicitWidth + 8); height: 16
+                            radius: 8
+                            color: Theme.accent
+                            z: 3
+                            Text {
+                                id: cnt
+                                anchors.centerIn: parent
+                                text: card.modelData.count
+                                color: Theme.base00
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSize - 5
+                                font.weight: Font.Bold
+                            }
                         }
 
                         Column {
