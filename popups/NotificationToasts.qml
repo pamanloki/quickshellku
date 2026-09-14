@@ -157,7 +157,7 @@ Variants {
                                     height: 26
                                     width: Math.min(140, actLabel.implicitWidth + 22)
                                     radius: 8
-                                    color: actHover.hovered ? Theme.base0D : Theme.base02
+                                    color: actHover.hovered ? Theme.accent : Theme.base02
                                     Text {
                                         id: actLabel
                                         anchors.centerIn: parent

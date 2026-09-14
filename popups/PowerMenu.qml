@@ -65,7 +65,7 @@ Variants {
 
                 Repeater {
                     model: [
-                        { icon: "󰌾", label: "Lock",      flag: "--lock",      accent: Theme.base0D },
+                        { icon: "󰌾", label: "Lock",      flag: "--lock",      accent: Theme.accent },
                         { icon: "󰤄", label: "Suspend",   flag: "--suspend",   accent: Theme.accent },
                         { icon: "󰋊", label: "Hibernate", flag: "--hibernate", accent: Theme.accent },
                         { icon: "󰗽", label: "Logout",    flag: "--logout",    accent: Theme.accent },

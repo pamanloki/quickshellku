@@ -140,7 +140,7 @@ Variants {
                             anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
                             radius: vtrack.radius
                             width: Math.max(win.volume > 0 ? 2 * radius : 0, Math.round(parent.width * Math.max(0, Math.min(100, win.volume)) / 100))
-                            color: win.muted ? Theme.accent : Theme.base0D
+                            color: win.muted ? Theme.accent : Theme.accent
                         }
                         Text {
                             anchors.left: parent.left; anchors.leftMargin: 13

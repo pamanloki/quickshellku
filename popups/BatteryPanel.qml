@@ -23,7 +23,7 @@ Variants {
 
         readonly property color levelColor: Battery.critical ? Theme.base08
             : Battery.low ? Theme.base0A
-            : Battery.charging ? Theme.base0B : Theme.base0D
+            : Battery.charging ? Theme.base0B : Theme.accent
 
         MouseArea { anchors.fill: parent; onClicked: Globals.batteryOpen = false }
 

@@ -168,7 +168,7 @@ PanelWindow {
         Item2 {
             visible: Player.hasPlayer
             icon: Player.isPlaying ? "󰎆" : "󰎊"
-            iconColor: Player.isPlaying ? Theme.base0D : Theme.base05
+            iconColor: Player.isPlaying ? Theme.accent : Theme.base05
             onClicked: Globals.toggleMusic()
         }
         Item2 {

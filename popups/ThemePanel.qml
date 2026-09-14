@@ -122,13 +122,13 @@ Variants {
                     height: 38
                     radius: 8
                     color: Theme.base01
-                    border.color: filter.activeFocus ? Theme.base0D : "transparent"
+                    border.color: filter.activeFocus ? Theme.accent : "transparent"
                     border.width: 2
                     Text {
                         id: fIcon
                         anchors.left: parent.left; anchors.leftMargin: 12
                         anchors.verticalCenter: parent.verticalCenter
-                        text: ""; color: Theme.base0D
+                        text: ""; color: Theme.accent
                         font.family: Theme.fontFamilyFallback; font.pixelSize: Theme.fontSize
                     }
                     TextInput {

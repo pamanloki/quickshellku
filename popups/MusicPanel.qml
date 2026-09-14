@@ -158,7 +158,7 @@ Variants {
                                 anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
                                 radius: 2.5
                                 width: parent.width * Player.progress
-                                color: Theme.base0D
+                                color: Theme.accent
                             }
                         }
                         MouseArea {
@@ -239,7 +239,7 @@ Variants {
                                 anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
                                 radius: 2.5
                                 width: parent.width * Math.max(0, Math.min(100, win.volume)) / 100
-                                color: win.muted ? Theme.accent : Theme.base0D
+                                color: win.muted ? Theme.accent : Theme.accent
                             }
                         }
                         MouseArea {

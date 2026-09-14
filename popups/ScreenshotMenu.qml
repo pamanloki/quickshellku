@@ -76,7 +76,7 @@ Variants {
 
                 Repeater {
                     model: [
-                        { icon: "󰆞", label: "Region → Clipboard", accent: Theme.base0D, act: "rc" },
+                        { icon: "󰆞", label: "Region → Clipboard", accent: Theme.accent, act: "rc" },
                         { icon: "󰆞", label: "Region → File",      accent: Theme.accent, act: "rf" },
                         { icon: "󰍹", label: "Full → Clipboard",   accent: Theme.accent, act: "fc" },
                         { icon: "󰍹", label: "Full → File",        accent: Theme.accent, act: "ff" }

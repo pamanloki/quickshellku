@@ -93,7 +93,7 @@ Variants {
                             color: Theme.base02
                             clip: true
                             border.width: imgHover.hovered ? 2 : 0
-                            border.color: Theme.base0D
+                            border.color: Theme.accent
 
                             Image {
                                 anchors.fill: parent

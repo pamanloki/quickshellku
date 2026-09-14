@@ -197,7 +197,7 @@ Variants {
                 height: 44
                 radius: 22
                 color: Theme.base01
-                border.color: search.activeFocus ? Theme.base0D : Theme.base02
+                border.color: search.activeFocus ? Theme.accent : Theme.base02
                 border.width: 1
 
                 Text {

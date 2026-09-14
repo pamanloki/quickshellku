@@ -28,7 +28,7 @@ Variants {
             property string label: ""
             property string value: ""
             property real pct: 0
-            property color tint: Theme.base0D
+            property color tint: Theme.accent
             width: parent ? parent.width : 0
             spacing: 6
             Row {
@@ -131,7 +131,7 @@ Variants {
                         : "--"
                     pct: SystemStats.memPercent
                     tint: SystemStats.memPercent >= 85 ? Theme.base08
-                        : SystemStats.memPercent >= 60 ? Theme.base0A : Theme.base0D
+                        : SystemStats.memPercent >= 60 ? Theme.base0A : Theme.accent
                 }
                 Stat {
                     label: "Disk"

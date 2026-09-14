@@ -100,7 +100,7 @@ Variants {
                             visible: mi.modelData.sep !== true
                             anchors.fill: parent
                             radius: 7
-                            color: itemMA.containsMouse ? Theme.base0D : "transparent"
+                            color: itemMA.containsMouse ? Theme.accent : "transparent"
                             Text {   // checkmark gutter (macOS-style, left of the label)
                                 anchors.left: parent.left; anchors.leftMargin: 9
                                 anchors.verticalCenter: parent.verticalCenter

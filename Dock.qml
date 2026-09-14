@@ -136,7 +136,7 @@ PanelWindow {
         id: cell
         property string source: ""
         property string glyph: ""      // draw a coloured tile instead of an image
-        property color glyphBg: Theme.base0D
+        property color glyphBg: Theme.accent
         property string tip: ""
         property bool running: false
         property int count: 0
@@ -353,7 +353,7 @@ PanelWindow {
 
             DockCell {
                 glyph: "󰀻"
-                glyphBg: Theme.base0D
+                glyphBg: Theme.accent
                 tip: "Launcher"
                 onActivated: Globals.toggleLauncher()
             }
