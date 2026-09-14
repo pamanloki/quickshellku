@@ -88,7 +88,7 @@ Variants {
             Rectangle {
                 id: ci
                 width: 34; height: 34; radius: 17
-                anchors.left: parent.left; anchors.leftMargin: 10
+                anchors.left: parent.left; anchors.leftMargin: 12
                 anchors.verticalCenter: parent.verticalCenter
                 color: on ? accent : Theme.base03
                 Behavior on color { ColorAnimation { duration: 120 } }
@@ -146,7 +146,7 @@ Variants {
             HoverHandler { id: tileHover }
             Text {
                 id: tIcon
-                anchors.left: parent.left; anchors.leftMargin: 14
+                anchors.left: parent.left; anchors.leftMargin: 12
                 anchors.verticalCenter: parent.verticalCenter
                 text: icon
                 color: on ? Theme.base00 : Theme.base05
@@ -265,7 +265,7 @@ Variants {
                     width: parent.width
                     spacing: 10
                     readonly property real cellW: (width - spacing) / 2
-                    readonly property real rowH: 138        // = three 46px connectivity rows
+                    readonly property real rowH: 146        // three 46px rows + a little breathing room
                     readonly property real tileH: (rowH - 10) / 2
 
                     // left: connectivity (Wi-Fi + Bluetooth + Night Light)
