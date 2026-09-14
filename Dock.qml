@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import "root:/services"
@@ -301,32 +300,6 @@ PanelWindow {
                         wins.push({ id: list[i].id, icon: dock.iconFor(list[i].app_id), title: (list[i].title && list[i].title.length ? list[i].title : dock.labelFor(list[i].app_id)) });
             const cx = (dock.screen.width - dock.width) / 2 + mapToItem(null, width / 2, 0).x;
             Globals.openDockMenu(wins, cx, modelData.app_id);
-        }
-    }
-
-    // soft drop shadow — a plain rounded rect (no children, so cheap/static)
-    // rendered through a real gaussian MultiEffect; its body sits under dockBg
-    // so only the blurred shadow spills out around the dock.
-    Rectangle {
-        id: dockShadow
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        width: dockBg.width
-        height: dockBg.height
-        radius: dockBg.radius
-        color: Theme.base01
-        visible: dock.shown
-        transform: Translate {
-            y: dock.shown ? 0 : (dockBg.height + dock.margins.bottom + 8)
-            Behavior on y { NumberAnimation { duration: Theme.durSlide; easing.type: Easing.OutCubic } }
-        }
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: "#59000000"
-            shadowBlur: 0.7
-            shadowVerticalOffset: 5
-            autoPaddingEnabled: true
         }
     }
 

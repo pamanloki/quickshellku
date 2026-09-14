@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -111,22 +110,6 @@ Variants {
             anchors.horizontalCenter: parent.horizontalCenter
             y: parent.height * 0.22
             height: card.height
-
-            // soft drop shadow — a shape-only caster (body hidden under the card)
-            Rectangle {
-                anchors.fill: card
-                radius: card.radius
-                color: Theme.base00
-                z: -1
-                layer.enabled: true
-                layer.effect: MultiEffect {
-                    shadowEnabled: true
-                    shadowColor: "#66000000"
-                    shadowBlur: 0.7
-                    shadowVerticalOffset: 10
-                    autoPaddingEnabled: true
-                }
-            }
 
             Rectangle {
                 id: card
