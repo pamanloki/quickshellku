@@ -149,13 +149,13 @@ Variants {
                                 width: Math.min(cell.width, cell.height) - 4
                                 height: width
                                 radius: width / 2
-                                color: cell.isToday ? Theme.base0D : "transparent"
+                                color: cell.isToday ? Theme.accent : "transparent"
                                 visible: cell.modelData > 0
                                 Text {
                                     anchors.centerIn: parent
                                     text: cell.modelData > 0 ? cell.modelData : ""
                                     color: cell.isToday ? Theme.base00
-                                        : (cell.weekend ? Theme.base08 : Theme.base05)
+                                        : (cell.weekend ? Theme.base04 : Theme.base05)
                                     font.family: Theme.fontFamily
                                     font.pixelSize: Theme.fontSize - 2
                                     font.features: ({ "tnum": 1 })

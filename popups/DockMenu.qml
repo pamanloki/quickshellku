@@ -195,6 +195,38 @@ Variants {
                         }
                     }
                 }
+
+                Rectangle {   // separator above Quit
+                    visible: Globals.dockMenuWindows.length > 0
+                    width: menuCol.width - 16
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    height: 1
+                    color: Theme.base03
+                }
+                Rectangle {   // Quit — close every window of this app (macOS)
+                    visible: Globals.dockMenuWindows.length > 0
+                    width: menuCol.width
+                    height: 34
+                    radius: 8
+                    color: quitMA.containsMouse ? Theme.base02 : "transparent"
+                    Text {
+                        anchors.left: parent.left; anchors.leftMargin: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Quit"
+                        color: Theme.base05
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize - 2
+                    }
+                    MouseArea {
+                        id: quitMA
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onClicked: {
+                            for (const w of Globals.dockMenuWindows) Niri.closeWindow(w.id);
+                            Globals.dockMenuOpen = false;
+                        }
+                    }
+                }
             }
         }
     }
