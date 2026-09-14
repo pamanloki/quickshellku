@@ -305,29 +305,29 @@ Variants {
                         }
                     }
 
-                    // right: Do Not Disturb (Focus) — tall tile matching the card
+                    // right: Theme — tall tile matching the card
                     Tile {
                         width: topRow.cellW
                         height: topRow.rowH
-                        icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"; label: "Do Not Disturb"
-                        state: Notifications.doNotDisturb ? "On" : "Off"
-                        on: Notifications.doNotDisturb
-                        onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
+                        icon: "󰸌"; label: "Theme"; state: "Flavours"
+                        onToggled: Globals.toggleTheme()
                     }
                 }
 
-                // ---- Theme + Caffeine ----
+                // ---- Do Not Disturb + Caffeine ----
                 Row {
                     width: parent.width
                     spacing: 10
                     Tile {
                         width: (parent.width - 10) / 2
-                        icon: "󰸌"; label: "Theme"; state: "Flavours"
-                        onToggled: Globals.toggleTheme()
+                        icon: Notifications.doNotDisturb ? "󰂛" : "󰂚"; label: "Do Not Disturb"
+                        state: Notifications.doNotDisturb ? "On" : "Off"
+                        on: Notifications.doNotDisturb
+                        onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
                     }
                     Tile {
                         width: (parent.width - 10) / 2
-                        icon: Caffeine.active ? "󰛊" : "󰛊"; label: "Caffeine"
+                        icon: "󰛊"; label: "Caffeine"
                         state: Caffeine.active ? "On" : "Off"
                         on: Caffeine.active
                         onToggled: Caffeine.toggle()
