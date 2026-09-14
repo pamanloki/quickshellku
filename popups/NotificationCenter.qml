@@ -22,7 +22,16 @@ Variants {
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         WlrLayershell.namespace: "quickshell:notifcenter"
 
-        onVisibleChanged: if (visible) Notifications.markRead()
+        onVisibleChanged: if (visible) { Notifications.markRead(); expandedApps = ({}); }
+
+        // which app groups are expanded (keyed by appName)
+        property var expandedApps: ({})
+        function toggleExpand(app) {
+            const e = ({});
+            for (const k in expandedApps) e[k] = expandedApps[k];
+            e[app] = !e[app];
+            expandedApps = e;
+        }
 
         function ago(ms) {
             const s = Math.max(0, Math.floor((Date.now() - ms) / 1000));
@@ -47,12 +56,13 @@ Variants {
                     const g = out[idx[k]];
                     g.count++;
                     g.ids.push(e.id);
+                    g.items.push(e);
                 } else {
                     idx[k] = out.length;
                     out.push({
                         appName: e.appName, appIcon: e.appIcon, image: e.image,
                         summary: e.summary, body: e.body, urgency: e.urgency,
-                        time: e.time, id: e.id, count: 1, ids: [e.id]
+                        time: e.time, id: e.id, count: 1, ids: [e.id], items: [e]
                     });
                 }
             }
@@ -270,7 +280,16 @@ Variants {
                             z: -1
                         }
 
+                        readonly property bool expanded: win.expandedApps[card.modelData.appName] === true
+
                         HoverHandler { id: cardH }
+
+                        // click the card to expand/collapse the app's stack
+                        MouseArea {
+                            anchors.fill: parent
+                            enabled: card.modelData.count > 1
+                            onClicked: win.toggleExpand(card.modelData.appName)
+                        }
 
                         Rectangle {
                             id: ic
@@ -386,6 +405,44 @@ Variants {
                                 maximumLineCount: 4
                                 elide: Text.ElideRight
                                 visible: text.length > 0
+                            }
+
+                            // expanded: the rest of this app's notifications
+                            Column {
+                                width: parent.width
+                                spacing: 6
+                                topPadding: 6
+                                visible: card.expanded && card.modelData.count > 1
+                                Repeater {
+                                    model: card.expanded ? card.modelData.items.slice(1) : []
+                                    delegate: Column {
+                                        required property var modelData
+                                        width: content.width
+                                        spacing: 1
+                                        Rectangle { width: parent.width; height: 1; color: Theme.base02 }
+                                        Text {
+                                            width: parent.width; topPadding: 5
+                                            text: modelData.summary
+                                            color: Theme.base05
+                                            font.family: Theme.fontFamily
+                                            font.pixelSize: Theme.fontSize - 1
+                                            font.weight: Theme.fontWeight
+                                            elide: Text.ElideRight
+                                            visible: text.length > 0
+                                        }
+                                        Text {
+                                            width: parent.width
+                                            text: modelData.body
+                                            color: Theme.base05
+                                            font.family: Theme.fontFamily
+                                            font.pixelSize: Theme.fontSize - 3
+                                            wrapMode: Text.WordWrap
+                                            maximumLineCount: 3
+                                            elide: Text.ElideRight
+                                            visible: text.length > 0
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
