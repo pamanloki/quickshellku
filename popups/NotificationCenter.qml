@@ -254,33 +254,48 @@ Variants {
                     model: win.grouped
                     boundsBehavior: Flickable.StopAtBounds
 
-                    delegate: Rectangle {
-                        id: card
+                    delegate: Item {
+                        id: cell
                         required property var modelData
                         width: list.width
-                        implicitHeight: content.y + content.implicitHeight + 10
-                        radius: 16
-                        color: Theme.base01
-                        border.width: 1
-                        border.color: card.modelData.urgency === NotificationUrgency.Critical
-                            ? Theme.base08 : Theme.base02
+                        readonly property bool showPeek: !card.expanded && cell.modelData.count > 1
+                        implicitHeight: card.height + (showPeek ? 10 : 0)
 
-                        // stacked-cards hint when more than one from the same app
+                        // stacked cards peeking behind (macOS collapsed look)
                         Rectangle {
-                            visible: card.modelData.count > 1
+                            visible: !card.expanded && cell.modelData.count > 2
                             anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.top: parent.bottom
-                            anchors.topMargin: -radius
-                            width: parent.width - 12
-                            height: 16
+                            y: card.height - 3
+                            width: cell.width - 24
+                            height: 18
                             radius: 14
                             color: Theme.base01
-                            border.width: 1
-                            border.color: Theme.base02
-                            z: -1
+                            border.width: 1; border.color: Theme.base02
+                        }
+                        Rectangle {
+                            visible: cell.showPeek
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            y: card.height - 6
+                            width: cell.width - 12
+                            height: 18
+                            radius: 14
+                            color: Theme.base01
+                            border.width: 1; border.color: Theme.base02
                         }
 
-                        readonly property bool expanded: win.expandedApps[card.modelData.appName] === true
+                        Rectangle {
+                            id: card
+                            property var modelData: cell.modelData
+                            width: cell.width
+                            anchors.top: parent.top
+                            implicitHeight: content.y + content.implicitHeight + 10
+                            radius: 16
+                            color: Theme.base01
+                            border.width: 1
+                            border.color: card.modelData.urgency === NotificationUrgency.Critical
+                                ? Theme.base08 : Theme.base02
+
+                            readonly property bool expanded: win.expandedApps[card.modelData.appName] === true
 
                         HoverHandler { id: cardH }
 
@@ -444,6 +459,7 @@ Variants {
                                     }
                                 }
                             }
+                        }
                         }
                     }
                 }
